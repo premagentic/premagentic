@@ -462,8 +462,10 @@ public sealed class SetupInstallTests(SetupTestServer server) : IClassFixture<Se
 
         Assert.False(report.Failed, output);
         Assert.Equal(StepOutcome.Applied, report.Find("login.app")!.Outcome);
-        // The control: the server's refusal really was never passed on.
-        Assert.True(proxy.Dropped > 0, "the proxy passed every refusal on");
+        // The control: a refusal really reached setup as an ended connection,
+        // whether the proxy dropped the server's error or the server ended the
+        // connection first, so the test cannot pass on a plain 28P01.
+        Assert.True(proxy.Dropped > 0, "no login through the proxy ended before authentication without an error");
     }
 
     [Fact]
