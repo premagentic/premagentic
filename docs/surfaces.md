@@ -5,11 +5,11 @@ The projects in the repository, the three ways a caller reaches the HTTP surface
 | Project | What it is |
 |---|---|
 | `Premagentic.Core` | Connectors, chunker, embedding providers, migrations, gates, hybrid retrieval, the in-memory vector index |
-| `Premagentic.Cli` | `migrate` (alias `init-db`), `setup`, `remove`, `rebuild-index`, `ingest`, `search`, `section`, `eval`, `reminders`, and administration: `users`, `groups`, `agents`, `tokens`, `rules`, `settings`, `sources`, `extensions`, `profile`. `prem --help`, `prem <command> --help` and `prem --version` answer with no database; [The prem command](cli.md) is generated from that text |
+| `Premagentic.Cli` | `migrate` (alias `init-db`), `setup`, `remove`, `rebuild-index`, `ingest`, `search`, `section`, `eval`, `reminders`, and administration: `users`, `groups`, `agents`, `tokens`, `oauth`, `rules`, `settings`, `sources`, `extensions`, `profile`. `prem --help`, `prem <command> --help` and `prem --version` answer with no database; [The prem command](cli.md) is generated from that text |
 | `Premagentic.Api` | Sign-in through one seam (a password and a session, or a trusted header), search and section as the caller (`POST /api/search`, `/api/section`), MCP over HTTP at `/mcp` for agent tokens, `GET /health`, and the administration portal at `/portal` with its usage page (`/portal/usage`), connect page (`/portal/connect`), and Review page with the reminders view |
 | `Premagentic.McpServer` | A stdio bridge to `/mcp` for an agent that only speaks stdio, with an agent token read from a file; it holds no database credentials |
 | `Premagentic.Tests` | Unit tests, plus the gates, identity, the datastore, the vector index and setup end to end on stock PostgreSQL |
-| `Premagentic.Conformance` | xunit fixtures an extension author inherits to prove a reader, a chunker, a connector or an embedding provider keeps its contract |
+| `Premagentic.Conformance` | xunit fixtures an extension author inherits to prove a reader, a chunker, a connector, an embedding provider, a sign-in adapter or a reminder sink keeps its contract |
 | `samples/extensions/sentence-chunker` | A whole extension: a chunker, a `.csv` reader and a sign-in adapter that claims nothing, loaded by the tests from a folder by hash |
 | `samples/extensions/paragraph-chunker` | An extension with a library of its own (`paragraph-rules`), listed in its manifest with its hash, which is how a dependency is allowed |
 
