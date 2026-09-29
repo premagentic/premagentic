@@ -81,8 +81,9 @@ written; the whole-body bound is proven on Kestrel, since the in-process
 test server does not keep it, and over HTTP/1.1 a browser may show a form
 past 320 KB as a dropped connection. Every other portal form past the
 framework's own bounds (4 MB a value) is still refused with a bare server
-error. In the run of 2026-09-29, 2181 tests pass (1990 in Premagentic.Tests,
-with 7 skipped, and 191 in Premagentic.Readers.Tests). The guards are checked
+error. In the run of 2026-09-29, 2181 tests pass: 1990 in Premagentic.Tests,
+where 7 more were skipped on that machine, and 191 in
+Premagentic.Readers.Tests. The guards are checked
 by breaking them, and the lists of those breaks are in the repository:
 `tests/mutants/` holds 67 lists with the runner that applies them one at a time
 and counts a break only when a named test fails between two passing controls
