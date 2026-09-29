@@ -143,16 +143,16 @@ script on its branch, so whoever merges it runs the script there first.
 An archive holds the command line (`bin/prem`), the API with the portal
 (`bin/Premagentic.Api`) and the MCP bridge (`bin/Premagentic.McpServer`),
 side by side in `bin/` with the one .NET runtime and Unicode library they
-share; the embedding model in
-`models/minilm`, with its license and the revision it came from; the starter
-profile and its sample documents; the first-party PDF and Word readers in
-`extensions/`, which load only once an administrator allows them; the
-systemd unit in the Linux archive; and, in `licenses/`, the license text of
-every package and runtime pack the three programs and the readers deploy. The programs find
-the model from where they are, so installing from an archive needs no .NET
-install and no internet connection. It carries no database: setup uses a
-PostgreSQL 14 or later that you already run, as above, and the Windows
-archive does not carry the bundled PostgreSQL.
+share; the embedding model in `models/minilm`, with its license and the
+revision it came from; the starter profile and its sample documents; the
+first-party PDF, Word and Excel readers in `extensions/`, which load only
+once an administrator allows them; the systemd unit in the Linux archive;
+and, in `licenses/`, the license text of every package and runtime pack the
+three programs and the readers deploy. The programs find the model from where
+they are, so installing from an archive needs no .NET install and no internet
+connection. It carries no database: setup uses a PostgreSQL 14 or later that
+you already run, as above, and the Windows archive does not carry the bundled
+PostgreSQL.
 
 The three programs are published self-contained one at a time and then laid
 into one folder. Where they carry different copies of one library, the build
@@ -167,8 +167,8 @@ Each archive's `INSTALL.txt` gives the steps: unpack it where it will live
 (on Linux into `/opt/premagentic`, where the service unit expects it), write
 an admin connection file, run `prem setup` with the first administrator and
 the host name, start the API, and apply the starter profile and ingest its
-two sources, or ingest your own folders; to read PDF and Word files, point
-`extensions.folder` at the archive's `extensions/` and allow each reader with
-`prem extensions allow`. The [Known state](status.md) page
-says how the archives were proven, and what is not proven yet, such as the bundled database as a service and a managed
-PostgreSQL.
+two sources, or ingest your own folders; to read PDF, Word and Excel files,
+point `extensions.folder` at the archive's `extensions/` and allow each
+reader with `prem extensions allow`. The [Known state](status.md) page says
+how the archives were proven, and what is not proven yet, such as the bundled
+database as a service and a managed PostgreSQL.
