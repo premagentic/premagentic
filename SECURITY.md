@@ -3,7 +3,8 @@
 PremAgentic exists to keep an organization's documents inside that
 organization and in front of only the people allowed to read them. A flaw in
 that is the most serious kind of bug this project can have, and a report of
-one is always answered.
+one is always answered. This policy covers PremAgentic and the PremAgentic
+business add-on.
 
 ## Reporting
 
@@ -11,6 +12,10 @@ Use GitHub's private vulnerability reporting: the **Report a vulnerability**
 button under this repository's **Security** tab. If you cannot use it, write
 to premagentic@agaveis.com. Please do not open a public issue for a suspected
 vulnerability.
+
+Say what you ran, what you saw, and the version or commit it ran on. The exact
+sentence the program printed, or the request that got through, makes a report
+the fastest to confirm.
 
 ## What counts
 
@@ -71,6 +76,10 @@ process separately.
 
 `PREM_ALLOW_HTTP_SIGN_IN=1` sends passwords unencrypted by design. It is for
 development on one machine.
+
+When the PremAgentic business add-on brings sign-in through a directory and
+connectors that read a source's own permissions, they talk to the directory
+and the sources an administrator points them at, by design.
 
 PremAgentic enforces access twice: in each query, and again in the database,
 which refuses every row a caller may not read. In the full-text match,
@@ -159,9 +168,9 @@ refused at load the same way, with both versions named, since it could call a
 member this host does not have; one built against the same or an older
 version is given the host's own contracts library.
 
-**The PDF and Word readers fetch and follow nothing outside the file.** They
-are first-party extensions under `extensions/`, and they load only when an
-administrator allows them, like any other. The Word reader resolves no
+**The PDF, Word and Excel readers fetch and follow nothing outside the file.**
+They are first-party extensions under `extensions/`, and they load only when
+an administrator allows them, like any other. The Word reader resolves no
 relationship to anything outside the file: a hyperlink's address, a linked
 template, an external picture and a field's instruction, such as one that
 includes another file, are never followed. It parses no part with a document
@@ -169,25 +178,31 @@ type definition and gives its XML reader no resolver, so no entity can name a
 file or an address, and every part it reads comes from inside the file,
 whatever the file's relationships name. The PDF reader opens no link, no
 launch, submit or go-to action, no script and no embedded file, and the
-library it uses has no network code in it. Both readers' tests point a file
-at an address on the machine the tests run on and check that nothing connects
-to it, beside a control that shows a connection would have been seen.
+library it uses has no network code in it. The Excel reader opens no link to
+another workbook, no data connection, web query or query table, no hyperlink
+and no picture by address, and reads a value that came through one only as it
+was saved; it parses no part with a document type definition either. All three
+readers' tests point a file at an address on the machine the tests run on and
+check that nothing connects to it, beside a control that shows a connection
+would have been seen.
 
-**Macros and embedded content are never read or run.** A `.docm`, and any
-Word file that carries a macro project or declares its content macro-enabled
+**Macros and embedded content are never read or run.** A `.docm`, and any Word
+file that carries a macro project or declares its content macro-enabled
 whatever its name says, is skipped with the reason `macro-enabled` and not
-read further. Pictures and embedded objects in a Word file, and embedded files
-and attachments in a PDF, are never opened.
+read further; so is a `.xlsm`, and any workbook that carries a macro project
+or an Excel 4 macro sheet whatever its name. Pictures and embedded objects in
+a Word file, and embedded files and attachments in a PDF, are never opened.
 
-**A Word file's limits are counted on what really comes out of it.** A
-`.docx` is a zip, and the sizes a zip states are written by whoever made it.
-Before the archive is opened, the reader refuses a file over its size limit,
-and one whose end record states more entries than its limit; once it is open,
-it counts the entries again and holds the sizes the zip states to a total.
-The parts it reads are then counted as they come out of the decompressor,
-against a total for all of them together and, past a floor, against a ratio
-to each part's compressed size. A part that is itself an archive, and two
-parts with one name, refuse the file.
+**A Word file's limits are counted on what really comes out of it.** A `.docx`
+is a zip, and the sizes a zip states are written by whoever made it. Before
+the archive is opened, the reader refuses a file over its size limit, and one
+whose end record states more entries than its limit; once it is open, it
+counts the entries again and holds the sizes the zip states to a total. The
+parts it reads are then counted as they come out of the decompressor, against
+a total for all of them together and, past a floor, against a ratio to each
+part's compressed size. A part that is itself an archive, and two parts with
+one name, refuse the file. An Excel workbook, `.xlsx` or `.xlsb`, is a zip
+too, and is held to the same container limits.
 
 **A PDF is held to limits on its size, its pages, the bytes it decodes, its
 text and its time.** Every compressed stream counts toward one total, and a
@@ -197,7 +212,8 @@ taken. The time limit is checked between pages and at every stream. A reading
 that does not come back to a check is reported thirty seconds past the limit,
 and the run moves on without waiting for it. Each reader's limits, and the
 sentence each one is reported with, are listed in
-`extensions/pdf-reader/README.md` and `extensions/docx-reader/README.md`.
+`extensions/pdf-reader/README.md`, `extensions/docx-reader/README.md` and
+`extensions/xlsx-reader/README.md`.
 
 **Document text cannot pose as a heading or hide one.** A heading a reader
 writes, such as a PDF's `Page 2` or a Word document's own heading, is the
