@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <AssemblyName>SentenceChunker</AssemblyName>
+    <RootNamespace>Premagentic.Samples.Chunking</RootNamespace>
+  </PropertyGroup>
+
+  <!-- The contracts come from the process that loads this, not from beside it.
+       Private="false" keeps Premagentic.Core out of the output folder: an
+       extension folder carrying its own copy would implement types the host has
+       never heard of, and the host's load context takes the host's copy anyway. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Premagentic.Core\Premagentic.Core.csproj" Private="false" />
+  </ItemGroup>
+
+  <!-- The manifest ships beside the assembly and carries its hash, which is not
+       known until the assembly exists. An extension author does this, by hand or
+       like this; an administrator then runs prem extensions allow on the folder,
+       which measures the assembly itself rather than believing this file. -->
+  <Target Name="WriteExtensionManifest" AfterTargets="Build">
+    <GetFileHash Files="$(TargetPath)" Algorithm="SHA256" HashEncoding="hex">
+      <Output TaskParameter="Items" ItemName="HashedAssembly" />
+    </GetFileHash>
+    <PropertyGroup>
+      <AssemblyHash>@(HashedAssembly->'%(FileHash)')</AssemblyHash>
+      <ManifestText>{
+  "name": "sentence-chunker",
+  "version": "$(Version)",
+  "assemblyFile": "$(TargetFileName)",
+  "sha256": "$(AssemblyHash)",
+  "seams": { "chunker": 1, "reader": 1, "signin": 1 }
+}</ManifestText>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(TargetDir)extension.json" Lines="$(ManifestText)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+  </Target>
+
+</Project>

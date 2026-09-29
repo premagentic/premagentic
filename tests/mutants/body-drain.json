@@ -1,0 +1,83 @@
+{
+  "name": "a form body past its bound drained up to a cap over HTTP/1.1",
+  "commit": "hand run, 2026-09-27",
+  "mutants": [
+    {
+      "name": "a body is drained over HTTP/2 too",
+      "file": "src/Premagentic.Api/Callers/PortalFormDrain.cs",
+      "old": "HttpProtocol.IsHttp11(protocol)",
+      "new": "true",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalFormDrainTests."
+    },
+    {
+      "name": "a cross-site body is drained",
+      "file": "src/Premagentic.Api/Callers/PortalFormDrain.cs",
+      "old": "&& fromThisOrigin",
+      "new": "&& true",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalFormDrainTests."
+    },
+    {
+      "name": "a body within its bound is drained and refused",
+      "file": "src/Premagentic.Api/Callers/PortalFormDrain.cs",
+      "old": "&& length > limit",
+      "new": "&& length >= 0",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalFormDrainTests.|FullyQualifiedName~Premagentic.Tests.PortalFormBoundsTests."
+    },
+    {
+      "name": "a body past the cap is drained",
+      "file": "src/Premagentic.Api/Callers/PortalFormDrain.cs",
+      "old": "&& length <= cap",
+      "new": "&& true",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalFormDrainTests."
+    },
+    {
+      "name": "a drain has no time limit",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "within.CancelAfter(_drain.Time);",
+      "new": "within.CancelAfter(Timeout.InfiniteTimeSpan);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalFormDrainTests."
+    },
+    {
+      "name": "the body's limit is not raised before the drain",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "limit.MaxRequestBodySize = http.Request.ContentLength;",
+      "new": "_ = http.Request.ContentLength;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalFormDrainTests."
+    },
+    {
+      "name": "a stopped drain keeps the connection",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "http.Response.Headers.Connection = \"close\";",
+      "new": "_ = 0;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalFormDrainTests."
+    },
+    {
+      "name": "the portal's origin test says yes to every request",
+      "file": "src/Premagentic.Portal/PortalFormBounds.cs",
+      "old": "=> PortalAccessFilter.FromThisOrigin(request);",
+      "new": "=> true;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalFormDrainTests."
+    },
+    {
+      "name": "a Kestrel test host is given no port of its own, so it takes the default",
+      "file": "tests/Premagentic.Tests/ApiTestSupport.cs",
+      "old": "if (options.Kestrel) web.UseSetting(WebHostDefaults.ServerUrlsKey, \"http://127.0.0.1:0\");",
+      "new": "if (false && options.Kestrel) web.UseSetting(WebHostDefaults.ServerUrlsKey, \"http://127.0.0.1:0\");",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalFormDrainTests.Two_hosts_on_Kestrel_start_at_once_each_on_a_port_of_its_own"
+    },
+    {
+      "name": "a client that asks for 100 Continue is drained",
+      "file": "src/Premagentic.Api/Callers/PortalFormDrain.cs",
+      "old": "&& !expectsContinue",
+      "new": "&& true",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalFormDrainTests."
+    },
+    {
+      "name": "the host never sees a request ask for 100 Continue",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "request.Headers.Expect.Any(value => value is not null && value.Contains(\"100-continue\", StringComparison.OrdinalIgnoreCase));",
+      "new": "false;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalFormDrainTests."
+    }
+  ]
+}

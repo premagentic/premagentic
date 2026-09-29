@@ -1,0 +1,195 @@
+{
+  "name": "removal, the offline guards and the ONNX Runtime telemetry switch",
+  "commit": "hand run, 2026-09-22",
+  "mutants": [
+    {
+      "name": "keep mode deletes the files",
+      "file": "src/Premagentic.Cli/Setup/RemovalEngine.cs",
+      "old": "        if (options.Purge) PurgeFiles(items, data);\n        else Keep(",
+      "new": "        PurgeFiles(items, data);\n        if (false) Keep(",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemovalTests.Without_purge_the_services_go"
+    },
+    {
+      "name": "no elevation refusal",
+      "file": "src/Premagentic.Cli/Setup/RemovalEngine.cs",
+      "old": "&& !options.Plan && !_services.CanChange)",
+      "new": "&& !options.Plan && false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemovalTests.The_services_are_not_touched"
+    },
+    {
+      "name": "database service before the API",
+      "file": "src/Premagentic.Cli/Setup/RemovalEngine.cs",
+      "old": "        items.Add(ServiceItem(\"service.database\", BundledPostgres.ServiceName, databaseService));",
+      "new": "        items.Insert(0, ServiceItem(\"service.database\", BundledPostgres.ServiceName, databaseService));",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemovalTests.Without_purge_the_services_go"
+    },
+    {
+      "name": "a plan acts",
+      "file": "src/Premagentic.Cli/Setup/RemovalEngine.cs",
+      "old": "            if (item.Act is null || options.Plan)",
+      "new": "            if (item.Act is null)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemovalTests.A_plan_lists_every_step"
+    },
+    {
+      "name": "no owner file is not refused",
+      "file": "src/Premagentic.Cli/Setup/RemovalEngine.cs",
+      "old": "        if (owner is null)\n            throw Refused($\"{ownerProblem} A purge drops",
+      "new": "        if (owner is null) return;\n        if (owner is null)\n            throw Refused($\"{ownerProblem} A purge drops",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemovalTests.A_purge_without_the_owner_file"
+    },
+    {
+      "name": "an owner that cannot connect is not refused",
+      "file": "src/Premagentic.Cli/Setup/RemovalEngine.cs",
+      "old": "            if (adminDatabaseOid is not null || (!loggedIn && adminOwnerOid is not null))",
+      "new": "            if (false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemovalTests.A_purge_is_refused_when_the_owner_cannot_connect"
+    },
+    {
+      "name": "another server's admin is not refused",
+      "file": "src/Premagentic.Cli/Setup/RemovalEngine.cs",
+      "old": "            if (databaseOid != adminDatabaseOid) throw DifferentServers(database);",
+      "new": "            if (false) throw DifferentServers(database);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemovalTests.A_purge_never_drops_roles"
+    },
+    {
+      "name": "no admin connection is not refused",
+      "file": "src/Premagentic.Cli/Setup/RemovalEngine.cs",
+      "old": "        if (string.IsNullOrWhiteSpace(adminText))",
+      "new": "        if (false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemovalTests.A_purge_without_a_role_that_may_drop_roles"
+    },
+    {
+      "name": "an open session is not looked for",
+      "file": "src/Premagentic.Cli/Setup/RemovalEngine.cs",
+      "old": "                if (open == 0) break;",
+      "new": "                break;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemovalTests.A_purge_is_refused_while_a_session_is_open"
+    },
+    {
+      "name": "a folder that is not a cluster is deleted",
+      "file": "src/Premagentic.Cli/Setup/RemovalEngine.cs",
+      "old": "            else if (!File.Exists(Path.Combine(data, \"PG_VERSION\")))\n                throw Refused(",
+      "new": "            else if (false)\n                throw Refused(",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemovalTests.A_data_folder_that_is_not_a_cluster"
+    },
+    {
+      "name": "a purge that stopped cannot be run again",
+      "file": "src/Premagentic.Cli/Setup/RemovalEngine.cs",
+      "old": "            if (loggedIn && roleOid != adminOwnerOid) throw DifferentServers(database);",
+      "new": "            if (loggedIn) throw DifferentServers(database);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemovalTests.A_purge_that_stopped_after_the_database"
+    },
+    {
+      "name": "the purge drops no role",
+      "file": "src/Premagentic.Cli/Setup/RemovalEngine.cs",
+      "old": "                await using var cmd = source.CreateCommand($\"DROP ROLE IF EXISTS {Quote(role)}\");",
+      "new": "                await using var cmd = source.CreateCommand(\"SELECT 1\");",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemovalTests.A_purge_drops_the_database_and_the_roles"
+    },
+    {
+      "name": "the systemd steps are not printed",
+      "file": "src/Premagentic.Cli/Setup/RemovalEngine.cs",
+      "old": "        if (File.Exists(options.SystemdUnitPath))",
+      "new": "        if (false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemovalTests.The_systemd_steps_are_printed"
+    },
+    {
+      "name": "a hand-started bundled server is not stopped",
+      "file": "src/Premagentic.Cli/Setup/RemovalEngine.cs",
+      "old": "        if (!databaseService && bundledRunning && data is not null)",
+      "new": "        if (false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemovalBundledPostgresTests"
+    },
+    {
+      "name": "the CLI carries out an unconfirmed purge",
+      "file": "src/Premagentic.Cli/Setup/RemoveCommand.cs",
+      "old": "            Plan: args.Contains(\"--plan\") || (purge && !yes),",
+      "new": "            Plan: args.Contains(\"--plan\"),",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemovalTests.The_cli_lists_a_purge"
+    },
+    {
+      "name": "a refusal exits 1",
+      "file": "src/Premagentic.Cli/Setup/RemoveCommand.cs",
+      "old": "            return StartupRefusedException.ExitCode;",
+      "new": "            return 1;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemovalTests.The_cli_lists_a_purge"
+    },
+    {
+      "name": "the state is read from the type line",
+      "file": "src/Premagentic.Cli/Setup/WindowsServiceRegistration.cs",
+      "old": "@\"STATE\\s*:\\s*(\\d+)\"",
+      "new": "@\"TYPE\\s*:\\s*(\\d+)\"",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemovalTests.The_state_is_read"
+    },
+    {
+      "name": "the stale body is not pending",
+      "file": "src/Premagentic.Core/Storage/MigrationRunner.cs",
+      "old": "        if (!await TextMatchCurrentAsync(ct)) pending.Add(AppliedMigration.TextMatchBody);\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.MigrationPendingTests"
+    },
+    {
+      "name": "the administrator step does not wait for the body",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        if (!_appLogsIn || !_schemaCurrent || !_textMatchCurrent)",
+      "new": "        if (!_appLogsIn || !_schemaCurrent)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.MigrationPendingTests"
+    },
+    {
+      "name": "a stale body stops the grant checks",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "            _schemaCurrent = pending.All(p => p.Kind != MigrationWork.Section);",
+      "new": "            _schemaCurrent = pending.Count == 0;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.MigrationPendingTests"
+    },
+    {
+      "name": "the provider does not switch the runtime telemetry off",
+      "file": "src/Premagentic.Core/Embeddings/LocalOnnxEmbeddingProvider.cs",
+      "old": "    public LocalOnnxEmbeddingProvider(string modelDir) : this(modelDir, OnnxTelemetry.Disable)",
+      "new": "    public LocalOnnxEmbeddingProvider(string modelDir) : this(modelDir, () => { })",
+      "filter": "FullyQualifiedName~Premagentic.Tests.EmbeddingTelemetryTests"
+    },
+    {
+      "name": "the runtime variable is never set",
+      "file": "src/Premagentic.Core/Embeddings/OnnxTelemetry.cs",
+      "old": "        SetForNativeCodeUnlessSet(Variable, \"1\");\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.EmbeddingTelemetryTests"
+    },
+    {
+      "name": "an operator's value is overwritten (Windows)",
+      "file": "src/Premagentic.Core/Embeddings/OnnxTelemetry.cs",
+      "old": "            if (Environment.GetEnvironmentVariable(name) is null) Environment.SetEnvironmentVariable(name, value);\n",
+      "new": "            Environment.SetEnvironmentVariable(name, value);\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.EmbeddingTelemetryTests"
+    },
+    {
+      "name": "the CLI's refusal handler prints but does not exit",
+      "file": "src/Premagentic.Cli/Program.cs",
+      "old": "    Environment.Exit(StartupRefusedException.ExitCode);\n};\n",
+      "new": "};\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.EmbeddingProviderRefusalTests"
+    },
+    {
+      "name": "an unreachable provider is not a refusal",
+      "file": "src/Premagentic.Core/Embeddings/OpenAiEmbeddingProvider.cs",
+      "old": "catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException && !ct.IsCancellationRequested)",
+      "new": "catch (Exception ex) when (ex is ArgumentNullException)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.EmbeddingProviderRefusalTests"
+    },
+    {
+      "name": "a missing key is not a refusal",
+      "file": "src/Premagentic.Core/Embeddings/OpenAiEmbeddingProvider.cs",
+      "old": "?? throw new StartupRefusedException($\"The embedding provider openai:{Model} needs OPENAI_API_KEY, which is not set.\");",
+      "new": "?? throw new InvalidOperationException(\"OPENAI_API_KEY is not set.\");",
+      "filter": "FullyQualifiedName~Premagentic.Tests.EmbeddingProviderRefusalTests"
+    },
+    {
+      "name": "the purge list's heading is printed before the list is made",
+      "file": "src/Premagentic.Cli/Setup/RemoveCommand.cs",
+      "old": "        private bool _started;\n",
+      "new": "        private bool _started = Begin(inner, heading);\n\n        private static bool Begin(TextWriter inner, string heading) { inner.WriteLine(heading); return true; }\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemovalTests.The_cli_lists_a_purge_until_it_is_confirmed_then_carries_it_out"
+    }
+  ]
+}

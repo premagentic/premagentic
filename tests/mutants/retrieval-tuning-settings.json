@@ -1,0 +1,97 @@
+{
+  "name": "The retrieval tuning settings, from the command line and the portal",
+  "commit": "hand run, 2026-09-22",
+  "mutants": [
+    {
+      "name": "store: setting the stored value again writes and records it",
+      "file": "src/Premagentic.Core/Evaluation/TuningSettingsStore.cs",
+      "old": "if (before is { } old && JsonElement.DeepEquals(old, value))",
+      "new": "if (before is { } old && JsonElement.DeepEquals(old, value) && false)",
+      "filter": "FullyQualifiedName~SettingsTuningCommandTests|FullyQualifiedName~SettingsCommandTests|FullyQualifiedName~PortalTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "store: unset is recorded as setting.set",
+      "file": "src/Premagentic.Core/Evaluation/TuningSettingsStore.cs",
+      "old": "change.Record(UnsetKind, key, before, null);",
+      "new": "change.Record(SetKind, key, before, null);",
+      "filter": "FullyQualifiedName~SettingsTuningCommandTests|FullyQualifiedName~SettingsCommandTests|FullyQualifiedName~PortalTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "store: a removed value is not removed",
+      "file": "src/Premagentic.Core/Evaluation/TuningSettingsStore.cs",
+      "old": "await store.RemoveAsync(key, ct);",
+      "new": "await Task.CompletedTask;",
+      "filter": "FullyQualifiedName~SettingsTuningCommandTests|FullyQualifiedName~SettingsCommandTests|FullyQualifiedName~PortalTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "store: a relative golden set path is accepted",
+      "file": "src/Premagentic.Core/Evaluation/TuningSettingsStore.cs",
+      "old": ": !System.IO.Path.IsPathFullyQualified(path)",
+      "new": ": false",
+      "filter": "FullyQualifiedName~SettingsTuningCommandTests|FullyQualifiedName~SettingsCommandTests|FullyQualifiedName~PortalTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "store: an unusable stored retrieval value reads as set",
+      "file": "src/Premagentic.Core/Evaluation/TuningSettingsStore.cs",
+      "old": "return RetrievalSettings.TryParse(key, value, out var problem)",
+      "new": "return RetrievalSettings.TryParse(key, value, out var problem) || true",
+      "filter": "FullyQualifiedName~SettingsTuningCommandTests|FullyQualifiedName~SettingsCommandTests|FullyQualifiedName~PortalTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "store: a stored golden set path that is not text reads as a path",
+      "file": "src/Premagentic.Core/Evaluation/TuningSettingsStore.cs",
+      "old": "if (value.ValueKind != JsonValueKind.String)\n            return new GoldenSetPathReading(null,",
+      "new": "if (value.ValueKind == JsonValueKind.Undefined)\n            return new GoldenSetPathReading(null,",
+      "filter": "FullyQualifiedName~SettingsTuningCommandTests|FullyQualifiedName~SettingsCommandTests|FullyQualifiedName~PortalTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "cli: the missing golden set file is not warned about",
+      "file": "src/Premagentic.Cli/Admin/SettingsCommands.cs",
+      "old": "if (key == TuningSettingsStore.GoldenSetPath && !File.Exists(text))",
+      "new": "if (key == TuningSettingsStore.GoldenSetPath && !File.Exists(text) && false)",
+      "filter": "FullyQualifiedName~SettingsTuningCommandTests|FullyQualifiedName~SettingsCommandTests|FullyQualifiedName~PortalTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "cli: the floor says it applies to searches",
+      "file": "src/Premagentic.Cli/Admin/SettingsCommands.cs",
+      "old": "RetrievalSettings.NoAnswerDistanceFloor => \"It applies to the next golden-set evaluation; a search is not filtered by it.\",",
+      "new": "RetrievalSettings.NoAnswerDistanceFloor => \"It applies to the next search.\",",
+      "filter": "FullyQualifiedName~SettingsTuningCommandTests|FullyQualifiedName~SettingsCommandTests|FullyQualifiedName~PortalTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "page: the golden set path reaches the store from the portal",
+      "file": "src/Premagentic.Portal/Pages/TuningPages.cs",
+      "old": "private static string? Refusal(string key) =>",
+      "new": "private static string? Refusal(string key) => key == TuningSettingsStore.GoldenSetPath ? null :",
+      "filter": "FullyQualifiedName~SettingsTuningCommandTests|FullyQualifiedName~SettingsCommandTests|FullyQualifiedName~PortalTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "page: the trust History shows every setting.set",
+      "file": "src/Premagentic.Portal/Pages/SettingsPages.cs",
+      "old": ".Where(e => e.Kind == TrustSettingsStore.ChangeKind && TrustSettingsStore.Keys.Contains(e.Target))",
+      "new": ".Where(e => e.Kind == TrustSettingsStore.ChangeKind)",
+      "filter": "FullyQualifiedName~SettingsTuningCommandTests|FullyQualifiedName~SettingsCommandTests|FullyQualifiedName~PortalTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "page: the tuning History shows every setting change",
+      "file": "src/Premagentic.Portal/Pages/TuningPages.cs",
+      "old": "&& TuningSettingsStore.IsKey(e.Target))",
+      "new": ")",
+      "filter": "FullyQualifiedName~SettingsTuningCommandTests|FullyQualifiedName~SettingsCommandTests|FullyQualifiedName~PortalTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "page: an unset row shows the raw new value",
+      "file": "src/Premagentic.Portal/Pages/TuningPages.cs",
+      "old": "e.Kind == TuningSettingsStore.UnsetKind ? \"unset, so the default applies\" : AuditPages.Json(e.NewValue),",
+      "new": "AuditPages.Json(e.NewValue),",
+      "filter": "FullyQualifiedName~SettingsTuningCommandTests|FullyQualifiedName~SettingsCommandTests|FullyQualifiedName~PortalTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "page: the floor loses its note",
+      "file": "src/Premagentic.Portal/Pages/TuningPages.cs",
+      "old": "private static Markup Note(string key) => key == RetrievalSettings.NoAnswerDistanceFloor",
+      "new": "private static Markup Note(string key) => key == \"\"",
+      "filter": "FullyQualifiedName~SettingsTuningCommandTests|FullyQualifiedName~SettingsCommandTests|FullyQualifiedName~PortalTuningTests|FullyQualifiedName~PortalPagesTests"
+    }
+  ]
+}

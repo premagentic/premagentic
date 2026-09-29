@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Markdig" Version="1.4.0" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.27.0" />
+    <PackageReference Include="Microsoft.ML.Tokenizers" Version="2.0.0" />
+    <PackageReference Include="Npgsql" Version="10.0.3" />
+    <PackageReference Include="System.Numerics.Tensors" Version="10.0.12" />
+    <PackageReference Include="YamlDotNet" Version="18.1.0" />
+  </ItemGroup>
+
+  <!-- Migrations ship inside the assembly, so a running build can never meet a
+       schema file from a different version. The logical name is fixed so the
+       runner does not depend on how the build mangles folder names. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Storage\Migrations\*.sql" LogicalName="Premagentic.Migrations.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Premagentic.Tests" />
+    <!-- The benchmark times the vector leg and the permitted read on their own,
+         through the same members a search uses. -->
+    <InternalsVisibleTo Include="Premagentic.Benchmark" />
+  </ItemGroup>
+
+</Project>

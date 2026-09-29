@@ -1,0 +1,31 @@
+services:
+  premagentic-postgres:
+    # Stock PostgreSQL, pinned to a minor version. Premagentic needs no extension.
+    image: postgres:17.11@sha256:d74eeac9a635390a49bc21bd49fccd973de707e2a53a76ac49b552b8712ec46f
+    container_name: premagentic-postgres
+    environment:
+      POSTGRES_USER: prem
+      # Local development only. A deployment takes its password from the
+      # customer's own secret store and never from this file.
+      POSTGRES_PASSWORD: ${PREM_PG_PASSWORD:-prem_dev}
+      POSTGRES_DB: premagentic
+    ports:
+      # 5434 rather than the default, so this never collides with a
+      # PostgreSQL a developer already runs on 5432 or 5433. Published on the
+      # loopback address only: the development password is in this file, so
+      # the database must not be reachable from anywhere but this computer.
+      - "127.0.0.1:5434:5432"
+    volumes:
+      # A new volume name on purpose. The volume from 0.1.0 holds a database
+      # created with the vector extension, which a stock image cannot load, and
+      # its data predates the migrations. Re-ingest into this one; the old
+      # volume can be removed with `docker volume rm` once nothing needs it.
+      - premagentic-pgdata-17:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prem -d premagentic"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  premagentic-pgdata-17:

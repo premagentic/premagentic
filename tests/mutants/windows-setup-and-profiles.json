@@ -1,0 +1,310 @@
+{
+  "name": "Windows setup's folder and files, profile names, and the bounds on a read",
+  "commit": "hand run, 2026-09-29",
+  "mutants": [
+    {
+      "name": "a folder or file another account owns counts as trusted",
+      "file": "src/Premagentic.Core/Storage/InstallAccess.cs",
+      "old": "        if (owner is null || !IsTrusted(owner, self))\n",
+      "new": "        if (false && (owner is null || !IsTrusted(owner, self)))\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupCredentialsTests",
+      "platform": "windows"
+    },
+    {
+      "name": "a folder or file other accounts may change counts as trusted",
+      "file": "src/Premagentic.Core/Storage/InstallAccess.cs",
+      "old": "        return others.Count == 0\n            ? null",
+      "new": "        return others.Count >= 0\n            ? null",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupCredentialsTests|FullyQualifiedName~Premagentic.Tests.SetupInstallTests",
+      "platform": "windows"
+    },
+    {
+      "name": "the private folder takes the rules of the folder above it",
+      "file": "src/Premagentic.Core/Storage/InstallAccess.cs",
+      "old": "        security.SetAccessRuleProtection(isProtected: true, preserveInheritance: false);",
+      "new": "        security.SetAccessRuleProtection(isProtected: false, preserveInheritance: true);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupCredentialsTests|FullyQualifiedName~Premagentic.Tests.SetupInstallTests",
+      "platform": "windows"
+    },
+    {
+      "name": "a secret written to a missing folder makes it the ordinary way",
+      "file": "src/Premagentic.Core/Storage/CredentialsFile.cs",
+      "old": "        if (!Directory.Exists(directory)) InstallAccess.CreatePrivateFolder(directory);",
+      "new": "        if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupCredentialsTests",
+      "platform": "windows"
+    },
+    {
+      "name": "a credentials file another account owns is private when its rules say so",
+      "file": "src/Premagentic.Core/Storage/CredentialsFile.cs",
+      "old": "|| !InstallAccess.IsTrusted(owner, user)) return false;",
+      "new": "|| !InstallAccess.IsTrusted(owner, user) && false) return false;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupCredentialsTests",
+      "platform": "windows"
+    },
+    {
+      "name": "the API reads an install folder other accounts may change",
+      "file": "src/Premagentic.Api/Hosting/PremagenticHosting.cs",
+      "old": "        if (InstallAccess.HostRefusal(config[\"PREM_CREDENTIALS_FILE\"]) is { } untrusted)\n",
+      "new": "        if (InstallAccess.HostRefusal(config[\"PREM_CREDENTIALS_FILE\"]) is { } untrusted && false)\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupCredentialsTests",
+      "platform": "windows"
+    },
+    {
+      "name": "the API loads https settings that set more than the Kestrel section",
+      "file": "src/Premagentic.Api/Hosting/PremagenticHosting.cs",
+      "old": "            if (KestrelSettingsRefusal(settings, own.GetChildren().Select(section => section.Key)) is { } refusal)\n",
+      "new": "            if (KestrelSettingsRefusal(settings, own.GetChildren().Select(section => section.Key)) is { } refusal && false)\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupCredentialsTests"
+    },
+    {
+      "name": "setup makes its folder the ordinary way, with the rules of the folder above",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "            InstallAccess.CreatePrivateFolder(folder, service);",
+      "new": "            Directory.CreateDirectory(folder);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupInstallTests",
+      "platform": "windows"
+    },
+    {
+      "name": "setup uses a folder other accounts may change",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        if (InstallAccess.Examine(folder) is { } finding)\n",
+      "new": "        if (InstallAccess.Examine(folder) is { } finding && false)\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupInstallTests",
+      "platform": "windows"
+    },
+    {
+      "name": "setup reads a credentials file another account could have written",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "            if (InstallAccess.Examine(path) is { } finding)\n            {\n                Fail(step, ",
+      "new": "            if (InstallAccess.Examine(path) is { } finding && false)\n            {\n                Fail(step, ",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupInstallTests",
+      "platform": "windows"
+    },
+    {
+      "name": "setup keeps a password other accounts could read",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "            var fresh = Secrets.NewPassword();\n",
+      "new": "            var fresh = existing.Password!;\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupInstallTests"
+    },
+    {
+      "name": "setup leaves https settings another account could have written in place",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "            if ((File.Exists(file) || InstallAccess.IsLink(file)) && InstallAccess.Examine(file) is { } finding)",
+      "new": "            if (false && (File.Exists(file) || InstallAccess.IsLink(file)) && InstallAccess.Examine(file) is { } finding)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupInstallTests",
+      "platform": "windows"
+    },
+    {
+      "name": "setup reads a superuser file another account could have written (needs PREM_TEST_POSTGRES_BUNDLE)",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "            if (InstallAccess.Examine(path) is { } finding)\n            {\n                Fail(Step, ",
+      "new": "            if (InstallAccess.Examine(path) is { } finding && false)\n            {\n                Fail(Step, ",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupBundledPostgresTests.A_superuser",
+      "platform": "windows"
+    },
+    {
+      "name": "setup keeps the superuser's password when other accounts could read it (needs PREM_TEST_POSTGRES_BUNDLE)",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        var password = Secrets.NewPassword();\n        await using var source = NpgsqlDataSource.Create(old.ConnectionString);",
+      "new": "        var password = old.Password!;\n        await using var source = NpgsqlDataSource.Create(old.ConnectionString);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupBundledPostgresTests.A_superuser",
+      "platform": "windows"
+    },
+    {
+      "name": "the search role gets no statement_timeout",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        await ExecuteAsync(admin,\n            $\"ALTER ROLE {Quote(options.SearchRole)} IN DATABASE {Quote(options.DatabaseName)} SET statement_timeout = '{SearchStatementTimeout}'\", ct);",
+      "new": "        await Task.CompletedTask;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupSearchRoleTests"
+    },
+    {
+      "name": "a statement_timeout of zero counts as one set",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "is string set && set != \"0\")",
+      "new": "is string set)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupSearchRoleTests"
+    },
+    {
+      "name": "a profile name with a folder in it is read without a word",
+      "file": "src/Premagentic.Core/Profiles/ProfileFolder.cs",
+      "old": "        else if (!SourceRegistry.IsName(manifest.Name))",
+      "new": "        else if (false && !SourceRegistry.IsName(manifest.Name))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ProfileTests"
+    },
+    {
+      "name": "a profile's golden set may be copied outside its folder",
+      "file": "src/Premagentic.Core/Profiles/ProfilePlan.cs",
+      "old": "        if (!string.Equals(Path.GetDirectoryName(target), folder, StringComparison.Ordinal))",
+      "new": "        if (false && !string.Equals(Path.GetDirectoryName(target), folder, StringComparison.Ordinal))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ProfileTests"
+    },
+    {
+      "name": "a query of any length is searched",
+      "file": "src/Premagentic.Core/Retrieval/HybridSearch.cs",
+      "old": "        if (QueryLimits.SearchRefusal(query) is { } tooLong) throw new QueryTooLongException(tooLong);",
+      "new": "        if (QueryLimits.SearchRefusal(query) is { } tooLong && false) throw new QueryTooLongException(tooLong);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ApiReadLimitTests"
+    },
+    {
+      "name": "a query one character over the limit is searched",
+      "file": "src/Premagentic.Core/Retrieval/QueryLimits.cs",
+      "old": "        query.Length > MaxLength\n",
+      "new": "        query.Length > MaxLength + 1\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ApiReadLimitTests"
+    },
+    {
+      "name": "a path or a heading of any length is fetched",
+      "file": "src/Premagentic.Core/Retrieval/SectionFetcher.cs",
+      "old": "        if (QueryLimits.SectionRefusal(path, heading) is { } tooLong) throw new QueryTooLongException(tooLong);",
+      "new": "        if (QueryLimits.SectionRefusal(path, heading) is { } tooLong && false) throw new QueryTooLongException(tooLong);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ApiReadLimitTests"
+    },
+    {
+      "name": "only the path is held to the limit, never the heading",
+      "file": "src/Premagentic.Core/Retrieval/QueryLimits.cs",
+      "old": "Math.Max(path.Length, heading?.Length ?? 0) is var longest",
+      "new": "path.Length is var longest",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ApiReadLimitTests"
+    },
+    {
+      "name": "a declared body over the bound is read",
+      "file": "src/Premagentic.Api/Callers/ReadRequestLimit.cs",
+      "old": "            if (ReadRequestLimit.Over(declared))",
+      "new": "            if (false && ReadRequestLimit.Over(declared))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ApiReadLimitTests"
+    },
+    {
+      "name": "a body of unknown length is read past the bound",
+      "file": "src/Premagentic.Api/Callers/ReadRequestLimit.cs",
+      "old": "                if (ReadRequestLimit.Over(received.Length)) return false;",
+      "new": "                if (false && ReadRequestLimit.Over(received.Length)) return false;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ApiReadLimitTests"
+    },
+    {
+      "name": "the search endpoint carries no bound",
+      "file": "src/Premagentic.Api/Callers/ApiEndpoints.cs",
+      "old": "        app.MapPost(\"/api/search\", SearchAsync).WithMetadata(ReadRequestLimit.Instance);",
+      "new": "        app.MapPost(\"/api/search\", SearchAsync);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ApiReadLimitTests"
+    },
+    {
+      "name": "the API answers a query over the limit with a server error",
+      "file": "src/Premagentic.Api/Callers/ApiEndpoints.cs",
+      "old": "        catch (QueryTooLongException tooLong)\n        {\n            return Results.BadRequest(new { error = tooLong.Message });\n        }\n        return Results.Ok(new",
+      "new": "        catch (QueryTooLongException tooLong) when (tooLong.Message.Length < 0)\n        {\n            return Results.BadRequest(new { error = tooLong.Message });\n        }\n        return Results.Ok(new",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ApiReadLimitTests"
+    },
+    {
+      "name": "a query over the limit is an error to an assistant rather than an answer",
+      "file": "src/Premagentic.Api/Callers/PremagenticMcpTools.cs",
+      "old": "        if (QueryLimits.SearchRefusal(query) is { } tooLong) return tooLong;",
+      "new": "        if (QueryLimits.SearchRefusal(query) is { } tooLong && false) return tooLong;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.McpHttpTests"
+    },
+    {
+      "name": "a path over the limit is an error to an assistant rather than an answer",
+      "file": "src/Premagentic.Api/Callers/PremagenticMcpTools.cs",
+      "old": "        if (QueryLimits.SectionRefusal(path, heading) is { } tooLong) return tooLong;",
+      "new": "        if (QueryLimits.SectionRefusal(path, heading) is { } tooLong && false) return tooLong;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.McpHttpTests"
+    },
+    {
+      "name": "the portal's search page fails on a question over the limit",
+      "file": "src/Premagentic.Portal/Pages/SearchPages.cs",
+      "old": "            catch (QueryTooLongException tooLong)\n",
+      "new": "            catch (QueryTooLongException tooLong) when (tooLong.Message.Length < 0)\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalPagesTests"
+    },
+    {
+      "name": "prem search ends a query over the limit with an unhandled exception",
+      "file": "src/Premagentic.Cli/Program.cs",
+      "old": "            return 1;\n        }\n\n        Console.WriteLine(\n",
+      "new": "            throw;\n        }\n\n        Console.WriteLine(\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SearchCliTuningTests"
+    },
+    {
+      "name": "a folder another account made first is taken as made",
+      "file": "src/Premagentic.Core/Storage/InstallAccess.cs",
+      "old": "        CreatePrivateFolderOnWindows(path, serviceSid);\n        RequireMadePrivate(path, \"folder\");",
+      "new": "        CreatePrivateFolderOnWindows(path, serviceSid);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupCredentialsTests",
+      "platform": "windows"
+    },
+    {
+      "name": "a secret another account changes as it is written is taken",
+      "file": "src/Premagentic.Core/Storage/CredentialsFile.cs",
+      "old": "        if (OperatingSystem.IsWindows()) InstallAccess.RequireMadePrivate(path, \"file\");",
+      "new": "        if (OperatingSystem.IsWindows() && false) InstallAccess.RequireMadePrivate(path, \"file\");",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupCredentialsTests",
+      "platform": "windows"
+    },
+    {
+      "name": "a junction is examined through its target",
+      "file": "src/Premagentic.Core/Storage/InstallAccess.cs",
+      "old": "        if (IsLink(path)) return new AccessFinding(AccessProblem.Link, Link);",
+      "new": "        if (false && IsLink(path)) return new AccessFinding(AccessProblem.Link, Link);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupCredentialsTests|FullyQualifiedName~Premagentic.Tests.SetupInstallTests",
+      "platform": "windows"
+    },
+    {
+      "name": "rules are set through a junction",
+      "file": "src/Premagentic.Core/Storage/InstallAccess.cs",
+      "old": "        RefuseLinks([folder, .. all]);",
+      "new": "        RefuseLinks([]);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupCredentialsTests",
+      "platform": "windows"
+    },
+    {
+      "name": "a cluster's superuser file is said to be moved aside (needs PREM_TEST_POSTGRES_BUNDLE)",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        if (!clusterExists) return FileRefusal(path, finding);",
+      "new": "        if (clusterExists || !clusterExists) return FileRefusal(path, finding);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupBundledPostgresTests.A_superuser",
+      "platform": "windows"
+    },
+    {
+      "name": "setup says it is complete over https settings that set more than the Kestrel section",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        if (KestrelSettingsRefusal() is { } beyondKestrel)",
+      "new": "        if (KestrelSettingsRefusal() is { } beyondKestrel && false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupInstallTests"
+    },
+    {
+      "name": "a new password is written before the role has it",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        await ExecuteAsync(admin, $\"ALTER ROLE {Quote(role)} WITH PASSWORD '{Secrets.ScramSha256Verifier(password)}'\", ct);\n        var rotated = WritePending(role, password);",
+      "new": "        var rotated = WritePending(role, password);\n        await ExecuteAsync(admin, $\"ALTER ROLE {Quote(role)} WITH PASSWORD '{Secrets.ScramSha256Verifier(password)}'\", ct);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupInstallTests"
+    },
+    {
+      "name": "the section endpoint carries no bound",
+      "file": "src/Premagentic.Api/Callers/ApiEndpoints.cs",
+      "old": "        app.MapPost(\"/api/section\", SectionAsync).WithMetadata(ReadRequestLimit.Instance);",
+      "new": "        app.MapPost(\"/api/section\", SectionAsync);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ApiReadLimitTests"
+    },
+    {
+      "name": "a golden question over the limit is read",
+      "file": "src/Premagentic.Core/Evaluation/EvalRunner.cs",
+      "old": "cases.FirstOrDefault(c => c?.Question is { Length: > QueryLimits.MaxLength })",
+      "new": "cases.FirstOrDefault(c => false && c?.Question is { Length: > QueryLimits.MaxLength })",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ProfileTests|FullyQualifiedName~Premagentic.Tests.SearchCliTuningTests"
+    },
+    {
+      "name": "prem eval runs a golden set it cannot ask",
+      "file": "src/Premagentic.Cli/Program.cs",
+      "old": "        if (EvalRunner.OverLongQuestion(args[1]) is { } tooLong)",
+      "new": "        if (EvalRunner.OverLongQuestion(args[1]) is { } tooLong && false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SearchCliTuningTests"
+    },
+    {
+      "name": "a refusal the server ends the connection on stops setup",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "            catch (NpgsqlException ex) when (ex is not PostgresException)",
+      "new": "            catch (NpgsqlException ex) when (ex is not PostgresException && false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupInstallTests"
+    }
+  ]
+}

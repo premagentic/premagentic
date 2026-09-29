@@ -1,0 +1,10 @@
+text:       pdfpig.txt (upstream file, byte for byte)
+package:    PdfPig 0.1.16 (redistributed by the PDF reader extension)
+nuspec:     license expression Apache-2.0
+repository: https://github.com/UglyToad/PdfPig
+commit:     a7bb35662bbbf405efddad50aedc9bcdcf515afc (the commit the package's nuspec names; tag v0.1.16, peeled)
+file:       LICENSE
+url:        https://raw.githubusercontent.com/UglyToad/PdfPig/a7bb35662bbbf405efddad50aedc9bcdcf515afc/LICENSE
+read:       2026-09-25, read only, this one file
+sha256:     4c510e162f896ea43b4b1cf1b743641d7c756f1004d0e5eaf0615b28b7ded409
+note:       The upstream file is a composite: the Apache License 2.0, then "EXTERNAL COMPONENTS" with BSD-style notices for contributions made to the original PDFBox and FontBox projects and for code from Adobe Systems Incorporated. The nuspec says Apache-2.0 alone; the file is shipped whole because it covers all of it. That was decided on 2026-09-25.

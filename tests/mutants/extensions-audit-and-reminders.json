@@ -1,0 +1,132 @@
+{
+  "name": "extensions, audit commands and the reminders job",
+  "commit": "hand run, 2026-09-24",
+  "mutants": [
+    {
+      "name": "1 help: answered after the database step instead of before",
+      "file": "src/Premagentic.Cli/Program.cs",
+      "old": "if (Premagentic.Cli.Help.Answer(args, Console.Out, Console.Error, out var notBuiltIn) is { } answered) return answered;",
+      "new": "string? notBuiltIn = null;\nif (args.Length > 0 && args[0] is \"setup\" or \"remove\" && Premagentic.Cli.Help.Answer(args, Console.Out, Console.Error, out notBuiltIn) is { } answered) return answered;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.CliHelpTests"
+    },
+    {
+      "name": "2c usage: an unknown flag passes through to the command",
+      "file": "src/Premagentic.Cli/Help.cs",
+      "old": "        if (unknown is not null)",
+      "new": "        if (false && unknown is not null)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.CliHelpTests"
+    },
+    {
+      "name": "2d manual: the program's text changes and docs/cli.md does not",
+      "file": "src/Premagentic.Cli/Help.cs",
+      "old": "          Applies the numbered migrations this build carries,",
+      "new": "          Applies every numbered migration this build carries,",
+      "filter": "FullyQualifiedName~Premagentic.Tests.CliHelpTests"
+    },
+    {
+      "name": "2e eval: the default report goes beside the golden set again",
+      "file": "src/Premagentic.Cli/Program.cs",
+      "old": "            : $\"report-{DateTime.Now:yyyy-MM-dd-HHmm}.md\");",
+      "new": "            : Path.Combine(Path.GetDirectoryName(Path.GetFullPath(args[1]))!, $\"report-{DateTime.Now:yyyy-MM-dd-HHmm}.md\"));",
+      "filter": "FullyQualifiedName~Premagentic.Tests.EvalReportPlaceTests"
+    },
+    {
+      "name": "2f eval: a report is written into a folder that holds a profile",
+      "file": "src/Premagentic.Cli/Program.cs",
+      "old": "        if (File.Exists(Path.Combine(Path.GetDirectoryName(reportPath)!, Premagentic.Core.Profiles.ProfileReader.ManifestFile)))",
+      "new": "        if (false && File.Exists(Path.Combine(Path.GetDirectoryName(reportPath)!, Premagentic.Core.Profiles.ProfileReader.ManifestFile)))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.EvalReportPlaceTests"
+    },
+    {
+      "name": "3a extension: an unlisted file beside it is loaded",
+      "file": "src/Premagentic.Core/Extensions/ExtensionLoadContext.cs",
+      "old": "        Unlisted(file);",
+      "new": "        if (File.Exists(System.IO.Path.Combine(_folder, file))) return LoadFromAssemblyPath(System.IO.Path.Combine(_folder, file));",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionDependencyTests"
+    },
+    {
+      "name": "3b extension: a listed file's hash is not checked",
+      "file": "src/Premagentic.Core/Extensions/ExtensionHost.cs",
+      "old": "            if (!fileSha256.Equals(listed.Sha256, StringComparison.OrdinalIgnoreCase))",
+      "new": "            if (false && !fileSha256.Equals(listed.Sha256, StringComparison.OrdinalIgnoreCase))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionDependencyTests"
+    },
+    {
+      "name": "3c extension: the allowed hash covers the assembly only",
+      "file": "src/Premagentic.Core/Extensions/ExtensionManifest.cs",
+      "old": "        if (files.Count == 0) return assemblySha256.ToLowerInvariant();",
+      "new": "        return assemblySha256.ToLowerInvariant();",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionDependencyTests"
+    },
+    {
+      "name": "3d extension: references are not looked up at load, so an unlisted one waits for first use",
+      "file": "src/Premagentic.Core/Extensions/ExtensionHost.cs",
+      "old": "        var pending = new Queue<Assembly>([assembly]);",
+      "new": "        var pending = new Queue<Assembly>();",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionDependencyTests"
+    },
+    {
+      "name": "6a reminders: every document goes to one owner",
+      "file": "src/Premagentic.Core/Reminders/RemindersJob.cs",
+      "old": "                var owner = OwnerOf(path, owners);",
+      "new": "                var owner = owners.Select(o => o.Owner).FirstOrDefault(o => o is not null);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemindersTests"
+    },
+    {
+      "name": "6b reminders: an unowned document is dropped instead of going to the administrators",
+      "file": "src/Premagentic.Core/Reminders/RemindersJob.cs",
+      "old": "                    unowned.Add(new ReminderItem(path, title, isStale ? staleAfter : updatedAt));",
+      "new": "                    _ = updatedAt;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemindersTests"
+    },
+    {
+      "name": "6c reminders: a document stale and in review is on one list only",
+      "file": "src/Premagentic.Core/Reminders/RemindersJob.cs",
+      "old": "                if (inReview) Add(review, owner, new ReminderItem(path, title, updatedAt));",
+      "new": "                else if (inReview) Add(review, owner, new ReminderItem(path, title, updatedAt));",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemindersTests"
+    },
+    {
+      "name": "6d reminders: --plan delivers",
+      "file": "src/Premagentic.Core/Reminders/RemindersJob.cs",
+      "old": "        if (plan) return run;",
+      "new": "        _ = plan;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemindersTests"
+    },
+    {
+      "name": "6e reminders: the built-in sink goes last",
+      "file": "src/Premagentic.Core/Reminders/RemindersJob.cs",
+      "old": "        _sinks = [new TableReminderSink(db, tenantId, log), .. sinks];",
+      "new": "        _sinks = [.. sinks, new TableReminderSink(db, tenantId, log)];",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemindersTests"
+    },
+    {
+      "name": "6f reminders: a failing sink stops the ones after it",
+      "file": "src/Premagentic.Core/Reminders/RemindersJob.cs",
+      "old": "            catch (Exception ex) when (ex is not OperationCanceledException)",
+      "new": "            catch (Exception ex) when (ex is OperationCanceledException)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RemindersTests"
+    },
+    {
+      "name": "6g reminders: the built-in sink opens a connection besides the database",
+      "file": "src/Premagentic.Core/Reminders/TableReminderSink.cs",
+      "old": "        await tx.CommitAsync(ct);",
+      "new": "        await tx.CommitAsync(ct); using (var probe = new System.Net.Sockets.TcpClient()) { try { await probe.ConnectAsync(System.Net.IPAddress.Loopback, 9, ct); } catch (System.Net.Sockets.SocketException) { } }",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ReminderSinkConnectionTests"
+    },
+    {
+      "name": "2a usage: a flag named in a usage and read by no parser",
+      "file": "src/Premagentic.Cli/Admin/RemindersCommands.cs",
+      "old": "        prem reminders run [--plan]",
+      "new": "        prem reminders run [--plan] [--dry-run]",
+      "filter": "FullyQualifiedName~Premagentic.Tests.CliHelpTests"
+    },
+    {
+      "name": "2b usage: a flag read by a parser and named in no usage",
+      "file": "src/Premagentic.Cli/Admin/RemindersCommands.cs",
+      "old": "        var plan = args.Contains(\"--plan\");",
+      "new": "        var plan = args.Contains(\"--plan\") || args.Contains(\"--dry-run\");",
+      "filter": "FullyQualifiedName~Premagentic.Tests.CliHelpTests"
+    }
+  ]
+}

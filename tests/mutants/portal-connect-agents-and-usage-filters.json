@@ -1,0 +1,69 @@
+{
+  "name": "The connect page's instructions, the agents page's self-made filter, the usage page's name filter and the health page",
+  "commit": "hand run, 2026-09-24",
+  "mutants": [
+    {
+      "name": "instructions: a block is shown when none are set",
+      "file": "src/Premagentic.Portal/Pages/ConnectPages.cs",
+      "old": "            || value.GetString() is not { Length: > 0 } text)\n            return Markup.Empty;",
+      "new": "            || value.GetString() is not { } text)\n            text = \"(none set)\";",
+      "filter": "FullyQualifiedName~PortalConnectClientsTests|FullyQualifiedName~PortalUsageScaleTests|FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalAgentsOriginTests|FullyQualifiedName~PortalHealth"
+    },
+    {
+      "name": "instructions: the copy button copies something else",
+      "file": "src/Premagentic.Portal/Pages/ConnectPages.cs",
+      "old": "data-copy=\"instructions\">Copy the instructions</button>",
+      "new": "data-copy=\"token\">Copy the instructions</button>",
+      "filter": "FullyQualifiedName~PortalConnectClientsTests|FullyQualifiedName~PortalUsageScaleTests|FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalAgentsOriginTests|FullyQualifiedName~PortalHealth"
+    },
+    {
+      "name": "instructions: the text is trimmed on the way to the page",
+      "file": "src/Premagentic.Portal/Pages/ConnectPages.cs",
+      "old": "<pre class=\"token snippet\" id=\"instructions\">{text}</pre>",
+      "new": "<pre class=\"token snippet\" id=\"instructions\">{text.Split('\\n')[0]}</pre>",
+      "filter": "FullyQualifiedName~PortalConnectClientsTests|FullyQualifiedName~PortalUsageScaleTests|FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalAgentsOriginTests|FullyQualifiedName~PortalHealth"
+    },
+    {
+      "name": "clients: VS Code's type is written the Claude Desktop way",
+      "file": "src/Premagentic.Portal/Connect/snippets.json",
+      "old": "\\\"type\\\": \\\"http\\\",\\n      \\\"url\\\"",
+      "new": "\\\"type\\\": \\\"streamable-http\\\",\\n      \\\"url\\\"",
+      "filter": "FullyQualifiedName~PortalConnectClientsTests|FullyQualifiedName~PortalUsageScaleTests|FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalAgentsOriginTests|FullyQualifiedName~PortalHealth"
+    },
+    {
+      "name": "agents: a self-made agent reads as made in the portal",
+      "file": "src/Premagentic.Portal/Pages/AgentPages.cs",
+      "old": "            AgentOrigin.SelfKind => $\"by {Person(origin!.UserId)}, for themself\",",
+      "new": "            AgentOrigin.SelfKind => $\"in the portal, by {Person(origin!.UserId)}\",",
+      "filter": "FullyQualifiedName~PortalConnectClientsTests|FullyQualifiedName~PortalUsageScaleTests|FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalAgentsOriginTests|FullyQualifiedName~PortalHealth"
+    },
+    {
+      "name": "usage: a page holds every row (no bound)",
+      "file": "src/Premagentic.Portal/Pages/UsagePages.cs",
+      "old": "        var rows = callers.Skip((page - 1) * PageRows).Take(PageRows);",
+      "new": "        var rows = callers.Skip((page - 1) * PageRows);",
+      "filter": "FullyQualifiedName~PortalConnectClientsTests|FullyQualifiedName~PortalUsageScaleTests|FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalAgentsOriginTests|FullyQualifiedName~PortalHealth"
+    },
+    {
+      "name": "usage: the name filter is ignored",
+      "file": "src/Premagentic.Portal/Pages/UsagePages.cs",
+      "old": "        string.IsNullOrEmpty(name) ? callers : [.. callers.Where(c => c.Name.Contains(name, StringComparison.OrdinalIgnoreCase))];",
+      "new": "        callers;",
+      "filter": "FullyQualifiedName~PortalConnectClientsTests|FullyQualifiedName~PortalUsageScaleTests|FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalAgentsOriginTests|FullyQualifiedName~PortalHealth"
+    },
+    {
+      "name": "usage: the figure counts only the rows on the page",
+      "file": "src/Premagentic.Portal/Pages/UsagePages.cs",
+      "old": "            {Figure(\"People\", people.Length)}",
+      "new": "            {Figure(\"People\", Math.Min(people.Length, PageRows))}",
+      "filter": "FullyQualifiedName~PortalConnectClientsTests|FullyQualifiedName~PortalUsageScaleTests|FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalAgentsOriginTests|FullyQualifiedName~PortalHealth"
+    },
+    {
+      "name": "health: the model's folder is left off the page",
+      "file": "src/Premagentic.Portal/Pages/HealthPages.cs",
+      "old": "(model.Folder is { } folder ? M.H($\"from <code>{folder}</code>\") : M.H($\"no folder: this provider runs without one\"))",
+      "new": "M.H($\"no folder: this provider runs without one\")",
+      "filter": "FullyQualifiedName~PortalConnectClientsTests|FullyQualifiedName~PortalUsageScaleTests|FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalAgentsOriginTests|FullyQualifiedName~PortalHealth"
+    }
+  ]
+}

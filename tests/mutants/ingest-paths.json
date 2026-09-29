@@ -1,0 +1,133 @@
+{
+  "name": "ingest paths: links, junctions and pipes in a folder source, long paragraphs, refused writes and frontmatter text",
+  "commit": "hand run, 2026-09-29",
+  "mutants": [
+    {
+      "name": "a pipe is kept on Windows",
+      "platform": "windows",
+      "file": "src/Premagentic.Core/Sources/ContainedFile.cs",
+      "old": "if (GetFileType(handle) != FileTypeDisk) throw new UnreadableDocumentException(NotRegular);",
+      "new": "if (false) throw new UnreadableDocumentException(NotRegular);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SourceContainmentTests"
+    },
+    {
+      "name": "a junction is followed on Windows",
+      "platform": "windows",
+      "file": "src/Premagentic.Core/Sources/ContainedFile.cs",
+      "old": "if (!IsListed(WindowsFinalPath(handle), finalRoot, relative)) throw new UnreadableDocumentException(NotAsListed);",
+      "new": "if (false) throw new UnreadableDocumentException(NotAsListed);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SourceContainmentTests"
+    },
+    {
+      "name": "a pipe is kept on Linux",
+      "platform": "linux",
+      "file": "src/Premagentic.Core/Sources/ContainedFile.cs",
+      "old": "if (!stream.CanSeek)",
+      "new": "if (false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SourceContainmentTests"
+    },
+    {
+      "name": "a link is followed on Linux",
+      "platform": "linux",
+      "file": "src/Premagentic.Core/Sources/ContainedFile.cs",
+      "old": "if (LinuxFinalPath(opened) is not { } final || !IsListed(final, finalRoot, relative))",
+      "new": "if (false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SourceContainmentTests"
+    },
+    {
+      "name": "a link inside the folder is followed",
+      "file": "src/Premagentic.Core/Sources/ContainedFile.cs",
+      "old": "return string.Equals(final, Path.Join(finalRoot, relative), comparison);",
+      "new": "return final.StartsWith(finalRoot + Path.DirectorySeparatorChar, comparison);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SourceContainmentTests"
+    },
+    {
+      "name": "a sibling folder passes for the folder",
+      "file": "src/Premagentic.Core/Sources/ContainedFile.cs",
+      "old": "return string.Equals(final, Path.Join(finalRoot, relative), comparison);",
+      "new": "return final.StartsWith(finalRoot, comparison);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SourceContainmentTests"
+    },
+    {
+      "name": "the folder is opened without the long-path prefix",
+      "platform": "windows",
+      "file": "src/Premagentic.Core/Sources/ContainedFile.cs",
+      "old": "using var handle = CreateFileW(Extended(Path.GetFullPath(root)), FileReadAttributes,",
+      "new": "using var handle = CreateFileW(Path.GetFullPath(root), FileReadAttributes,",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SourceContainmentTests"
+    },
+    {
+      "name": "a pipe is opened waiting for a writer",
+      "platform": "linux",
+      "file": "src/Premagentic.Core/Sources/ContainedFile.cs",
+      "old": "var opened = LinuxOpen(file, ORdOnly | ONonBlock | OCloExec);",
+      "new": "var opened = LinuxOpen(file, ORdOnly | OCloExec);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SourceContainmentTests"
+    },
+    {
+      "name": "a file another program holds is read on Linux",
+      "platform": "linux",
+      "file": "src/Premagentic.Core/Sources/ContainedFile.cs",
+      "old": "if (flock((int)opened.DangerousGetHandle(), LockShared | LockNonBlocking) != 0 && Marshal.GetLastPInvokeError() == EWouldBlock)",
+      "new": "if (false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SourceContainmentTests|FullyQualifiedName~Premagentic.Tests.FileSystemSourceConformanceTests"
+    },
+    {
+      "name": "the bundle index is opened unchecked",
+      "platform": "linux",
+      "file": "src/Premagentic.Core/Sources/FileSystemSource.cs",
+      "old": "await using (var stream = ContainedFile.Open(file, finalRoot, relative))",
+      "new": "await using (var stream = File.OpenRead(file))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SourceContainmentTests"
+    },
+    {
+      "name": "the bundle index is read whole",
+      "file": "src/Premagentic.Core/Sources/FileSystemSource.cs",
+      "old": "bytes = await DocumentSourceReading.ReadBoundedAsync(stream, limit, ct);",
+      "new": "bytes = await DocumentSourceReading.ReadBoundedAsync(stream, long.MaxValue, ct);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SourceContainmentTests"
+    },
+    {
+      "name": "a long paragraph is kept whole",
+      "file": "src/Premagentic.Core/Ingestion/MarkdownChunker.cs",
+      "old": "var paragraphs = text.Split(\"\\n\\n\").SelectMany(Pieces);",
+      "new": "var paragraphs = text.Split(\"\\n\\n\");",
+      "filter": "FullyQualifiedName~Premagentic.Tests.OversizedParagraphTests|FullyQualifiedName~Premagentic.Tests.OversizedTextIngestTests"
+    },
+    {
+      "name": "a cut may fall inside a word",
+      "file": "src/Premagentic.Core/Ingestion/MarkdownChunker.cs",
+      "old": "var blank = lineBreak >= 0 ? lineBreak : paragraph.LastIndexOfAny(Blanks, cut - 1, MaxChunkChars / 2);",
+      "new": "var blank = lineBreak;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.OversizedParagraphTests"
+    },
+    {
+      "name": "a cut may fall inside a character",
+      "file": "src/Premagentic.Core/Ingestion/MarkdownChunker.cs",
+      "old": "else if (char.IsHighSurrogate(paragraph[cut - 1])) cut--;",
+      "new": "else if (false) cut--;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.OversizedParagraphTests"
+    },
+    {
+      "name": "a refused write ends the run",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.cs",
+      "old": "catch (PostgresException ex) when (IsThisDocuments(ex))",
+      "new": "catch (PostgresException ex) when (ex.SqlState.Length == 0)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.OversizedTextIngestTests"
+    },
+    {
+      "name": "a program limit ends the run",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.cs",
+      "old": " || ex.SqlState.StartsWith(\"54\", StringComparison.Ordinal);",
+      "new": ";",
+      "filter": "FullyQualifiedName~Premagentic.Tests.OversizedTextIngestTests"
+    },
+    {
+      "name": "expanded text is not counted",
+      "file": "src/Premagentic.Core/Sources/Frontmatter.cs",
+      "old": "if (bytes > MaxExpandedBytes) return false;",
+      "new": "if (bytes < 0) return false;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.OkfFrontmatterTests"
+    }
+  ]
+}

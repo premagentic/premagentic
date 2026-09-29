@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>NativeLines</AssemblyName>
+    <RootNamespace>Premagentic.Samples.Chunking</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Premagentic.Core\Premagentic.Core.csproj" Private="false" />
+  </ItemGroup>
+
+  <!-- The native library is committed, built for each platform by
+       scripts/build-native-sample.sh from native/prem_sample_lines.c, so
+       building this needs no C compiler. The build puts each one where the
+       host looks for it, runtimes/<rid>/native/, and lists each in the
+       manifest with its hash. -->
+  <ItemGroup>
+    <NativeLibrary Include="native\win-x64\prem_sample_lines.dll" Rid="win-x64" />
+    <NativeLibrary Include="native\linux-x64\libprem_sample_lines.so" Rid="linux-x64" />
+  </ItemGroup>
+
+  <Target Name="WriteExtensionManifest" AfterTargets="Build">
+    <Copy SourceFiles="@(NativeLibrary)" DestinationFiles="@(NativeLibrary->'$(TargetDir)runtimes\%(Rid)\native\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <GetFileHash Files="$(TargetPath)" Algorithm="SHA256" HashEncoding="hex">
+      <Output TaskParameter="Items" ItemName="HashedAssembly" />
+    </GetFileHash>
+    <GetFileHash Files="@(NativeLibrary)" Algorithm="SHA256" HashEncoding="hex">
+      <Output TaskParameter="Items" ItemName="HashedNative" />
+    </GetFileHash>
+    <PropertyGroup>
+      <AssemblyHash>@(HashedAssembly->'%(FileHash)')</AssemblyHash>
+      <NativeEntries>@(HashedNative->'    { "file": "runtimes/%(Rid)/native/%(Filename)%(Extension)", "sha256": "%(FileHash)" }', ',%0A')</NativeEntries>
+      <ManifestText>{
+  "name": "native-lines",
+  "version": "$(Version)",
+  "assemblyFile": "$(TargetFileName)",
+  "sha256": "$(AssemblyHash)",
+  "files": [
+$(NativeEntries)
+  ],
+  "seams": { "chunker": 1 }
+}</ManifestText>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(TargetDir)extension.json" Lines="$(ManifestText)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+  </Target>
+
+</Project>

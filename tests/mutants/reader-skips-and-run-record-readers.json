@@ -1,0 +1,28 @@
+{
+  "name": "reader skips, unread files kept or removed, and the run record",
+  "commit": "hand run, 2026-09-25",
+  "project": "tests/Premagentic.Readers.Tests/Premagentic.Readers.Tests.csproj",
+  "mutants": [
+    {
+      "name": "f10 docx: a nested table's cells are taken from every level below, once per path",
+      "file": "extensions/docx-reader/DocxDocumentReader.cs",
+      "old": "                    parts.AddRange(element.Elements().Where(r => Is(r, \"tr\"))\n                        .SelectMany(r => r.Elements().Where(c => Is(c, \"tc\")))\n                        .Select(Cell));",
+      "new": "                    parts.AddRange(element.Descendants().Where(e => Is(e, \"tc\")).Select(Cell));",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests.Tables_nested_in_cells_are_read_once_each"
+    },
+    {
+      "name": "f11 pdf: the library's depth refusal is not named as unreadable",
+      "file": "extensions/pdf-reader/PdfDocumentReader.cs",
+      "old": "        catch (PdfDocumentStackDepthException)",
+      "new": "        catch (PdfDocumentStackDepthException) when (false)",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.PdfReaderTests"
+    },
+    {
+      "name": "f12 pdf: the depth limit is not given to the library",
+      "file": "extensions/pdf-reader/PdfDocumentReader.cs",
+      "old": "            MaxStackDepth = limits.MaxDepth,\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.PdfReaderTests"
+    }
+  ]
+}

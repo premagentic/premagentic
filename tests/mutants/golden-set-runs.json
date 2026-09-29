@@ -1,0 +1,90 @@
+{
+  "name": "Golden-set runs from the portal and the command line, and what a run writes",
+  "commit": "hand run, 2026-09-22",
+  "mutants": [
+    {
+      "name": "runner: judged by the code default floor, not the settings the search ran under",
+      "file": "src/Premagentic.Core/Evaluation/EvalRunner.cs",
+      "old": "var floor = result.Settings.Tuning.NoAnswerDistanceFloor;",
+      "new": "var floor = RetrievalTuning.Default.NoAnswerDistanceFloor;",
+      "filter": "FullyQualifiedName~PortalGoldenRunTests|FullyQualifiedName~EvalCliTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "runner: a change between cases is never flagged",
+      "file": "src/Premagentic.Core/Evaluation/EvalRunner.cs",
+      "old": "return ran.Zip(ran.Skip(1)).Any(pair => !RetrievalReadings.Same(pair.First, pair.Second));",
+      "new": "return false;",
+      "filter": "FullyQualifiedName~PortalGoldenRunTests|FullyQualifiedName~EvalCliTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "runner: an empty golden set is accepted",
+      "file": "src/Premagentic.Core/Evaluation/EvalRunner.cs",
+      "old": "problem = loaded.Count == 0",
+      "new": "problem = loaded.Count == -1",
+      "filter": "FullyQualifiedName~PortalGoldenRunTests|FullyQualifiedName~EvalCliTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "runner: the parser's message is shown",
+      "file": "src/Premagentic.Core/Evaluation/EvalRunner.cs",
+      "old": "problem = $\"The golden set at {goldenPath} is not a JSON list of golden questions.\";",
+      "new": "problem = ex.Message;",
+      "filter": "FullyQualifiedName~PortalGoldenRunTests|FullyQualifiedName~EvalCliTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "readings: weights compared by reference",
+      "file": "src/Premagentic.Core/Evaluation/RetrievalReadings.cs",
+      "old": "&& a.Authority.DefaultWeight.Equals(b.Authority.DefaultWeight)",
+      "new": "&& ReferenceEquals(a.Authority, b.Authority)",
+      "filter": "FullyQualifiedName~PortalGoldenRunTests|FullyQualifiedName~EvalCliTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "readings: class weights ignored",
+      "file": "src/Premagentic.Core/Evaluation/RetrievalReadings.cs",
+      "old": "&& a.Authority.ByClass.All(entry =>",
+      "new": "&& true || a.Authority.ByClass.All(entry =>",
+      "filter": "FullyQualifiedName~PortalGoldenRunTests|FullyQualifiedName~EvalCliTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "run: a second run is not refused while one is in progress",
+      "file": "src/Premagentic.Core/Evaluation/GoldenSetRun.cs",
+      "old": "if (!await OneAtATime.WaitAsync(0)) return new GoldenRunResult(GoldenRunOutcome.Busy);",
+      "new": "if (!await OneAtATime.WaitAsync(0) && false) return new GoldenRunResult(GoldenRunOutcome.Busy);",
+      "filter": "FullyQualifiedName~PortalGoldenRunTests|FullyQualifiedName~EvalCliTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "run: a stopped run is not caught and recorded",
+      "file": "src/Premagentic.Core/Evaluation/GoldenSetRun.cs",
+      "old": "catch (OperationCanceledException) when (timeout.IsCancellationRequested)",
+      "new": "catch (OperationCanceledException) when (false)",
+      "filter": "FullyQualifiedName~PortalGoldenRunTests|FullyQualifiedName~EvalCliTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "run: the record carries the code defaults, not the settings in force",
+      "file": "src/Premagentic.Core/Evaluation/GoldenSetRun.cs",
+      "old": "value[\"settings\"] = RetrievalReadings.ToValue(settings);",
+      "new": "value[\"settings\"] = RetrievalReadings.ToValue(new RetrievalSettingsReading(RetrievalTuning.Default, AuthorityWeights.Flat, []));",
+      "filter": "FullyQualifiedName~PortalGoldenRunTests|FullyQualifiedName~EvalCliTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "page: the run before shows the latest run",
+      "file": "src/Premagentic.Portal/Pages/TuningPages.cs",
+      "old": "var before = runs.Count > 1 ? runs[1] : null;",
+      "new": "var before = runs.Count > 1 ? runs[0] : null;",
+      "filter": "FullyQualifiedName~PortalGoldenRunTests|FullyQualifiedName~EvalCliTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "cli: prem eval ranks without the stored settings",
+      "file": "src/Premagentic.Cli/Program.cs",
+      "old": "new HybridSearch(db, embedder, headingPrefixSpace: headingPrefix, storedTuning: storedTuning), tenantId,",
+      "new": "new HybridSearch(db, embedder, headingPrefixSpace: headingPrefix), tenantId,",
+      "filter": "FullyQualifiedName~PortalGoldenRunTests|FullyQualifiedName~EvalCliTuningTests|FullyQualifiedName~PortalPagesTests"
+    },
+    {
+      "name": "bundle: the chunker is always markdown",
+      "file": "src/Premagentic.Core/Admin/SupportBundle.cs",
+      "old": "json.WriteString(\"chunker\", source.Chunker);",
+      "new": "json.WriteString(\"chunker\", \"markdown\");",
+      "filter": "FullyQualifiedName~PortalGoldenRunTests|FullyQualifiedName~EvalCliTuningTests|FullyQualifiedName~PortalPagesTests"
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "name": "extension load contexts, the mail sample and reminders",
+  "commit": "hand run, 2026-09-24",
+  "mutants": [
+    {
+      "name": "7a runtimes: a native library is looked for under runtimes/<rid>/lib/ instead of native/",
+      "file": "src/Premagentic.Core/Extensions/ExtensionLoadContext.cs",
+      "old": "                yield return $\"runtimes/{rid}/native/{candidate}\";",
+      "new": "                yield return $\"runtimes/{rid}/lib/{candidate}\";",
+      "filter": "FullyQualifiedName~Premagentic.Tests.NativeExtensionTests"
+    },
+    {
+      "name": "7b runtimes: a file under runtimes/ the manifest does not list is let through",
+      "file": "src/Premagentic.Core/Extensions/ExtensionHost.cs",
+      "old": "                if (files.Any(f => f.File.Equals(relative, StringComparison.OrdinalIgnoreCase))) continue;",
+      "new": "                continue;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.NativeExtensionTests"
+    },
+    {
+      "name": "7c native: a library is not measured again before it is loaded",
+      "file": "src/Premagentic.Core/Extensions/ExtensionLoadContext.cs",
+      "old": "            if (!Convert.ToHexStringLower(SHA256.HashData(bytes)).Equals(listed.Sha256, StringComparison.OrdinalIgnoreCase))",
+      "new": "            if (false && !Convert.ToHexStringLower(SHA256.HashData(bytes)).Equals(listed.Sha256, StringComparison.OrdinalIgnoreCase))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.NativeExtensionTests"
+    },
+    {
+      "name": "7d paths: a listed path may leave the extension's folder",
+      "file": "src/Premagentic.Core/Extensions/ExtensionManifest.cs",
+      "old": "        path.Length > 0 && path.Split('/').All(IsFileNameInFolder);",
+      "new": "        path.Length > 0;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.NativeExtensionTests"
+    },
+    {
+      "name": "7e mail: only the first owner's message is sent",
+      "file": "samples/extensions/mail-reminders/MailRemindersExtension.cs",
+      "old": "            await client.SendMailAsync(message, ct);",
+      "new": "            if (ReferenceEquals(summary, summaries[0])) await client.SendMailAsync(message, ct);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.MailRemindersTests"
+    },
+    {
+      "name": "7f mail: the administrators' summary of unowned documents is not sent",
+      "file": "samples/extensions/mail-reminders/MailRemindersExtension.cs",
+      "old": "            if (settings.AddressOf(summary.OwnerPrincipal) is not { } to)",
+      "new": "            if (summary.OwnerPrincipal == ReminderSummary.Administrators || settings.AddressOf(summary.OwnerPrincipal) is not { } to)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.MailRemindersTests"
+    },
+    {
+      "name": "7g mail: --plan delivers to the sinks",
+      "file": "src/Premagentic.Core/Reminders/RemindersJob.cs",
+      "old": "        if (plan) return run;",
+      "new": "        _ = plan;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.MailRemindersTests"
+    },
+    {
+      "name": "7h mail: a password in mail.json is accepted",
+      "file": "samples/extensions/mail-reminders/MailRemindersExtension.cs",
+      "old": "        if (root.TryGetProperty(\"password\", out _))",
+      "new": "        if (false && root.TryGetProperty(\"password\", out _))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.MailRemindersTests"
+    },
+    {
+      "name": "7i host: the extension is not told its folder",
+      "file": "src/Premagentic.Core/Extensions/ExtensionHost.cs",
+      "old": "        var registrations = new ExtensionRegistrations { Folder = directory };",
+      "new": "        var registrations = new ExtensionRegistrations();",
+      "filter": "FullyQualifiedName~Premagentic.Tests.MailRemindersTests"
+    }
+  ]
+}

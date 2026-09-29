@@ -1,0 +1,160 @@
+{
+  "name": "the installer: text checks, the development switch, HTTPS files, the Windows service, password hashing, the chunker's fences",
+  "commit": "hand run, 2026-09-21",
+  "mutants": [
+    {
+      "name": "text check always passes",
+      "file": "src/Premagentic.Core/Storage/TextCheck.cs",
+      "old": "        if (works) return null;",
+      "new": "        return null;",
+      "filter": "FullyQualifiedName~GlobalizationTests"
+    },
+    {
+      "name": "development fallback without the switch",
+      "file": "src/Premagentic.Core/Storage/PremagenticDatabase.cs",
+      "old": "        if (development)\n            return DevelopmentConnectionString;",
+      "new": "        if (true)\n            return DevelopmentConnectionString;",
+      "filter": "FullyQualifiedName~SetupCredentialsTests"
+    },
+    {
+      "name": "gss encryption left on by default",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "            _admin.GssEncryptionMode = GssEncryptionMode.Disable;",
+      "new": "            { }",
+      "filter": "FullyQualifiedName~Both_credentials_files_turn_off_gss"
+    },
+    {
+      "name": "postgres 13 accepted",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "    internal const int MinimumServerVersion = 140000;",
+      "new": "    internal const int MinimumServerVersion = 130000;",
+      "filter": "FullyQualifiedName~PostgreSQL_14_is_the_floor"
+    },
+    {
+      "name": "an existing administrator does not stop the step",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        if (ready.Count > 0)\n",
+      "new": "        if (ready.Count < 0)\n",
+      "filter": "FullyQualifiedName~SetupInstallTests"
+    },
+    {
+      "name": "a member's name is taken for the administrator",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "existing is not null && (existing.Role != Role.Administrator || existing.Disabled)",
+      "new": "existing is not null && existing.Disabled",
+      "filter": "FullyQualifiedName~A_sign_in_name_that_belongs_to_a_member"
+    },
+    {
+      "name": "a plan on a finished install makes the administrator",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        if (options.Plan)\n            return Record(\"administrator\"",
+      "new": "        if (false)\n            return Record(\"administrator\"",
+      "filter": "FullyQualifiedName~A_plan_makes_no_certificate"
+    },
+    {
+      "name": "kestrel.json written with ordinary permissions",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "            CredentialsFile.WritePrivate(options.KestrelSettingsPath, settings);",
+      "new": "            File.WriteAllBytes(options.KestrelSettingsPath, settings);",
+      "filter": "FullyQualifiedName~Https_settings_and_certificate_are_private"
+    },
+    {
+      "name": "https.pfx written with ordinary permissions",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "            CredentialsFile.WritePrivate(options.CertificatePath, pfx);",
+      "new": "            File.WriteAllBytes(options.CertificatePath, pfx);",
+      "filter": "FullyQualifiedName~Https_settings_and_certificate_are_private"
+    },
+    {
+      "name": "a customer's certificate is replaced",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        if (current is { OwnCertificate: false })",
+      "new": "        if (current is { OwnCertificate: false, Url: \"never\" })",
+      "filter": "FullyQualifiedName~A_certificate_setup_did_not_make"
+    },
+    {
+      "name": "an expiring certificate is kept",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        if (current.NotAfter < DateTime.UtcNow.Add(HttpsCertificate.RenewWithin))",
+      "new": "        if (current.NotAfter < DateTime.MinValue)",
+      "filter": "FullyQualifiedName~A_certificate_close_to_expiry"
+    },
+    {
+      "name": "a plan writes the certificate",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        if (options.Plan)\n            return Record(\"https\"",
+      "new": "        if (false)\n            return Record(\"https\"",
+      "filter": "FullyQualifiedName~A_plan_makes_no_certificate"
+    },
+    {
+      "name": "the certificate does not name the host",
+      "file": "src/Premagentic.Cli/Setup/HttpsCertificate.cs",
+      "old": "        else names.AddDnsName(hostName);",
+      "new": "        else { }",
+      "filter": "FullyQualifiedName~SetupInstallTests"
+    },
+    {
+      "name": "the service may hold more than read",
+      "file": "src/Premagentic.Core/Storage/CredentialsFile.cs",
+      "old": " || (rule.FileSystemRights & ~ReadOnly) != 0) return false;",
+      "new": ") return false;",
+      "filter": "FullyQualifiedName~The_service_account_can_be_given_read_access"
+    },
+    {
+      "name": "any account may read if a reader is named",
+      "file": "src/Premagentic.Core/Storage/CredentialsFile.cs",
+      "old": "readerSid is null || rule.IdentityReference.Value != readerSid || ",
+      "new": "readerSid is null || ",
+      "filter": "FullyQualifiedName~The_service_account_can_be_given_read_access"
+    },
+    {
+      "name": "the owner file tolerates the service",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "\"credentials.owner\", reader: null);",
+      "new": "\"credentials.owner\", reader: ServiceReader);",
+      "filter": "FullyQualifiedName~The_service_may_keep_read_access"
+    },
+    {
+      "name": "service sid without upper-casing",
+      "file": "src/Premagentic.Cli/Setup/WindowsServiceRegistration.cs",
+      "old": "Encoding.Unicode.GetBytes(serviceName.ToUpperInvariant())",
+      "new": "Encoding.Unicode.GetBytes(serviceName)",
+      "filter": "FullyQualifiedName~The_service_sid_is_the_one"
+    },
+    {
+      "name": "service program path stored unquoted",
+      "file": "src/Premagentic.Cli/Setup/WindowsServiceRegistration.cs",
+      "old": "\"binPath=\", $\"\\\"{executable}\\\"\"",
+      "new": "\"binPath=\", executable",
+      "filter": "FullyQualifiedName~The_service_program_path_is_stored_quoted"
+    },
+    {
+      "name": "service registration without elevation",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        if (!WindowsServiceRegistration.IsElevated())\n            return Fail(step, \"Registering a Windows service",
+      "new": "        if (false)\n            return Fail(step, \"Registering a Windows service",
+      "filter": "FullyQualifiedName~Registering_the_windows_service"
+    },
+    {
+      "name": "absolute certificate paths rebased",
+      "file": "src/Premagentic.Core/Storage/InstallFiles.cs",
+      "old": " && !Path.IsPathFullyQualified(s.Value))",
+      "new": ")",
+      "filter": "FullyQualifiedName~Relative_certificate_paths"
+    },
+    {
+      "name": "passwords normalized to NFC, not NFKC",
+      "file": "src/Premagentic.Core/Identity/PasswordHasher.cs",
+      "old": "password.Normalize(NormalizationForm.FormKC)",
+      "new": "password.Normalize(NormalizationForm.FormC)",
+      "filter": "FullyQualifiedName~GlobalizationTests"
+    },
+    {
+      "name": "fence test made ordinal",
+      "file": "src/Premagentic.Core/Ingestion/MarkdownChunker.cs",
+      "old": "if (line.TrimStart().StartsWith(\"```\")) inFence = !inFence;",
+      "new": "if (line.TrimStart().StartsWith(\"```\", StringComparison.Ordinal)) inFence = !inFence;",
+      "filter": "FullyQualifiedName~GlobalizationTests"
+    }
+  ]
+}

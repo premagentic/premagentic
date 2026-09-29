@@ -1,0 +1,70 @@
+{
+  "name": "the readers: Word's text boxes, and how a reader takes the file it was handed",
+  "commit": "hand run, 2026-09-26",
+  "project": "tests/Premagentic.Readers.Tests/Premagentic.Readers.Tests.csproj",
+  "mutants": [
+    {
+      "name": "6a text boxes are not looked for",
+      "file": "extensions/docx-reader/DocxDocumentReader.cs",
+      "old": "                            if (!fields.Any(i => i)) TextBoxes(e, boxes);\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests"
+    },
+    {
+      "name": "6b a text box is read from every choice of alternate content",
+      "file": "extensions/docx-reader/DocxDocumentReader.cs",
+      "old": "                if (e.Elements().FirstOrDefault(c => c.Name.NamespaceName == Mc) is { } first) TextBoxes(first, boxes);\n",
+      "new": "                foreach (var choice in e.Elements()) TextBoxes(choice, boxes);\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests"
+    },
+    {
+      "name": "6c a text box inside a text box is taken with the box around it",
+      "file": "extensions/docx-reader/DocxDocumentReader.cs",
+      "old": "            else if (Is(e, \"txbxContent\")) boxes.Add(e);\n",
+      "new": "            else if (Is(e, \"txbxContent\")) { boxes.Add(e); TextBoxes(e, boxes); }\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests"
+    },
+    {
+      "name": "6d a text box anchored in a table cell is not read",
+      "file": "extensions/docx-reader/DocxDocumentReader.cs",
+      "old": "                parts.AddRange(boxes.Select(Cell));\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests"
+    },
+    {
+      "name": "6e a text box inside a field's instruction is read",
+      "file": "extensions/docx-reader/DocxDocumentReader.cs",
+      "old": "                            if (!fields.Any(i => i)) TextBoxes(e, boxes);\n",
+      "new": "                            TextBoxes(e, boxes);\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests"
+    },
+    {
+      "name": "6f a paragraph's text boxes are not read after it",
+      "file": "extensions/docx-reader/DocxDocumentReader.cs",
+      "old": "                        Blocks(box.Elements(), headings);\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests"
+    },
+    {
+      "name": "4d a reader always copies the file it was handed",
+      "file": "extensions/shared/ReaderBytes.cs",
+      "old": "memory.Position == 0 && ",
+      "new": "memory.Position < 0 && ",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.ReaderBytesTests"
+    },
+    {
+      "name": "4e a reader takes the whole array behind a stream that shows only part of it",
+      "file": "extensions/shared/ReaderBytes.cs",
+      "old": " && visible.Offset == 0 && visible.Count == array.Length",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.ReaderBytesTests"
+    },
+    {
+      "name": "4f a reader takes the array whatever position the stream stands at",
+      "file": "extensions/shared/ReaderBytes.cs",
+      "old": "memory.Position == 0 && ",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.ReaderBytesTests"
+    }
+  ]
+}

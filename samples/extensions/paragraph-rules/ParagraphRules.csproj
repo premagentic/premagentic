@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- An ordinary library with no idea it is used by an extension. It ships in
+       the extension's folder, so the extension's manifest lists it with its
+       hash; see ../paragraph-chunker. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <AssemblyName>ParagraphRules</AssemblyName>
+    <RootNamespace>Premagentic.Samples.ParagraphRules</RootNamespace>
+  </PropertyGroup>
+
+</Project>

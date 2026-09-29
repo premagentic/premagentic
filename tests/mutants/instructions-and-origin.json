@@ -1,0 +1,146 @@
+{
+  "name": "the instructions at connect and as a resource, an agent's origin by every path, every verb's record row and the health model",
+  "commit": "hand run, 2026-09-24",
+  "mutants": [
+    {
+      "name": "instructions may run to twice the bound",
+      "file": "src/Premagentic.Core/Identity/DeploymentInstructions.cs",
+      "old": "        if (text.Length > InstructionsMaxLength)",
+      "new": "        if (text.Length > InstructionsMaxLength * 2)",
+      "filter": "FullyQualifiedName~InstructionsTests"
+    },
+    {
+      "name": "instructions may carry a tab",
+      "file": "src/Premagentic.Core/Identity/DeploymentInstructions.cs",
+      "old": "        if (text.Any(c => char.IsControl(c) && c is not '\\n' and not '\\r'))",
+      "new": "        if (text.Any(c => char.IsControl(c) && c is not '\\n' and not '\\r' and not '\\t'))",
+      "filter": "FullyQualifiedName~InstructionsTests"
+    },
+    {
+      "name": "an unusable stored value is read as instructions",
+      "file": "src/Premagentic.Core/Identity/DeploymentInstructions.cs",
+      "old": "        if (McpSettings.InstructionsProblem(stored.RootElement) is not null) return null;",
+      "new": "        _ = stored;",
+      "filter": "FullyQualifiedName~InstructionsTests"
+    },
+    {
+      "name": "with nothing set an assistant is told an empty text",
+      "file": "src/Premagentic.Api/Callers/CallerServices.cs",
+      "old": "GetRequiredService<McpInstructionsState>().Current?.Text;",
+      "new": "GetRequiredService<McpInstructionsState>().Current?.Text ?? \"\";",
+      "filter": "FullyQualifiedName~McpHttpTests"
+    },
+    {
+      "name": "the instructions never reach a request",
+      "file": "src/Premagentic.Api/Callers/CallerServices.cs",
+      "old": "                    server.ServerInstructions = http.RequestServices.GetRequiredService<McpInstructionsState>().Current?.Text;",
+      "new": "                    server.ServerInstructions = null;",
+      "filter": "FullyQualifiedName~McpHttpTests"
+    },
+    {
+      "name": "the resource is listed when nothing is set",
+      "file": "src/Premagentic.Api/Callers/McpInstructions.cs",
+      "old": "            Resources = current is null\n                ? []",
+      "new": "            Resources = current is null\n                ? [new Resource { Uri = ResourceUri, Name = \"instructions\" }]",
+      "filter": "FullyQualifiedName~McpHttpTests"
+    },
+    {
+      "name": "a profile takes instructions the setting refuses",
+      "file": "src/Premagentic.Core/Profiles/ProfilePlan.cs",
+      "old": "                    : definition.Problem(value);",
+      "new": "                    : null;",
+      "filter": "FullyQualifiedName~InstructionsTests"
+    },
+    {
+      "name": "a profile sets what code the server loads",
+      "file": "src/Premagentic.Core/Profiles/ProfilePlan.cs",
+      "old": "            if (key.StartsWith(\"extensions.\", StringComparison.Ordinal))\n            {",
+      "new": "            if (false && key.StartsWith(\"extensions.\", StringComparison.Ordinal))\n            {",
+      "filter": "FullyQualifiedName~InstructionsTests"
+    },
+    {
+      "name": "the command line does not say who made the agent",
+      "file": "src/Premagentic.Cli/Admin/AdminCommands.cs",
+      "old": "CliArgs.Value(args, \"--vendor\"), AgentOrigin.Cli(actor.Account ?? \"unknown\"));",
+      "new": "CliArgs.Value(args, \"--vendor\"), null);",
+      "filter": "FullyQualifiedName~AgentOriginTests"
+    },
+    {
+      "name": "the connect page does not say who made the agent",
+      "file": "src/Premagentic.Core/Identity/SelfServeAgents.cs",
+      "old": "                AgentOrigin.Self(actingUserId), ct);",
+      "new": "                null, ct);",
+      "filter": "FullyQualifiedName~AgentOriginTests|FullyQualifiedName~SelfServeAgentsTests"
+    },
+    {
+      "name": "the portal does not say who made the agent",
+      "file": "src/Premagentic.Portal/Pages/AgentPages.cs",
+      "old": "                AgentOrigin.Portal(r.Person.User.Id), r.Aborted);",
+      "new": "                null, r.Aborted);",
+      "filter": "FullyQualifiedName~AgentOriginTests"
+    },
+    {
+      "name": "the connect page lists by the assistant kind again",
+      "file": "src/Premagentic.Core/Identity/SelfServeAgents.cs",
+      "old": "              AND a.created_by = @self AND a.deleted_at IS NULL",
+      "new": "              AND a.assistant_kind IS NOT NULL AND a.deleted_at IS NULL",
+      "filter": "FullyQualifiedName~AgentOriginTests"
+    },
+    {
+      "name": "users add leaves no row",
+      "file": "src/Premagentic.Cli/Admin/AdminCommands.cs",
+      "old": "            change.Record(\"user.add\", user.Name, null,",
+      "new": "            if (false) change.Record(\"user.add\", user.Name, null,",
+      "filter": "FullyQualifiedName~AdminVerbRecordTests"
+    },
+    {
+      "name": "groups add leaves no row",
+      "file": "src/Premagentic.Cli/Admin/AdminCommands.cs",
+      "old": "            change.Record(\"group.add\", group.Name, null, new { name = group.Name });",
+      "new": "            _ = group;",
+      "filter": "FullyQualifiedName~AdminVerbRecordTests"
+    },
+    {
+      "name": "agents add leaves no row",
+      "file": "src/Premagentic.Cli/Admin/AdminCommands.cs",
+      "old": "            change.Record(\"agent.add\", agent.Name, null,",
+      "new": "            if (false) change.Record(\"agent.add\", agent.Name, null,",
+      "filter": "FullyQualifiedName~AdminVerbRecordTests"
+    },
+    {
+      "name": "tokens issue leaves no row",
+      "file": "src/Premagentic.Cli/Admin/AdminCommands.cs",
+      "old": "            change.Record(\"token.issue\", agent.Name, null, new { token_id = issued.Record.Id, expires_at = issued.Record.ExpiresAt });",
+      "new": "            _ = agent;",
+      "filter": "FullyQualifiedName~AdminVerbRecordTests"
+    },
+    {
+      "name": "a verb that writes is marked as a read",
+      "file": "src/Premagentic.Cli/Admin/AdminCommands.cs",
+      "old": "        [(\"users\", \"enable\")] = new(true,",
+      "new": "        [(\"users\", \"enable\")] = new(false,",
+      "filter": "FullyQualifiedName~AdminVerbRecordTests"
+    },
+    {
+      "name": "a verb that changed nothing is recorded anyway",
+      "file": "src/Premagentic.Cli/Admin/AdminCommands.cs",
+      "old": "            if (changed) change.Record(grant ? \"agent.grant\" : \"agent.ungrant\"",
+      "new": "            if (true) change.Record(grant ? \"agent.grant\" : \"agent.ungrant\"",
+      "filter": "FullyQualifiedName~AdminVerbRecordTests"
+    },
+    {
+      "name": "the model's revision is dropped",
+      "file": "src/Premagentic.Core/Embeddings/LocalOnnxEmbeddingProvider.cs",
+      "old": "        return (config.Name, string.IsNullOrWhiteSpace(config.Revision) ? null : config.Revision);",
+      "new": "        return (config.Name, null);",
+      "filter": "FullyQualifiedName~HealthModelTests"
+    },
+    {
+      "name": "the health report misnames a provider with no folder",
+      "file": "src/Premagentic.Core/Admin/HealthReport.cs",
+      "old": "            : new LoadedModel(provider.Name, null, null);",
+      "new": "            : new LoadedModel(\"local\", null, null);",
+      "filter": "FullyQualifiedName~HealthModelTests"
+    }
+  ]
+}

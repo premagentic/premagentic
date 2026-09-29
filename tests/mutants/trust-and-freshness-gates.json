@@ -1,0 +1,90 @@
+{
+  "name": "The trust and freshness gates, the strict default, the section fetch and the search instant",
+  "commit": "hand run, 2026-09-25",
+  "mutants": [
+    {
+      "name": "TrustGate out of the default set",
+      "file": "src/Premagentic.Core/Retrieval/Gates/GateSet.cs",
+      "old": "new(new AccessGate(), new LifecycleGate(), new TrustGate(), new FreshnessGate())",
+      "new": "new(new AccessGate(), new LifecycleGate(), new FreshnessGate())",
+      "filter": "FullyQualifiedName~Trust|FullyQualifiedName~Okf|FullyQualifiedName~DatastoreCodecTests"
+    },
+    {
+      "name": ">= turned to >",
+      "file": "src/Premagentic.Core/Retrieval/Gates/TrustGate.cs",
+      "old": "d.trust_tier >= @trust_min_tier",
+      "new": "d.trust_tier > @trust_min_tier",
+      "filter": "FullyQualifiedName~Trust|FullyQualifiedName~Okf|FullyQualifiedName~DatastoreCodecTests"
+    },
+    {
+      "name": "freshness comparison reversed",
+      "file": "src/Premagentic.Core/Retrieval/Gates/FreshnessGate.cs",
+      "old": "d.stale_after > @freshness_now",
+      "new": "d.stale_after <= @freshness_now",
+      "filter": "FullyQualifiedName~Trust|FullyQualifiedName~Okf|FullyQualifiedName~DatastoreCodecTests"
+    },
+    {
+      "name": "strict default loosened (tier)",
+      "file": "src/Premagentic.Core/Okf/TrustPolicy.cs",
+      "old": "Strict { get; } = new(OkfTrustTier.HumanReviewed, IncludeStale: false);",
+      "new": "Strict { get; } = new(OkfTrustTier.Unverified, IncludeStale: false);",
+      "filter": "FullyQualifiedName~Trust|FullyQualifiedName~Okf|FullyQualifiedName~DatastoreCodecTests"
+    },
+    {
+      "name": "strict default loosened (stale)",
+      "file": "src/Premagentic.Core/Okf/TrustPolicy.cs",
+      "old": "Strict { get; } = new(OkfTrustTier.HumanReviewed, IncludeStale: false);",
+      "new": "Strict { get; } = new(OkfTrustTier.HumanReviewed, IncludeStale: true);",
+      "filter": "FullyQualifiedName~Trust|FullyQualifiedName~Okf|FullyQualifiedName~DatastoreCodecTests"
+    },
+    {
+      "name": "FreshnessGate out of the default set",
+      "file": "src/Premagentic.Core/Retrieval/Gates/GateSet.cs",
+      "old": "new(new AccessGate(), new LifecycleGate(), new TrustGate(), new FreshnessGate())",
+      "new": "new(new AccessGate(), new LifecycleGate(), new TrustGate())",
+      "filter": "FullyQualifiedName~Trust|FullyQualifiedName~Okf|FullyQualifiedName~DatastoreCodecTests"
+    },
+    {
+      "name": "stale flag off by the boundary",
+      "file": "src/Premagentic.Core/Retrieval/HybridSearch.cs",
+      "old": "d.stale_after <= @hit_now",
+      "new": "d.stale_after < @hit_now",
+      "filter": "FullyQualifiedName~Trust|FullyQualifiedName~Okf|FullyQualifiedName~DatastoreCodecTests"
+    },
+    {
+      "name": "section fetch without the trust gate",
+      "file": "src/Premagentic.Core/Retrieval/SectionFetcher.cs",
+      "old": "private static readonly GateSet Gates = GateSet.Default;",
+      "new": "private static readonly GateSet Gates = GateSet.Default.Without(TrustGate.GateName);",
+      "filter": "FullyQualifiedName~Trust|FullyQualifiedName~Okf|FullyQualifiedName~DatastoreCodecTests"
+    },
+    {
+      "name": "unreadable agent minimum loosens",
+      "file": "src/Premagentic.Core/Okf/TrustPolicy.cs",
+      "old": ": TryParseTier(agentMinimumTier, out var tier) ? tier : OkfTrustTier.HumanReviewed;",
+      "new": ": TryParseTier(agentMinimumTier, out var tier) ? tier : OkfTrustTier.Unverified;",
+      "filter": "FullyQualifiedName~Trust|FullyQualifiedName~Okf|FullyQualifiedName~DatastoreCodecTests"
+    },
+    {
+      "name": "bundle unparseable not machine",
+      "file": "src/Premagentic.Core/Okf/OkfMetadata.cs",
+      "old": "_ when BundleConcept && FrontmatterState == FrontmatterState.Unparseable => OkfAuthorship.Machine,",
+      "new": "_ when false => OkfAuthorship.Machine,",
+      "filter": "FullyQualifiedName~Trust|FullyQualifiedName~Okf|FullyQualifiedName~DatastoreCodecTests"
+    },
+    {
+      "name": "unchanged check ignores OKF values",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.cs",
+      "old": "              AND d.okf_concept_id IS NOT DISTINCT FROM @okfConceptId\n              AND d.trust_tier = @okfTrustTier\n              AND d.authorship = @okfAuthorship\n              AND d.stale_after IS NOT DISTINCT FROM @okfStaleAfter\n              AND d.generated_at IS NOT DISTINCT FROM @okfGeneratedAt\n              AND d.last_verified_at IS NOT DISTINCT FROM @okfLastVerifiedAt\n              AND d.frontmatter_state = @okfFrontmatterState\n",
+      "new": "              AND @okfConceptId IS NOT DISTINCT FROM @okfConceptId\n              AND @okfTrustTier = @okfTrustTier\n              AND @okfAuthorship = @okfAuthorship\n              AND @okfStaleAfter IS NOT DISTINCT FROM @okfStaleAfter\n              AND @okfGeneratedAt IS NOT DISTINCT FROM @okfGeneratedAt\n              AND @okfLastVerifiedAt IS NOT DISTINCT FROM @okfLastVerifiedAt\n              AND @okfFrontmatterState = @okfFrontmatterState\n",
+      "filter": "FullyQualifiedName~Trust|FullyQualifiedName~Okf|FullyQualifiedName~DatastoreCodecTests"
+    },
+    {
+      "name": "search instant ignores AsOf",
+      "file": "src/Premagentic.Core/Retrieval/Gates/GateContext.cs",
+      "old": "Now = (options.AsOf ?? (clock ?? TimeProvider.System).GetUtcNow()).ToUniversalTime();",
+      "new": "Now = (clock ?? TimeProvider.System).GetUtcNow().ToUniversalTime();",
+      "filter": "FullyQualifiedName~Trust|FullyQualifiedName~Okf|FullyQualifiedName~DatastoreCodecTests"
+    }
+  ]
+}

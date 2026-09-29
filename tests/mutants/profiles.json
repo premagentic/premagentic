@@ -1,0 +1,62 @@
+{
+  "name": "Applying a profile: its plan, its changes and what it prints",
+  "commit": "hand run, 2026-09-23",
+  "mutants": [
+    {
+      "name": "a profile with problems still produces a plan (apply before validate)",
+      "file": "src/Premagentic.Core/Profiles/ProfilePlan.cs",
+      "old": "        return problems.Count > 0 ? (null, problems) : (new ProfilePlan(profile, changes), problems);",
+      "new": "        return (new ProfilePlan(profile, changes), problems);",
+      "filter": "FullyQualifiedName~ProfileTests|FullyQualifiedName~SourceExposureTests"
+    },
+    {
+      "name": "planning stops at the first check that found a problem",
+      "file": "src/Premagentic.Core/Profiles/ProfilePlan.cs",
+      "old": "        CheckSeams(profile, problems);\n        await PlanSettingsAsync(profile, db, tenantId, settings ?? DeploymentSettings.BuiltIn, changes, problems, ct);",
+      "new": "        CheckSeams(profile, problems);\n        if (problems.Count > 0) return (null, problems);\n        await PlanSettingsAsync(profile, db, tenantId, settings ?? DeploymentSettings.BuiltIn, changes, problems, ct);",
+      "filter": "FullyQualifiedName~ProfileTests|FullyQualifiedName~SourceExposureTests"
+    },
+    {
+      "name": "a seam version BELOW this build is refused instead of one above",
+      "file": "src/Premagentic.Core/Profiles/ProfilePlan.cs",
+      "old": "            if (wanted > have)",
+      "new": "            if (wanted < have)",
+      "filter": "FullyQualifiedName~ProfileTests|FullyQualifiedName~SourceExposureTests"
+    },
+    {
+      "name": "an unknown file in a profile is ignored rather than refused",
+      "file": "src/Premagentic.Core/Profiles/ProfileFolder.cs",
+      "old": "            if (!KnownFiles.Contains(file!, StringComparer.OrdinalIgnoreCase))",
+      "new": "            if (!KnownFiles.Contains(file!, StringComparer.OrdinalIgnoreCase) && false)",
+      "filter": "FullyQualifiedName~ProfileTests|FullyQualifiedName~SourceExposureTests"
+    },
+    {
+      "name": "the oldest apply is reported as the profile in force",
+      "file": "src/Premagentic.Core/Profiles/ProfileApply.cs",
+      "old": "            WHERE tenant_id = @tenant ORDER BY id DESC LIMIT 1",
+      "new": "            WHERE tenant_id = @tenant ORDER BY id ASC LIMIT 1",
+      "filter": "FullyQualifiedName~ProfileTests|FullyQualifiedName~SourceExposureTests"
+    },
+    {
+      "name": "a profile may move a source's folder after all",
+      "file": "src/Premagentic.Core/Profiles/ProfilePlan.cs",
+      "old": "        if (!string.Equals(existing.Folder, folder, StringComparison.OrdinalIgnoreCase))",
+      "new": "        if (false && !string.Equals(existing.Folder, folder, StringComparison.OrdinalIgnoreCase))",
+      "filter": "FullyQualifiedName~ProfileTests|FullyQualifiedName~SourceExposureTests"
+    },
+    {
+      "name": "a refused profile exits 0, so a scripted install carries on",
+      "file": "src/Premagentic.Cli/Admin/ProfileCommands.cs",
+      "old": "        var (plan, problems) = await PlanAsync(args, db, tenantId, chunkers, settings);\n        if (plan is null) return Refuse(problems);\n\n        var report = await ProfileApply.RunAsync(plan, db, tenantId, AdminActor.Cli(), chunkers);",
+      "new": "        var (plan, problems) = await PlanAsync(args, db, tenantId, chunkers, settings);\n        if (plan is null) { Refuse(problems); return 0; }\n\n        var report = await ProfileApply.RunAsync(plan, db, tenantId, AdminActor.Cli(), chunkers);",
+      "filter": "FullyQualifiedName~ProfileTests|FullyQualifiedName~SourceExposureTests"
+    },
+    {
+      "name": "the base ToString is not sealed, so every change prints as its record text",
+      "file": "src/Premagentic.Core/Profiles/ProfilePlan.cs",
+      "old": "    public sealed override string ToString() => $\"{Target}: {Describe()}\";",
+      "new": "    public override string ToString() => $\"{Target}: {Describe()}\";",
+      "filter": "FullyQualifiedName~ProfileTests"
+    }
+  ]
+}

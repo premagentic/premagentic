@@ -1,0 +1,112 @@
+{
+  "name": "the readers: the binary workbook read",
+  "commit": "hand run, 2026-09-26",
+  "project": "tests/Premagentic.Readers.Tests/Premagentic.Readers.Tests.csproj",
+  "mutants": [
+    {
+      "name": "11a a record that runs past its part is taken",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.Binary.cs",
+      "old": "            if (size > _data.Length - _at) throw PastTheEnd();\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.Xls"
+    },
+    {
+      "name": "11b a cell may name a shared string past the table",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.Binary.cs",
+      "old": "                return index < (uint)values.Shared.Count\n                    ? values.Shared[(int)index]\n                    : throw new UnreadableDocumentException($\"holds a cell that names shared string {index}, past the {values.Shared.Count} its table holds\");\n",
+      "new": "                return values.Shared[(int)index];\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.Xls"
+    },
+    {
+      "name": "11c a workbook listing more sheets than the limit is read",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.Binary.cs",
+      "old": "        if (listed > limits.MaxSheets)\n            throw new UnreadableDocumentException($\"holds {listed} sheets, more than the {limits.MaxSheets} this reader reads\");\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.Xls"
+    },
+    {
+      "name": "11d the reason a record runs past its part is blank",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.Binary.cs",
+      "old": "new($\"the part {_name} holds a record that runs past its end\");",
+      "new": "new(\"\");",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.Xls"
+    },
+    {
+      "name": "11e the 1904 date system is read from the wrong bit",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.Binary.cs",
+      "old": "date1904 = (book.U32(0) & 1) != 0;",
+      "new": "date1904 = (book.U32(0) & 2) != 0;",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.Xls"
+    },
+    {
+      "name": "11f a cell's style counts among the cell style formats too",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.Binary.cs",
+      "old": "                case BrtXf when inCellXfs:\n",
+      "new": "                case BrtXf:\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.Xls"
+    },
+    {
+      "name": "11g an RK stored times 100 is not divided",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.Binary.cs",
+      "old": "        return (rk & 1) != 0 ? value / 100 : value;\n",
+      "new": "        return value;\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.Xls"
+    },
+    {
+      "name": "11h an RK integer is read as a double",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.Binary.cs",
+      "old": "double value = (rk & 2) != 0 ? (int)rk >> 2 :",
+      "new": "double value = false ? (int)rk >> 2 :",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.Xls"
+    },
+    {
+      "name": "11i a binary main part is judged as XML",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.cs",
+      "old": "        if (main.EndsWith(\".bin\", StringComparison.OrdinalIgnoreCase)) return ReadBinary(parts, main, fileName, limits, clock);\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.Xls"
+    },
+    {
+      "name": "11j a binary workbook's Excel 4 macro sheet is not looked for",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.Binary.cs",
+      "old": "        if (HoldsMacroSheet(relationships)) return ReadDocument.Skipped(\"macro-enabled\");\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.Xls"
+    },
+    {
+      "name": "11k a part that does not begin as its kind must is taken",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.Binary.cs",
+      "old": "if (!records.Next() || records.Type != first) throw",
+      "new": "if (!records.Next()) throw",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.Xls"
+    },
+    {
+      "name": "11l a string count past its record is taken",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.Binary.cs",
+      "old": "            if (count > (uint)(_length - at) / 2) throw new UnreadableDocumentException(Damaged);\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.Xls"
+    },
+    {
+      "name": "11m the binary shared strings are not held to the cell limit",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.Binary.cs",
+      "old": "            if (strings.Count >= cells.Max)\n                throw new UnreadableDocumentException($\"holds more than {cells.Max} shared strings, more than the cells this reader reads\");\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.Xls"
+    },
+    {
+      "name": "11n a number cell's style is not looked at",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.Binary.cs",
+      "old": "                return values.Number(cell.F64(8), style);\n",
+      "new": "                return values.Number(cell.F64(8), -1);\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.Xls"
+    },
+    {
+      "name": "11o a binary cell's text is not cleaned",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.Binary.cs",
+      "old": "                return Clean(cell.String(8));\n",
+      "new": "                return cell.String(8);\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.Xls"
+    }
+  ]
+}

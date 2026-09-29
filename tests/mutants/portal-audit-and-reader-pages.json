@@ -1,0 +1,55 @@
+{
+  "name": "The audit page's filters over what left the network, and the portal's reader pages",
+  "commit": "hand run, 2026-09-27",
+  "mutants": [
+    {
+      "name": "the portal's run passes the built-in readers whatever its host registered",
+      "file": "src/Premagentic.Portal/Pages/SourcePages.cs",
+      "old": "        var pipeline = new IngestPipeline(\n            r.Db, services.GetRequiredService<IEmbeddingProvider>(), r.Host.HeadingPrefix(http), r.Chunkers, r.Readers)\n        {",
+      "new": "        var pipeline = new IngestPipeline(\n            r.Db, services.GetRequiredService<IEmbeddingProvider>(), r.Host.HeadingPrefix(http), r.Chunkers)\n        {",
+      "filter": "FullyQualifiedName~PortalAuditHealthAndSourcesTests|FullyQualifiedName~PortalReaderSeamTests"
+    },
+    {
+      "name": "the portal resolves no reader registry and always uses the built-ins",
+      "file": "src/Premagentic.Portal/PortalRequest.cs",
+      "old": "    public Core.Ingestion.Readers.ReaderRegistry Readers =>\n        Http.RequestServices.GetService<Core.Ingestion.Readers.ReaderRegistry>()\n        ?? Core.Ingestion.Readers.ReaderRegistry.BuiltIn;",
+      "new": "    public Core.Ingestion.Readers.ReaderRegistry Readers => Core.Ingestion.Readers.ReaderRegistry.BuiltIn;",
+      "filter": "FullyQualifiedName~PortalAuditHealthAndSourcesTests|FullyQualifiedName~PortalReaderSeamTests"
+    },
+    {
+      "name": "the audit filter matches every row, so a filtered page is not filtered",
+      "file": "src/Premagentic.Core/Admin/AuditTrail.cs",
+      "old": "              AND (@left IS NULL OR (e.model_location IS NOT DISTINCT FROM @hosted) = @left)",
+      "new": "              AND (@left IS NULL OR (e.model_location IS NOT DISTINCT FROM @hosted) IS NOT NULL)",
+      "filter": "FullyQualifiedName~PortalAuditHealthAndSourcesTests|FullyQualifiedName~PortalReaderSeamTests"
+    },
+    {
+      "name": "the older link drops the filter, so page two answers another question",
+      "file": "src/Premagentic.Portal/Pages/AuditPages.cs",
+      "old": "                    (\"before\", new AuditCursor(page[PageSize - 1].At, page[PageSize - 1].Id).ToString()),\n                    (\"left\", r.Query(\"left\"))),",
+      "new": "                    (\"before\", new AuditCursor(page[PageSize - 1].At, page[PageSize - 1].Id).ToString())),",
+      "filter": "FullyQualifiedName~PortalAuditHealthAndSourcesTests|FullyQualifiedName~PortalReaderSeamTests"
+    },
+    {
+      "name": "the source form drops the owner it was given",
+      "file": "src/Premagentic.Portal/Pages/SourcePages.cs",
+      "old": "            var owner = Guid.TryParse(form[\"owner\"].ToString(), out var id) ? id : (Guid?)null;",
+      "new": "            var owner = Guid.TryParse(form[\"owner\"].ToString(), out var id) && false ? id : (Guid?)null;",
+      "filter": "FullyQualifiedName~PortalAuditHealthAndSourcesTests|FullyQualifiedName~PortalReaderSeamTests"
+    },
+    {
+      "name": "a profile folder that is gone reads as no drift instead of not compared",
+      "file": "src/Premagentic.Portal/Pages/HealthPages.cs",
+      "old": "        if (!Directory.Exists(folder))\n            return $\"not compared: {folder} is not on this machine\";",
+      "new": "        if (!Directory.Exists(folder))\n            return \"none: the settings, sources and rules match the profile\";",
+      "filter": "FullyQualifiedName~PortalAuditHealthAndSourcesTests|FullyQualifiedName~PortalReaderSeamTests"
+    },
+    {
+      "name": "an empty extensions folder is not told apart from one with extensions",
+      "file": "src/Premagentic.Portal/Pages/HealthPages.cs",
+      "old": "        if (host.Loaded.Count == 0 && host.Refused.Count == 0)",
+      "new": "        if (false && host.Loaded.Count == 0 && host.Refused.Count == 0)",
+      "filter": "FullyQualifiedName~PortalAuditHealthAndSourcesTests|FullyQualifiedName~PortalReaderSeamTests"
+    }
+  ]
+}

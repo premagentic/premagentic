@@ -1,0 +1,48 @@
+{
+  "name": "The reader seam: which reader reads a file, the hash of its bytes, and what the connector takes from a parse",
+  "commit": "hand run, 2026-09-23",
+  "mutants": [
+    {
+      "name": "fail closed: an extension with no reader falls back to markdown",
+      "file": "src/Premagentic.Core/Ingestion/Readers/ReaderRegistry.cs",
+      "old": "        System.IO.Path.GetExtension(path) is { Length: > 1 } extension ? _byExtension.GetValueOrDefault(extension) : null;",
+      "new": "        System.IO.Path.GetExtension(path) is { Length: > 1 } extension ? _byExtension.GetValueOrDefault(extension) ?? MarkdownReader.Instance : MarkdownReader.Instance;",
+      "filter": "FullyQualifiedName~ReaderSeamTests|FullyQualifiedName~FirstPartyReaderTests|FullyQualifiedName~FileSystemSourceTests|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "a second reader may take over an extension a built-in claims",
+      "file": "src/Premagentic.Core/Ingestion/Readers/ReaderRegistry.cs",
+      "old": "                if (_byExtension.TryGetValue(extension, out var claimed))\n                    throw new ArgumentException(\n                        $\"The readers '{claimed.Name}' and '{reader.Name}' both claim '{extension}'. One extension has one reader, and a built-in one cannot be taken over.\");",
+      "new": "                if (_byExtension.ContainsKey(extension + \".never\"))\n                    throw new ArgumentException(\n                        $\"The readers '{reader.Name}' and '{reader.Name}' both claim '{extension}'. One extension has one reader, and a built-in one cannot be taken over.\");",
+      "filter": "FullyQualifiedName~ReaderSeamTests|FullyQualifiedName~FirstPartyReaderTests|FullyQualifiedName~FileSystemSourceTests|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "an unreadable path is counted as a format we do not read instead of a failure",
+      "file": "src/Premagentic.Core/Ingestion/Readers/DocumentSourceReading.cs",
+      "old": "            return SourceRead.Failed(content.Path, $\"{ex.GetType().Name}: {ex.Message}\");",
+      "new": "            return SourceRead.Skipped(content.Path, SourceSkip.ExtensionOf(content.Path));",
+      "filter": "FullyQualifiedName~ReaderSeamTests|FullyQualifiedName~FirstPartyReaderTests|FullyQualifiedName~FileSystemSourceTests|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "the pipeline reads with the built-in readers whatever its host registered",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.cs",
+      "old": "        await foreach (var read in source.ReadThroughAsync(readers ?? ReaderRegistry.BuiltIn, ct))",
+      "new": "        await foreach (var read in source.ReadThroughAsync(ReaderRegistry.BuiltIn, ct))",
+      "filter": "FullyQualifiedName~ReaderSeamTests|FullyQualifiedName~FirstPartyReaderTests|FullyQualifiedName~FileSystemSourceTests|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "a document whose reader states no title gets no title from the connector",
+      "file": "src/Premagentic.Core/Sources/FileSystemSource.cs",
+      "old": "            Title: read.Title ?? Path.GetFileNameWithoutExtension(file),",
+      "new": "            Title: read.Title,",
+      "filter": "FullyQualifiedName~ReaderSeamTests|FullyQualifiedName~FirstPartyReaderTests|FullyQualifiedName~FileSystemSourceTests|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "the connector ignores the reader's whole parse and sees flat fields only",
+      "file": "src/Premagentic.Core/Sources/FileSystemSource.cs",
+      "old": "        var frontmatter = read.ParsedFrontmatter\n            ?? new FrontmatterResult(read.Frontmatter ?? NoFields, read.Text);",
+      "new": "        var frontmatter = new FrontmatterResult(read.Frontmatter ?? NoFields, read.Text);",
+      "filter": "FullyQualifiedName~ReaderSeamTests|FullyQualifiedName~FirstPartyReaderTests|FullyQualifiedName~FileSystemSourceTests|FullyQualifiedName~SourcesTests"
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "name": "the PDF and Word readers, the reader seam and the conformance kit",
+  "commit": "hand run, 2026-09-25",
+  "mutants": [
+    {
+      "name": "8a seam: the host refuses any seam version other than its own, so a reader built for version 1 no longer loads",
+      "file": "src/Premagentic.Core/Extensions/ExtensionManifest.cs",
+      "old": "            if (wanted > offered)",
+      "new": "            if (wanted != offered)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SampleExtensionTests"
+    },
+    {
+      "name": "8b containment: the connector's Complete callback is contained with the reader, so its defect is blamed on the file",
+      "file": "src/Premagentic.Core/Ingestion/Readers/DocumentSourceReading.cs",
+      "old": "        return SourceRead.Ok(content.Complete(read, hash));",
+      "new": "        try { return SourceRead.Ok(content.Complete(read, hash)); } catch (Exception ex) { return SourceRead.Failed(content.Path, ex.Message); }",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ReaderSeamTests"
+    },
+    {
+      "name": "8c containment: a reader that throws ends the run again",
+      "file": "src/Premagentic.Core/Ingestion/Readers/DocumentSourceReading.cs",
+      "old": "        catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)",
+      "new": "        catch (Exception ex) when (false && (ex is not OperationCanceledException || !ct.IsCancellationRequested))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ReaderSeam"
+    },
+    {
+      "name": "8d skip: a reader's skip reason is ignored and the file is indexed as empty text",
+      "file": "src/Premagentic.Core/Ingestion/Readers/DocumentSourceReading.cs",
+      "old": "        if (read.SkipReason is { } why)",
+      "new": "        if (false && read.SkipReason is { } why)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ReaderSeam"
+    },
+    {
+      "name": "8aj kit: with nothing overridden the kit gives no unreadable item",
+      "file": "tests/Premagentic.Conformance/DocumentSourceConformance.cs",
+      "old": "        new OneUnreadableItem(await SourceAsync());",
+      "new": "        await Task.FromResult<IDocumentSource?>(null);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.KitFakeSourceConformanceTests|FullyQualifiedName~Premagentic.Tests.ConformanceKitTests"
+    },
+    {
+      "name": "8ak kit: the fake holds nothing unreadable",
+      "file": "tests/Premagentic.Conformance/OneUnreadableItem.cs",
+      "old": "                yield return SourceRead.Unread(content with { Open = _ => throw new IOException(Reason) });",
+      "new": "                yield return read;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.KitFakeSourceConformanceTests|FullyQualifiedName~Premagentic.Tests.ConformanceKitTests"
+    },
+    {
+      "name": "8al kit: the kit is stamped with a version of its own instead of the product version",
+      "file": "tests/Premagentic.Conformance/Premagentic.Conformance.csproj",
+      "old": "    <IsPackable>true</IsPackable>",
+      "new": "    <IsPackable>true</IsPackable><Version>9.9.9</Version>",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ConformanceKitTests"
+    },
+    {
+      "name": "8an kit: a kit for another seam version is never a mismatch",
+      "file": "tests/Premagentic.Conformance/KitSeams.cs",
+      "old": "        proven == offered",
+      "new": "        true",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ConformanceKitTests"
+    },
+    {
+      "name": "8o pdf: the test process references the reader, so it holds a PdfPig the host would take instead of the folder's",
+      "file": "tests/Premagentic.Tests/Premagentic.Tests.csproj",
+      "old": "    <ProjectReference Include=\"..\\..\\extensions\\pdf-reader\\PdfReader.csproj\" ReferenceOutputAssembly=\"false\" Private=\"false\" />",
+      "new": "    <ProjectReference Include=\"..\\..\\extensions\\pdf-reader\\PdfReader.csproj\" />",
+      "filter": "FullyQualifiedName~Premagentic.Tests.FirstPartyReaderTests"
+    }
+  ]
+}

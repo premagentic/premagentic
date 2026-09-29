@@ -1,0 +1,133 @@
+{
+  "name": "the PDF and Word readers, the reader seam and the conformance kit",
+  "commit": "hand run, 2026-09-25",
+  "project": "tests/Premagentic.Readers.Tests/Premagentic.Readers.Tests.csproj",
+  "mutants": [
+    {
+      "name": "8e markdown: a line of document text that starts with # or a fence is not escaped",
+      "file": "extensions/shared/ReaderMarkdown.cs",
+      "old": "        if (trimmed.StartsWith('#') || trimmed.StartsWith(\"```\", StringComparison.Ordinal) || trimmed.StartsWith(\"~~~\", StringComparison.Ordinal))",
+      "new": "        if (false)",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests"
+    },
+    {
+      "name": "8f pdf: a file larger than the limit is parsed",
+      "file": "extensions/pdf-reader/PdfDocumentReader.cs",
+      "old": "        if (bytes.Length > limits.MaxFileBytes)",
+      "new": "        if (false && bytes.Length > limits.MaxFileBytes)",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.PdfReader"
+    },
+    {
+      "name": "8g pdf: a file with more pages than the limit is read",
+      "file": "extensions/pdf-reader/PdfDocumentReader.cs",
+      "old": "            if (document.NumberOfPages > limits.MaxPages)",
+      "new": "            if (false && document.NumberOfPages > limits.MaxPages)",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.PdfReader"
+    },
+    {
+      "name": "8h pdf: a Flate stream is decoded before it is measured",
+      "file": "extensions/pdf-reader/PdfDocumentReader.cs",
+      "old": "            if (inner is FlateFilter && InflatedLength(input.Span, budget.Remaining + 1) > budget.Remaining)",
+      "new": "            if (false && inner is FlateFilter && InflatedLength(input.Span, budget.Remaining + 1) > budget.Remaining)",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.PdfReader"
+    },
+    {
+      "name": "8i pdf: what a filter decoded is not counted against the budget",
+      "file": "extensions/pdf-reader/PdfDocumentReader.cs",
+      "old": "            budget.Take(output.Length);",
+      "new": "            _ = output.Length;",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.PdfReader"
+    },
+    {
+      "name": "8j pdf: the time budget is never checked by the reading itself",
+      "file": "extensions/pdf-reader/PdfDocumentReader.cs",
+      "old": "            if (_tripped is null && _clock.Elapsed > limits.TimeBudget)",
+      "new": "            if (false && _tripped is null && _clock.Elapsed > limits.TimeBudget)",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.PdfReader"
+    },
+    {
+      "name": "8k pdf: the run waits for a reading that does not come back",
+      "file": "extensions/pdf-reader/PdfDocumentReader.cs",
+      "old": "            return await reading.WaitAsync(limits.TimeBudget + limits.Grace, ct);",
+      "new": "            return await reading;",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.PdfReader"
+    },
+    {
+      "name": "8l pdf: a file with more text than the limit is kept",
+      "file": "extensions/pdf-reader/PdfDocumentReader.cs",
+      "old": "                if (text.Length > limits.MaxTextChars)",
+      "new": "                if (false && text.Length > limits.MaxTextChars)",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.PdfReader"
+    },
+    {
+      "name": "8m pdf: a file with no text layer is indexed as empty instead of skipped with its reason",
+      "file": "extensions/pdf-reader/PdfDocumentReader.cs",
+      "old": "                return sawAPage ? ReadDocument.Skipped(\"no text layer\") : new ReadDocument(\"\", null, null);",
+      "new": "                return new ReadDocument(\"\", null, null);",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.PdfReader"
+    },
+    {
+      "name": "8n pdf: a password-protected file is not called that",
+      "file": "extensions/pdf-reader/PdfDocumentReader.cs",
+      "old": "        catch (PdfDocumentEncryptedException)",
+      "new": "        catch (PdfDocumentEncryptedException) when (false)",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.PdfReader"
+    },
+    {
+      "name": "8p docx: a legacy .doc is opened instead of skipped",
+      "file": "extensions/docx-reader/DocxDocumentReader.cs",
+      "old": "        if (extension == \".doc\") return ReadDocument.Skipped(\"legacy .doc\");",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.DocxReader"
+    },
+    {
+      "name": "8q docx: a .docm is opened instead of skipped as macro-enabled",
+      "file": "extensions/docx-reader/DocxDocumentReader.cs",
+      "old": "        if (extension == \".docm\") return ReadDocument.Skipped(\"macro-enabled\");",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.DocxReader"
+    },
+    {
+      "name": "8r docx: a file larger than the limit is opened",
+      "file": "extensions/docx-reader/DocxDocumentReader.cs",
+      "old": "        if (bytes.Length > limits.MaxFileBytes)",
+      "new": "        if (false && bytes.Length > limits.MaxFileBytes)",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.DocxReader"
+    },
+    {
+      "name": "8s docx: a compound file with an encrypted package is called a legacy .doc",
+      "file": "extensions/docx-reader/DocxDocumentReader.cs",
+      "old": "                ? throw new UnreadableDocumentException(\"password protected\")",
+      "new": "                ? ReadDocument.Skipped(\"legacy .doc\")",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.DocxReader"
+    },
+    {
+      "name": "8af docx: a heading style is not followed to what it is based on",
+      "file": "extensions/docx-reader/DocxDocumentReader.cs",
+      "old": "                styleId = style.BasedOn;",
+      "new": "                styleId = null;",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.DocxReader"
+    },
+    {
+      "name": "8ah docx: a file with more text than the limit is kept",
+      "file": "extensions/docx-reader/DocxDocumentReader.cs",
+      "old": "            if (_text.Length > maxChars)",
+      "new": "            if (false && _text.Length > maxChars)",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.DocxReader"
+    },
+    {
+      "name": "8ae docx: a deletion is walked like any run, so ordinary text inside it is read",
+      "file": "extensions/docx-reader/DocxDocumentReader.cs",
+      "old": "                        case \"pPr\" or \"rPr\" or \"del\" or ",
+      "new": "                        case \"pPr\" or \"rPr\" or ",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.DocxReader"
+    },
+    {
+      "name": "8ai docx: both choices of alternate content are read",
+      "file": "extensions/docx-reader/DocxDocumentReader.cs",
+      "old": "                        if (e.Elements().FirstOrDefault(c => c.Name.NamespaceName == Mc) is { } first) Walk(first);",
+      "new": "                        foreach (var c in e.Elements()) Walk(c);",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.DocxReader"
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "name": "the extension host: the Excel reader's claims through the extension host and a real ingest, the manifest's size cap, what the pipeline hands a reader, and the per-platform managed refusal",
+  "commit": "hand run, 2026-09-26",
+  "mutants": [
+    {
+      "name": "1d the Excel reader does not claim .xlsb",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.cs",
+      "old": "[\".xlsx\", \".xlsm\", \".xlsb\", \".xls\"]",
+      "new": "[\".xlsx\", \".xlsm\", \".xls\"]",
+      "filter": "FullyQualifiedName~Premagentic.Tests.FirstPartyReaderTests"
+    },
+    {
+      "name": "5a a manifest one byte over the cap is read",
+      "file": "src/Premagentic.Core/Extensions/ExtensionManifest.cs",
+      "old": "            if (total > MaxBytes)\n",
+      "new": "            if (total > MaxBytes + 1)\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionHostTests"
+    },
+    {
+      "name": "5b a manifest exactly at the cap is refused",
+      "file": "src/Premagentic.Core/Extensions/ExtensionManifest.cs",
+      "old": "            if (total > MaxBytes)\n",
+      "new": "            if (total >= MaxBytes)\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionHostTests"
+    },
+    {
+      "name": "4a the pipeline hides the buffer it hands a reader",
+      "file": "src/Premagentic.Core/Ingestion/Readers/DocumentSourceReading.cs",
+      "old": "using var forReader = new MemoryStream(bytes, 0, bytes.Length, writable: false, publiclyVisible: true);",
+      "new": "using var forReader = new MemoryStream(bytes, 0, bytes.Length, writable: false, publiclyVisible: false);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PipelineReaderBufferTests"
+    },
+    {
+      "name": "4b the hash is taken after the reader has had the buffer",
+      "edits": [
+        {
+          "file": "src/Premagentic.Core/Ingestion/Readers/DocumentSourceReading.cs",
+          "old": "            hash = Convert.ToHexString(SHA256.HashData(bytes));\n",
+          "new": ""
+        },
+        {
+          "file": "src/Premagentic.Core/Ingestion/Readers/DocumentSourceReading.cs",
+          "old": "            read = await reader.ReadAsync(forReader, content.Path, ct);\n",
+          "new": "            read = await reader.ReadAsync(forReader, content.Path, ct);\n            hash = Convert.ToHexString(SHA256.HashData(bytes));\n"
+        }
+      ],
+      "filter": "FullyQualifiedName~Premagentic.Tests.PipelineReaderBufferTests"
+    },
+    {
+      "name": "4c the read hands over its buffer with the slack past the file",
+      "file": "src/Premagentic.Core/Ingestion/Readers/DocumentSourceReading.cs",
+      "old": "        return buffer.Length == buffer.Capacity ? buffer.GetBuffer() : buffer.ToArray();\n",
+      "new": "        return buffer.GetBuffer();\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PipelineReaderBufferTests"
+    },
+    {
+      "name": "7a a managed library built for one platform does not refuse the extension",
+      "file": "src/Premagentic.Core/Extensions/ExtensionHost.cs",
+      "old": "                if (ExtensionManifest.IsPlatformManagedPath(relative))\n",
+      "new": "                if (ExtensionManifest.IsPlatformManagedPath(relative) && relative.Length < 0)\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionHostTests|FullyQualifiedName~Premagentic.Tests.NativeExtensionTests"
+    },
+    {
+      "name": "7b a native library is taken for a managed one",
+      "file": "src/Premagentic.Core/Extensions/ExtensionManifest.cs",
+      "old": "               && parts[2].Equals(\"lib\", StringComparison.OrdinalIgnoreCase)\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionHostTests|FullyQualifiedName~Premagentic.Tests.NativeExtensionTests"
+    },
+    {
+      "name": "7c any file under runtimes/<rid>/lib/ is taken for a library",
+      "file": "src/Premagentic.Core/Extensions/ExtensionManifest.cs",
+      "old": "\n               && parts[^1].EndsWith(\".dll\", StringComparison.OrdinalIgnoreCase);",
+      "new": ";",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionHostTests|FullyQualifiedName~Premagentic.Tests.NativeExtensionTests"
+    }
+  ]
+}

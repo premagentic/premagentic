@@ -1,0 +1,31 @@
+Microsoft Visual C++ runtime files in bin\
+
+This archive's bin\ folder carries four files of Microsoft's Visual C++
+runtime, which ONNX Runtime's Windows library (bin\onnxruntime.dll) needs and
+which Windows does not include:
+
+  msvcp140.dll
+  msvcp140_1.dll
+  vcruntime140.dll
+  vcruntime140_1.dll
+
+They are Microsoft's files, version @VERSION@, shipped unmodified. They were
+taken from the Microsoft Visual C++ 2015-2022 Redistributable (x64) @VERSION@:
+
+  @URL@
+  SHA-256 @SHA256@
+
+Nothing else of that package is shipped.
+
+These four files are NOT licensed under the GNU Affero General Public License
+3.0, which covers PremAgentic. They are Distributable Code under the Microsoft
+Software License Terms for Visual Studio 2022, which let a licensed Visual
+Studio user distribute them with a program. The Distributable List those terms
+refer to (https://aka.ms/vs/17/redistribution) says:
+
+  "If you have a validly licensed copy of such software, you may copy and
+  distribute with your program the unmodified form of the files listed below,
+  subject to the License Terms for the software."
+
+They are distributed here as part of PremAgentic only. They must not be
+modified, and they must not be redistributed apart from the program.

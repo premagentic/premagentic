@@ -1,0 +1,139 @@
+{
+  "name": "Reissue and Remove on the connect page and the agent page, and the removed marks",
+  "commit": "hand run, 2026-09-27",
+  "mutants": [
+    {
+      "name": "the connect page takes any of the person's assistants for the one named, so another's id reaches a page",
+      "file": "src/Premagentic.Portal/Pages/ConnectPages.cs",
+      "old": "FirstOrDefault(a => a.AgentId == id);",
+      "new": "FirstOrDefault();",
+      "filter": "FullyQualifiedName~PortalReissueRemoveTests"
+    },
+    {
+      "name": "the connect page offers a new key on a revoked assistant too",
+      "file": "src/Premagentic.Portal/Pages/ConnectPages.cs",
+      "old": "        a.State == OwnAgentState.Live\n            ? M.H",
+      "new": "        a.State is OwnAgentState.Live or OwnAgentState.Revoked\n            ? M.H",
+      "filter": "FullyQualifiedName~PortalReissueRemoveTests"
+    },
+    {
+      "name": "the connect page gives a new key without asking",
+      "file": "src/Premagentic.Portal/Pages/ConnectPages.cs",
+      "old": "        if (!confirmed)\n            return Layout.Page(r, $\"Give",
+      "new": "        if (!confirmed && id == Guid.Empty)\n            return Layout.Page(r, $\"Give",
+      "filter": "FullyQualifiedName~PortalReissueRemoveTests"
+    },
+    {
+      "name": "the connect page removes without asking",
+      "file": "src/Premagentic.Portal/Pages/ConnectPages.cs",
+      "old": "        if (!confirmed)\n            return Layout.Page(r, $\"Remove '",
+      "new": "        if (!confirmed && id == Guid.Empty)\n            return Layout.Page(r, $\"Remove '",
+      "filter": "FullyQualifiedName~PortalReissueRemoveTests"
+    },
+    {
+      "name": "the connect page's new key is for administrators only",
+      "file": "src/Premagentic.Portal/PortalEndpoints.cs",
+      "old": "people.MapPost(\"/connect/{id:guid}/reissue\", (Delegate)ConnectPages.Reissue).Needs(PortalNeed.Person);",
+      "new": "people.MapPost(\"/connect/{id:guid}/reissue\", (Delegate)ConnectPages.Reissue);",
+      "filter": "FullyQualifiedName~PortalReissueRemoveTests"
+    },
+    {
+      "name": "the agent page's token reissue is open to any signed-in person",
+      "file": "src/Premagentic.Portal/PortalEndpoints.cs",
+      "old": "people.MapPost(\"/tokens/{id}/reissue\", (Delegate)AgentPages.ReissueToken);",
+      "new": "people.MapPost(\"/tokens/{id}/reissue\", (Delegate)AgentPages.ReissueToken).Needs(PortalNeed.Person);",
+      "filter": "FullyQualifiedName~PortalReissueRemoveTests"
+    },
+    {
+      "name": "the agent page's Remove agent is open to any signed-in person",
+      "file": "src/Premagentic.Portal/PortalEndpoints.cs",
+      "old": "people.MapPost(\"/agents/{name}/remove\", (Delegate)AgentPages.Remove);",
+      "new": "people.MapPost(\"/agents/{name}/remove\", (Delegate)AgentPages.Remove).Needs(PortalNeed.Person);",
+      "filter": "FullyQualifiedName~PortalReissueRemoveTests"
+    },
+    {
+      "name": "the Reissue button is shown to every reader of the agent page",
+      "file": "src/Premagentic.Portal/Pages/AgentPages.cs",
+      "old": "Layout.Form(r, \"/portal/tokens/\" + M.Segment(t.Id) + \"/reissue\", Markup.Empty, \"Reissue\", secondary: true)",
+      "new": "Layout.OwnForm(r, \"/portal/tokens/\" + M.Segment(t.Id) + \"/reissue\", Markup.Empty, \"Reissue\", secondary: true)",
+      "filter": "FullyQualifiedName~PortalReissueRemoveTests"
+    },
+    {
+      "name": "the agent page's Change block renders for every reader and its Remove agent is a form any reader gets (both layers: the button's form call alone was an equivalent mutant, since the block renders nothing for a reader)",
+      "file": "src/Premagentic.Portal/Pages/AgentPages.cs",
+      "old": "        var forms = !r.IsAdministrator ? Markup.Empty : M.H($\"\"\"\n            <h2>Change</h2>\n            {(viaGrant ? Markup.Empty : Layout.Form(r, path + \"/tokens\", Layout.Field(\"Days until it expires\", \"days\", \"90\", \"number\"), \"Issue a token\"))}\n            {Layout.Form(r, path + \"/limits\", M.H($\"{Layout.Field(\"Requests per minute\", \"rate\", agent.RequestsPerMinute.ToString(System.Globalization.CultureInfo.InvariantCulture), \"number\")}{Layout.Select(\"Minimum trust tier\", \"minTier\", Tiers, agent.MinimumTrustTier ?? \"\")}\"), \"Save limits\")}\n            {Layout.Form(r, path + \"/model\", M.H($\"{Layout.Select(\"Where its model runs\", \"model\", Models, ModelLocations.Text(agent.ModelLocation))}{Layout.Field(\"Model vendor, for a hosted model\", \"vendor\", agent.ModelVendor ?? \"\")}\"), \"Save where the model runs\")}\n            <p class=\"note\">Moving an agent to a hosted model puts it in the reserved hosted-model agents group, and moving it back\n            takes it out. A source whose switch is off denies that group, so this changes what this agent can read, at once, on its next call.</p>\n            {Layout.Form(r, path + \"/enabled\", Layout.Hidden(\"enabled\", agent.Disabled ? \"on\" : \"off\"), agent.Disabled ? \"Enable\" : \"Disable\", danger: !agent.Disabled)}\n            {Layout.Form(r, path + \"/remove\", Markup.Empty, \"Remove agent\", danger: true)}",
+      "new": "        var forms = M.H($\"\"\"\n            <h2>Change</h2>\n            {(viaGrant ? Markup.Empty : Layout.Form(r, path + \"/tokens\", Layout.Field(\"Days until it expires\", \"days\", \"90\", \"number\"), \"Issue a token\"))}\n            {Layout.Form(r, path + \"/limits\", M.H($\"{Layout.Field(\"Requests per minute\", \"rate\", agent.RequestsPerMinute.ToString(System.Globalization.CultureInfo.InvariantCulture), \"number\")}{Layout.Select(\"Minimum trust tier\", \"minTier\", Tiers, agent.MinimumTrustTier ?? \"\")}\"), \"Save limits\")}\n            {Layout.Form(r, path + \"/model\", M.H($\"{Layout.Select(\"Where its model runs\", \"model\", Models, ModelLocations.Text(agent.ModelLocation))}{Layout.Field(\"Model vendor, for a hosted model\", \"vendor\", agent.ModelVendor ?? \"\")}\"), \"Save where the model runs\")}\n            <p class=\"note\">Moving an agent to a hosted model puts it in the reserved hosted-model agents group, and moving it back\n            takes it out. A source whose switch is off denies that group, so this changes what this agent can read, at once, on its next call.</p>\n            {Layout.Form(r, path + \"/enabled\", Layout.Hidden(\"enabled\", agent.Disabled ? \"on\" : \"off\"), agent.Disabled ? \"Enable\" : \"Disable\", danger: !agent.Disabled)}\n            {Layout.OwnForm(r, path + \"/remove\", Markup.Empty, \"Remove agent\", danger: true)}",
+      "filter": "FullyQualifiedName~PortalReissueRemoveTests"
+    },
+    {
+      "name": "Reissue is offered beside a revoked or expired token",
+      "file": "src/Premagentic.Portal/Pages/AgentPages.cs",
+      "old": "reissuable && t.IsUsableAt(now) ?",
+      "new": "reissuable ?",
+      "filter": "FullyQualifiedName~PortalReissueRemoveTests"
+    },
+    {
+      "name": "Reissue is offered on a disabled agent",
+      "file": "src/Premagentic.Portal/Pages/AgentPages.cs",
+      "old": "var reissuable = !agent.Disabled && owner is { Disabled: false };",
+      "new": "var reissuable = owner is { Disabled: false };",
+      "filter": "FullyQualifiedName~PortalReissueRemoveTests"
+    },
+    {
+      "name": "Reissue is offered on an agent whose person is disabled",
+      "file": "src/Premagentic.Portal/Pages/AgentPages.cs",
+      "old": "var reissuable = !agent.Disabled && owner is { Disabled: false };",
+      "new": "var reissuable = !agent.Disabled;",
+      "filter": "FullyQualifiedName~PortalReissueRemoveTests"
+    },
+    {
+      "name": "the agent page reissues a token without asking",
+      "file": "src/Premagentic.Portal/Pages/AgentPages.cs",
+      "old": "        if (!confirmed)\n            return Layout.Page(r, $\"Reissue token",
+      "new": "        if (!confirmed && id.Length == 0)\n            return Layout.Page(r, $\"Reissue token",
+      "filter": "FullyQualifiedName~PortalReissueRemoveTests"
+    },
+    {
+      "name": "the agent page removes an agent without asking",
+      "file": "src/Premagentic.Portal/Pages/AgentPages.cs",
+      "old": "        if (!confirmed)\n            return Layout.Page(r, $\"Remove agent",
+      "new": "        if (!confirmed && name.Length == 0)\n            return Layout.Page(r, $\"Remove agent",
+      "filter": "FullyQualifiedName~PortalReissueRemoveTests"
+    },
+    {
+      "name": "the removed view shows the live agents",
+      "file": "src/Premagentic.Portal/Pages/AgentPages.cs",
+      "old": "var removedOnly = !selfMadeOnly && r.Query(\"view\") == \"removed\";",
+      "new": "var removedOnly = false;",
+      "filter": "FullyQualifiedName~PortalReissueRemoveTests"
+    },
+    {
+      "name": "the removed view offers the register form",
+      "file": "src/Premagentic.Portal/Pages/AgentPages.cs",
+      "old": "{(r.IsAdministrator && !removedOnly ? M.H(",
+      "new": "{(r.IsAdministrator ? M.H(",
+      "filter": "FullyQualifiedName~PortalReissueRemoveTests"
+    },
+    {
+      "name": "the removed view says who removed it by a bare id",
+      "file": "src/Premagentic.Portal/Pages/AgentPages.cs",
+      "old": "Layout.When(a.RemovedAt), RemovedBy(a.RemovedBy, users))))",
+      "new": "Layout.When(a.RemovedAt), a.RemovedBy)))",
+      "filter": "FullyQualifiedName~PortalReissueRemoveTests"
+    },
+    {
+      "name": "the audit page drops the removed mark",
+      "file": "src/Premagentic.Portal/Pages/AuditPages.cs",
+      "old": "$\"{q.AgentName ?? id.ToString()}{(q.AgentRemoved ? \" (removed)\" : \"\")}\";",
+      "new": "$\"{q.AgentName ?? id.ToString()}\";",
+      "filter": "FullyQualifiedName~PortalReissueRemoveTests"
+    },
+    {
+      "name": "the usage page drops the removed mark",
+      "file": "src/Premagentic.Portal/Pages/UsagePages.cs",
+      "old": "Layout.Row(c.Removed ? $\"{c.Name} (removed)\" : c.Name,",
+      "new": "Layout.Row(c.Name,",
+      "filter": "FullyQualifiedName~PortalReissueRemoveTests"
+    }
+  ]
+}

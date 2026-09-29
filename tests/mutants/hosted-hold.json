@@ -1,0 +1,341 @@
+{
+  "name": "The hosted-model switch as a hold beside the rules, stamped at every list writer and excluded again in what a hosted-model agent may read, through the CLI, the portal, a profile and the 0141 upgrade",
+  "commit": "hand run, 2026-09-29",
+  "mutants": [
+    {
+      "name": "both enforcements gone: a rule set at the command line beneath or at a held folder hands it to a hosted-model agent",
+      "edits": [
+        {
+          "file": "src/Premagentic.Core/Security/AclStore.cs",
+          "old": "        if ((await HostedHolds.ReadAsync(conn, tx, tenantId, ct)).Any(h => h.Source == source))\n            heldId = await EnsureSetAsync(",
+          "new": "        if ((await HostedHolds.ReadAsync(conn, tx, tenantId, ct)).Any(h => false))\n            heldId = await EnsureSetAsync("
+        },
+        {
+          "file": "src/Premagentic.Core/Security/PermittedSetReader.cs",
+          "old": "            if (held.Count > 0) permitted = [.. permitted.Where(id => !held.Contains(id))];",
+          "new": "            if (held.Count < 0) permitted = [.. permitted.Where(id => !held.Contains(id))];"
+        }
+      ],
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.A_rule_beneath_a_held_folder_set_at_the_command_line_does_not_undo_the_hold|FullyQualifiedName~Premagentic.Tests.HostedHoldTests.The_held_folders_own_rule_written_again_at_the_command_line_keeps_the_hold"
+    },
+    {
+      "name": "both enforcements gone: rules set in the portal hand a held folder to a hosted-model agent over the api and mcp",
+      "edits": [
+        {
+          "file": "src/Premagentic.Core/Security/AclStore.cs",
+          "old": "        if ((await HostedHolds.ReadAsync(conn, tx, tenantId, ct)).Any(h => h.Source == source))\n            heldId = await EnsureSetAsync(",
+          "new": "        if ((await HostedHolds.ReadAsync(conn, tx, tenantId, ct)).Any(h => false))\n            heldId = await EnsureSetAsync("
+        },
+        {
+          "file": "src/Premagentic.Core/Security/PermittedSetReader.cs",
+          "old": "            if (held.Count > 0) permitted = [.. permitted.Where(id => !held.Contains(id))];",
+          "new": "            if (held.Count < 0) permitted = [.. permitted.Where(id => !held.Contains(id))];"
+        }
+      ],
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.Rules_set_in_the_portal_beneath_and_at_a_held_folder_leave_it_held_over_the_api_and_mcp"
+    },
+    {
+      "name": "a rule written at the command line stores a held document's plain list",
+      "file": "src/Premagentic.Core/Security/AclStore.cs",
+      "old": "        if ((await HostedHolds.ReadAsync(conn, tx, tenantId, ct)).Any(h => h.Source == source))\n            heldId = await EnsureSetAsync(",
+      "new": "        if ((await HostedHolds.ReadAsync(conn, tx, tenantId, ct)).Any(h => false))\n            heldId = await EnsureSetAsync(",
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.A_rule_beneath_a_held_folder_set_at_the_command_line_does_not_undo_the_hold|FullyQualifiedName~Premagentic.Tests.HostedHoldTests.The_held_folders_own_rule_written_again_at_the_command_line_keeps_the_hold"
+    },
+    {
+      "name": "a rule written in the portal stores a held document's plain list",
+      "file": "src/Premagentic.Core/Security/AclStore.cs",
+      "old": "        if ((await HostedHolds.ReadAsync(conn, tx, tenantId, ct)).Any(h => h.Source == source))\n            heldId = await EnsureSetAsync(",
+      "new": "        if ((await HostedHolds.ReadAsync(conn, tx, tenantId, ct)).Any(h => false))\n            heldId = await EnsureSetAsync(",
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.Rules_set_in_the_portal_beneath_and_at_a_held_folder_leave_it_held_over_the_api_and_mcp"
+    },
+    {
+      "name": "a rule a profile writes stores a held document's plain list",
+      "file": "src/Premagentic.Core/Security/AclStore.cs",
+      "old": "        if ((await HostedHolds.ReadAsync(conn, tx, tenantId, ct)).Any(h => h.Source == source))\n            heldId = await EnsureSetAsync(",
+      "new": "        if ((await HostedHolds.ReadAsync(conn, tx, tenantId, ct)).Any(h => false))\n            heldId = await EnsureSetAsync(",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ProfileTests.Rules_written_after_a_profile_held_a_source_do_not_release_it"
+    },
+    {
+      "name": "a hosted-model agent reads the lists held documents store",
+      "file": "src/Premagentic.Core/Security/PermittedSetReader.cs",
+      "old": "            if (held.Count > 0) permitted = [.. permitted.Where(id => !held.Contains(id))];",
+      "new": "            if (held.Count < 0) permitted = [.. permitted.Where(id => !held.Contains(id))];",
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.A_held_document_stored_without_its_stamp_is_still_kept_from_a_hosted_model_agent|FullyQualifiedName~Premagentic.Tests.HostedHoldTests.Through_the_api_as_the_application_role_the_exclusion_alone_refuses_a_hosted_model_agent"
+    },
+    {
+      "name": "the exclusion's range stops before the folder's documents",
+      "file": "src/Premagentic.Core/Security/HostedHolds.cs",
+      "old": "                        AND (d.path COLLATE \"C\") < h.path_prefix || '0'",
+      "new": "                        AND (d.path COLLATE \"C\") < h.path_prefix || '/'",
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.A_held_document_stored_without_its_stamp_is_still_kept_from_a_hosted_model_agent"
+    },
+    {
+      "name": "the exclusion ignores a hold on a whole source",
+      "file": "src/Premagentic.Core/Security/HostedHolds.cs",
+      "old": "              AND ((h.path_prefix = '' AND EXISTS (",
+      "new": "              AND ((h.path_prefix = '' AND false AND EXISTS (",
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.A_document_of_a_whole_held_source_stored_without_its_stamp_is_still_kept_from_a_hosted_model_agent"
+    },
+    {
+      "name": "the exclusion takes a folder whose name only starts like a held one",
+      "file": "src/Premagentic.Core/Security/HostedHolds.cs",
+      "old": "                        AND (d.path = h.path_prefix OR starts_with(d.path, h.path_prefix || '/'))))))",
+      "new": "                        AND true))))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.A_folder_whose_name_starts_like_a_held_one_is_not_held"
+    },
+    {
+      "name": "a hold covers a folder whose name only starts like it",
+      "file": "src/Premagentic.Core/Security/HostedHolds.cs",
+      "old": " && path.StartsWith(prefix, StringComparison.Ordinal) && path[prefix.Length] == '/'))",
+      "new": " && path.StartsWith(prefix, StringComparison.Ordinal)))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.A_folder_whose_name_starts_like_a_held_one_is_not_held"
+    },
+    {
+      "name": "ingest stores a held document's plain list",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.Access.cs",
+      "old": "            var set = hosted is { } group && HostedHolds.Covers(holds, sourceName, doc.Path)",
+      "new": "            var set = hosted is { } group && false && HostedHolds.Covers(holds, sourceName, doc.Path)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.A_document_ingested_beneath_a_held_folder_is_stored_stamped|FullyQualifiedName~Premagentic.Tests.HostedHoldTests.A_connector_decided_document_keeps_its_stamp_until_its_next_ingest"
+    },
+    {
+      "name": "holding a folder stamps nothing already indexed",
+      "file": "src/Premagentic.Core/Security/AclStore.cs",
+      "old": "            var changed = await insert.ExecuteNonQueryAsync(ct) > 0;\n            return (changed, await RestampAsync(conn, tx, source, pathPrefix, ct));",
+      "new": "            var changed = await insert.ExecuteNonQueryAsync(ct) > 0;\n            return (changed, 0);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.Holding_a_folder_stamps_the_documents_rules_beneath_it_already_decide|FullyQualifiedName~Premagentic.Tests.SourceExposureTests.Turning_the_switch_leaves_the_rule_as_written_and_stamps_what_the_documents_store"
+    },
+    {
+      "name": "releasing a folder gives no document back its rule's list",
+      "file": "src/Premagentic.Core/Security/AclStore.cs",
+      "old": "            return (legacy is not null, await RestampAsync(conn, tx, source, pathPrefix, ct), legacy is true);",
+      "new": "            return (legacy is not null, 0, legacy is true);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.Turning_the_switch_back_on_gives_every_rule_decided_document_its_rules_list|FullyQualifiedName~Premagentic.Tests.SourceExposureTests.Turning_the_switch_leaves_the_rule_as_written_and_stamps_what_the_documents_store"
+    },
+    {
+      "name": "a hold leaves a document its connector decided unstamped",
+      "file": "src/Premagentic.Core/Security/AclStore.cs",
+      "old": "            else if (covered && d.Text is not null)",
+      "new": "            else if (false && d.Text is not null)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.A_connector_decided_document_keeps_its_stamp_until_its_next_ingest"
+    },
+    {
+      "name": "the switch's entry from before 0141 stays in the rule when the switch is turned on",
+      "file": "src/Premagentic.Core/Sources/SourceExposureStore.cs",
+      "old": "is { } kept && kept.Count != rule.Entries.Count)",
+      "new": "is { } kept && false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SourceExposureTests.Turning_the_switch_on_removes_the_entry_it_wrote_before_0141_and_nothing_else"
+    },
+    {
+      "name": "turning the switch on strips a denial at the top of a rule that was never held",
+      "file": "src/Premagentic.Core/Sources/SourceExposureStore.cs",
+      "old": "            if (!released) return (false, 0);",
+      "new": "            if (false) return (false, 0);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SourceExposureTests.Turning_the_switch_on_keeps_a_denial_written_at_the_top_by_hand"
+    },
+    {
+      "name": "the switch's turn is recorded as a rule change",
+      "file": "src/Premagentic.Core/Sources/SourceExposureStore.cs",
+      "old": "    public const string ChangeKind = \"source.hosted\";",
+      "new": "    public const string ChangeKind = \"rule.set\";",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SourceExposureTests.The_switch_is_written_to_the_change_record_because_the_rules_store_writes_none"
+    },
+    {
+      "name": "a held folder reads as may be served",
+      "file": "src/Premagentic.Core/Sources/SourceExposure.cs",
+      "old": "        if (held) return SourceExposureState.NeverLeaves;",
+      "new": "        if (false) return SourceExposureState.NeverLeaves;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SourceExposureTests.|FullyQualifiedName~Premagentic.Tests.PortalAuditHealthAndSourcesTests.The_source_page_shows_and_turns_the_hosted_model_switch"
+    },
+    {
+      "name": "a profile's hosted change is planned and never applied",
+      "file": "src/Premagentic.Core/Profiles/ProfileApply.cs",
+      "old": "                await new SourceExposureStore(db, tenantId).SetAsync(hosted.Prefix, hosted.MayBeServed, actor, ct);",
+      "new": "                await Task.CompletedTask;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ProfileTests.A_profile_applies_its_settings_sources_and_rules_through_the_administrator_paths|FullyQualifiedName~Premagentic.Tests.ProfileTests.A_profile_may_hold_a_source_back_without_stating_a_rule|FullyQualifiedName~Premagentic.Tests.ProfileTests.A_profile_that_says_hosted_no_holds_the_folder_and_writes_the_rule_as_stated"
+    },
+    {
+      "name": "a profile silent about hosted models serves a source it adds",
+      "file": "src/Premagentic.Core/Profiles/ProfilePlan.cs",
+      "old": "? !mayBeServed : existing is null || held;",
+      "new": "? !mayBeServed : held;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ProfileTests.A_profile_adding_a_source_holds_it_back_from_hosted_models_unless_it_says_otherwise|FullyQualifiedName~Premagentic.Tests.ProfileTests.A_profile_applies_its_settings_sources_and_rules_through_the_administrator_paths"
+    },
+    {
+      "name": "a profile silent about hosted models releases a registered source whose rule it rewrites",
+      "file": "src/Premagentic.Core/Profiles/ProfilePlan.cs",
+      "old": "? !mayBeServed : existing is null || held;",
+      "new": "? !mayBeServed : existing is null;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ProfileTests.Rules_written_after_a_profile_held_a_source_do_not_release_it"
+    },
+    {
+      "name": "a legacy hold's entry from before 0141 reads as profile drift",
+      "file": "src/Premagentic.Core/Profiles/ProfilePlan.cs",
+      "old": "            var legacy = ownHold && legacyHolds.Contains(covering!);",
+      "new": "            var legacy = false;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ProfileTests.A_legacy_held_rule_still_carrying_the_switchs_old_entry_is_not_drift"
+    },
+    {
+      "name": "a top denial under a hold that is not legacy is taken for the switch's and never written",
+      "file": "src/Premagentic.Core/Profiles/ProfilePlan.cs",
+      "old": "            var legacy = ownHold && legacyHolds.Contains(covering!);",
+      "new": "            var legacy = ownHold;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ProfileTests.Under_a_hold_that_is_not_legacy_a_top_denial_the_profile_does_not_state_is_drift"
+    },
+    {
+      "name": "a profile whose rule is in force as stated is planned again when the folder is held",
+      "file": "src/Premagentic.Core/Profiles/ProfilePlan.cs",
+      "old": "            var drifted = inForce?.CanonicalText != rule.Acl.CanonicalText",
+      "new": "            var drifted = true",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ProfileTests.A_profile_whose_rule_opens_with_the_hosted_denial_converges"
+    },
+    {
+      "name": "a profile may release a folder a hold above it covers, and asks again on every run",
+      "file": "src/Premagentic.Core/Profiles/ProfilePlan.cs",
+      "old": "            else if (!wantHeld && held)",
+      "new": "            else if (false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ProfileTests.A_profile_cannot_serve_a_source_a_hold_above_its_folder_covers"
+    },
+    {
+      "name": "a profile writes its sources and rules before its holds",
+      "edits": [
+        {
+          "file": "src/Premagentic.Core/Profiles/ProfileApply.cs",
+          "old": "        .. changes.OfType<HostedChange>().Where(h => !h.MayBeServed),\n",
+          "new": ""
+        },
+        {
+          "file": "src/Premagentic.Core/Profiles/ProfileApply.cs",
+          "old": "        .. changes.OfType<HostedChange>().Where(h => h.MayBeServed),",
+          "new": "        .. changes.OfType<HostedChange>(),"
+        }
+      ],
+      "filter": "FullyQualifiedName~Premagentic.Tests.ProfileTests.A_profile_applies_holds_first_and_releases_last"
+    },
+    {
+      "name": "releasing a hold that is not legacy strips the top entry of the folder's rule",
+      "file": "src/Premagentic.Core/Sources/SourceExposureStore.cs",
+      "old": "            if (legacy && rule is not null && SourceExposure.WithoutLegacyEntry",
+      "new": "            if (rule is not null && SourceExposure.WithoutLegacyEntry",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SourceExposureTests.Turning_the_switch_on_leaves_the_top_entry_when_the_hold_is_not_a_legacy_one"
+    },
+    {
+      "name": "the legacy strip records no rule text",
+      "file": "src/Premagentic.Core/Sources/SourceExposureStore.cs",
+      "old": "                stripped = (rule.CanonicalText, after.CanonicalText);",
+      "new": "                stripped = (\"\", \"\");",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SourceExposureTests.Turning_the_switch_on_removes_the_entry_it_wrote_before_0141_and_nothing_else"
+    },
+    {
+      "name": "turning the switch off again stamps a document and records nothing",
+      "file": "src/Premagentic.Core/Sources/SourceExposureStore.cs",
+      "old": "                if (held || stamped > 0) Record(",
+      "new": "                if (held) Record(",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SourceExposureTests.Turning_the_switch_off_again_stamps_a_document_stored_without_the_denial_and_records_it"
+    },
+    {
+      "name": "the command line says nothing changed when turning the switch off again stamped a document",
+      "file": "src/Premagentic.Cli/Admin/SourcesCommands.cs",
+      "old": "            : turn.Moved > 0 ? $\"Source",
+      "new": "            : turn.Moved < 0 ? $\"Source",
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.Turning_the_switch_off_again_at_the_command_line_says_it_stamped_a_document_again"
+    },
+    {
+      "name": "a folder is held only by its own hold, not by one above it",
+      "file": "src/Premagentic.Core/Security/HostedHolds.cs",
+      "old": "        return holds.Where(h => Covers([h], source, prefix)).MaxBy(h => h.PathPrefix.Length);",
+      "new": "        return holds.FirstOrDefault(h => h.Source == source && h.PathPrefix == prefix);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.A_folder_beneath_a_held_one_reads_as_held_by_the_hold_above_and_names_it|FullyQualifiedName~Premagentic.Tests.ProfileTests.A_profile_cannot_serve_a_source_a_hold_above_its_folder_covers"
+    },
+    {
+      "name": "the words for a folder held from above do not name the hold",
+      "file": "src/Premagentic.Core/Sources/SourceExposureStore.cs",
+      "old": "        return (state, covering is not null && covering.PathPrefix != pathPrefix",
+      "new": "        return (state, false",
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.A_folder_beneath_a_held_one_reads_as_held_by_the_hold_above_and_names_it"
+    },
+    {
+      "name": "hosted-release releases a folder a registered source reads",
+      "file": "src/Premagentic.Cli/Admin/SourcesCommands.cs",
+      "old": "        if ((await registry.ListAsync()).FirstOrDefault(s => s.PathPrefix == prefix) is { } live)",
+      "new": "        if ((await registry.ListAsync()).FirstOrDefault(s => s.PathPrefix == prefix) is { } live && false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.A_hold_whose_source_was_removed_stays_is_listed_and_is_released_by_hosted_release"
+    },
+    {
+      "name": "the sources list does not name a hold whose source was removed",
+      "file": "src/Premagentic.Cli/Admin/SourcesCommands.cs",
+      "old": "sources.All(s => s.PathPrefix != h.PathPrefix)",
+      "new": "false",
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.A_hold_whose_source_was_removed_stays_is_listed_and_is_released_by_hosted_release"
+    },
+    {
+      "name": "the rules list names no hold",
+      "file": "src/Premagentic.Cli/Admin/AdminCommands.cs",
+      "old": "            if (HostedHolds.Touching(holds, r.Rule) is { Count: > 0 } touching)",
+      "new": "            if (HostedHolds.Touching(holds, r.Rule) is { Count: > 99 } touching)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.The_rules_list_names_the_hold_beside_every_rule_it_reaches_and_no_other"
+    },
+    {
+      "name": "a hold is named beside every rule of its source",
+      "file": "src/Premagentic.Core/Security/HostedHolds.cs",
+      "old": "            && (Covers([h], rule.Source, rule.PathPrefix) || rule.Covers(h.PathPrefix)))];",
+      "new": "            && true)];",
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.The_rules_list_names_the_hold_beside_every_rule_it_reaches_and_no_other"
+    },
+    {
+      "name": "the permissions page names no hold",
+      "file": "src/Premagentic.Portal/Pages/PermissionPages.cs",
+      "old": "HostedHolds.Touching(holds, rule.Rule) is { Count: > 0 } touching",
+      "new": "HostedHolds.Touching(holds, rule.Rule) is { Count: > 99 } touching",
+      "filter": "FullyQualifiedName~Premagentic.Tests.HostedHoldTests.Rules_set_in_the_portal_beneath_and_at_a_held_folder_leave_it_held_over_the_api_and_mcp"
+    },
+    {
+      "name": "the upgrade holds a folder whose rule denies the group anywhere",
+      "file": "src/Premagentic.Core/Storage/Migrations/0141_hosted_hold.sql",
+      "old": "  AND split_part(s.canonical_text, E'\\n', 1) = 'deny group:' || g.id::text;",
+      "new": "  AND strpos(s.canonical_text, 'deny group:' || g.id::text) > 0;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.MigrationBackfillTests.Upgrading_to_0141_holds_each_registered_folder_whose_live_rule_opens_with_the_switchs_entry"
+    },
+    {
+      "name": "the upgrade holds a folder whose rule was removed",
+      "file": "src/Premagentic.Core/Storage/Migrations/0141_hosted_hold.sql",
+      "old": "WHERE r.deleted_at IS NULL\n  AND r.source = 'filesystem'",
+      "new": "WHERE true\n  AND r.source = 'filesystem'",
+      "filter": "FullyQualifiedName~Premagentic.Tests.MigrationBackfillTests.Upgrading_to_0141_holds_each_registered_folder_whose_live_rule_opens_with_the_switchs_entry"
+    },
+    {
+      "name": "the upgrade holds another connector's rule",
+      "file": "src/Premagentic.Core/Storage/Migrations/0141_hosted_hold.sql",
+      "old": "  AND r.source = 'filesystem'\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.MigrationBackfillTests.Upgrading_to_0141_holds_each_registered_folder_whose_live_rule_opens_with_the_switchs_entry"
+    },
+    {
+      "name": "the upgrade holds a folder no registered source reads",
+      "file": "src/Premagentic.Core/Storage/Migrations/0141_hosted_hold.sql",
+      "old": " AND src.path_prefix = r.path_prefix",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.MigrationBackfillTests.Upgrading_to_0141_holds_each_registered_folder_whose_live_rule_opens_with_the_switchs_entry"
+    },
+    {
+      "name": "the upgrade holds a removed source's folder",
+      "file": "src/Premagentic.Core/Storage/Migrations/0141_hosted_hold.sql",
+      "old": " AND src.deleted_at IS NULL)",
+      "new": ")",
+      "filter": "FullyQualifiedName~Premagentic.Tests.MigrationBackfillTests.Upgrading_to_0141_holds_each_registered_folder_whose_live_rule_opens_with_the_switchs_entry"
+    },
+    {
+      "name": "the upgrade's holds are not marked legacy",
+      "file": "src/Premagentic.Core/Storage/Migrations/0141_hosted_hold.sql",
+      "old": "SELECT r.tenant_id, r.source, r.path_prefix, true",
+      "new": "SELECT r.tenant_id, r.source, r.path_prefix, false",
+      "filter": "FullyQualifiedName~Premagentic.Tests.MigrationBackfillTests.Upgrading_to_0141_holds_each_registered_folder_whose_live_rule_opens_with_the_switchs_entry"
+    },
+    {
+      "name": "the upgrade holds a folder whose rule denies another tenant's group",
+      "file": "src/Premagentic.Core/Storage/Migrations/0141_hosted_hold.sql",
+      "old": "JOIN prem_config.app_group g ON g.tenant_id = r.tenant_id AND g.system_key = 'hosted_model_agents'",
+      "new": "JOIN prem_config.app_group g ON g.system_key = 'hosted_model_agents'",
+      "filter": "FullyQualifiedName~Premagentic.Tests.MigrationBackfillTests.Upgrading_to_0141_holds_each_registered_folder_whose_live_rule_opens_with_the_switchs_entry"
+    }
+  ]
+}

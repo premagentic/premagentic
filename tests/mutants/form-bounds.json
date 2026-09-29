@@ -1,0 +1,41 @@
+{
+  "name": "a form past its own bounds answered with its page",
+  "commit": "hand run, 2026-09-27",
+  "mutants": [
+    {
+      "name": "the catch is dropped",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "http.GetEndpoint()?.Metadata.GetMetadata<PortalFormBounds>() is { } bounds",
+      "new": "http.GetEndpoint()?.Metadata.GetMetadata<PortalFormBounds>() is { } bounds && false",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalFormBoundsTests.|FullyQualifiedName~Premagentic.Tests.PortalOAuthPagesTests.A_document_form_over_its_bounds"
+    },
+    {
+      "name": "the sentence is blanked",
+      "file": "src/Premagentic.Portal/PortalFormBounds.cs",
+      "old": "public IResult Answer() => Layout.After(Back, error: Refusal);",
+      "new": "public IResult Answer() => Layout.After(Back, error: \"\");",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalFormBoundsTests.|FullyQualifiedName~Premagentic.Tests.PortalOAuthPagesTests.A_document_form_over_its_bounds"
+    },
+    {
+      "name": "a whole body past its bound is not caught",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "catch (BadHttpRequestException ex) when (ex.StatusCode == StatusCodes.Status413PayloadTooLarge)",
+      "new": "catch (BadHttpRequestException ex) when (false && ex.StatusCode == StatusCodes.Status413PayloadTooLarge)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalFormBoundsTests.|FullyQualifiedName~Premagentic.Tests.PortalFormDrainTests."
+    },
+    {
+      "name": "the form is read before the caller resolves",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "        var ct = http.RequestAborted;\n",
+      "new": "        var ct = http.RequestAborted;\n        if (http.GetEndpoint()?.Metadata.GetMetadata<PortalFormBounds>() is { } early && http.Request.HasFormContentType && await BoundPassedAsync(http, ct) is not null)\n        {\n            await early.Answer().ExecuteAsync(http);\n            return;\n        }\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalFormBoundsTests."
+    },
+    {
+      "name": "the catch answers for an endpoint without bounds of its own",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "http.GetEndpoint()?.Metadata.GetMetadata<PortalFormBounds>() is { } bounds",
+      "new": "(http.GetEndpoint()?.Metadata.GetMetadata<PortalFormBounds>() ?? new PortalFormBounds(\"/portal/groups\", \"planted\")) is { } bounds",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalFormBoundsTests."
+    }
+  ]
+}

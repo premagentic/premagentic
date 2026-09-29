@@ -1,0 +1,286 @@
+{
+  "name": "hosting: startup refusals, trusted proxies, the search role and its grants, the bundled PostgreSQL",
+  "commit": "hand run, 2026-09-22",
+  "mutants": [
+    {
+      "name": "the refusal handler does not exit",
+      "file": "src/Premagentic.Core/Storage/StartupRefusedException.cs",
+      "old": "            Environment.Exit(ExitCode);",
+      "new": "            { }",
+      "filter": "FullyQualifiedName~The_real_api_ends_a_refusal"
+    },
+    {
+      "name": "Program.cs does not install the handler",
+      "file": "src/Premagentic.Api/Program.cs",
+      "old": "StartupRefusedException.ExitCleanlyWhenUnhandled(\"Premagentic API\");\n",
+      "new": "",
+      "filter": "FullyQualifiedName~The_real_api_ends_a_refusal"
+    },
+    {
+      "name": "an unreadable credentials file is not a refusal",
+      "file": "src/Premagentic.Core/Storage/PremagenticDatabase.cs",
+      "old": "catch (Exception ex) when (ex is IOException or InvalidDataException or UnauthorizedAccessException)",
+      "new": "catch (Exception ex) when (ex is TimeoutException)",
+      "filter": "FullyQualifiedName~An_unreadable_credentials_file|FullyQualifiedName~The_credentials_file_wins"
+    },
+    {
+      "name": "hosting does not check the database first",
+      "file": "src/Premagentic.Api/Hosting/PremagenticHosting.cs",
+      "old": "        PremagenticDatabase.ConnectionStringFrom(key => config[key]);\n",
+      "new": "",
+      "filter": "FullyQualifiedName~With_nothing_configured_the_api_refuses_in_process|FullyQualifiedName~An_unreadable_credentials_file"
+    },
+    {
+      "name": "the framework's trust-anyone switch is allowed",
+      "file": "src/Premagentic.Api/Hosting/TrustedProxies.cs",
+      "old": "            if (string.Equals(config[key], \"true\", StringComparison.OrdinalIgnoreCase))",
+      "new": "            if (false)",
+      "filter": "FullyQualifiedName~The_framework_switch"
+    },
+    {
+      "name": "a range covering every address is allowed",
+      "file": "src/Premagentic.Api/Hosting/TrustedProxies.cs",
+      "old": "            if (network.PrefixLength == 0)",
+      "new": "            if (false)",
+      "filter": "FullyQualifiedName~A_proxy_list_that"
+    },
+    {
+      "name": "the default loopback networks stay trusted",
+      "file": "src/Premagentic.Api/Hosting/TrustedProxies.cs",
+      "old": "            options.KnownIPNetworks.Clear();\n",
+      "new": "",
+      "filter": "FullyQualifiedName~An_unlisted_sender"
+    },
+    {
+      "name": "the default loopback proxies stay trusted",
+      "file": "src/Premagentic.Api/Hosting/TrustedProxies.cs",
+      "old": "            options.KnownProxies.Clear();\n",
+      "new": "",
+      "filter": "FullyQualifiedName~An_unlisted_sender"
+    },
+    {
+      "name": "only one hop is unwrapped",
+      "file": "src/Premagentic.Api/Hosting/TrustedProxies.cs",
+      "old": "            options.ForwardLimit = null;\n",
+      "new": "",
+      "filter": "FullyQualifiedName~A_client_cannot_forge"
+    },
+    {
+      "name": "the forwarding middleware is never added",
+      "file": "src/Premagentic.Api/Hosting/TrustedProxies.cs",
+      "old": "        services.AddSingleton<IStartupFilter, TrustedProxyStartupFilter>();\n",
+      "new": "",
+      "filter": "FullyQualifiedName~A_listed_proxy_is_believed"
+    },
+    {
+      "name": "the forwarded scheme is ignored",
+      "file": "src/Premagentic.Api/Hosting/TrustedProxies.cs",
+      "old": "ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;",
+      "new": "ForwardedHeaders.XForwardedFor;",
+      "filter": "FullyQualifiedName~A_listed_proxy_is_believed"
+    },
+    {
+      "name": "the search role is not granted its two tables",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "            GRANT SELECT ON {string.Join(\", \", SearchReadable)} TO {search};\n",
+      "new": "",
+      "filter": "FullyQualifiedName~The_search_role_reads_documents"
+    },
+    {
+      "name": "the search role keeps other table rights",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "            REVOKE ALL ON ALL TABLES IN SCHEMA {schemas} FROM {search};\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Anything_more_the_search_role"
+    },
+    {
+      "name": "the search role keeps default privileges",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "            ALTER DEFAULT PRIVILEGES FOR ROLE {Quote(options.OwnerRole)} IN SCHEMA {schemas} REVOKE ALL ON TABLES FROM {search};\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Anything_more_the_search_role"
+    },
+    {
+      "name": "column grants to the search role go unseen",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "                            OR has_any_column_privilege(@search, t.oid, 'INSERT, UPDATE, REFERENCES')\n",
+      "new": "",
+      "filter": "FullyQualifiedName~A_column_grant_alone"
+    },
+    {
+      "name": "no EXECUTE on the caller-session functions",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "            sql.Append($\"GRANT EXECUTE ON FUNCTION {function} TO {app};\\n\");",
+      "new": "            sql.Append(\"\");",
+      "filter": "FullyQualifiedName~The_caller_session_functions"
+    },
+    {
+      "name": "the application role keeps the caller-session table",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "            sql.Append($\"REVOKE ALL ON {CallerSessionTable} FROM {app};\\n\");",
+      "new": "            sql.Append(\"\");",
+      "filter": "FullyQualifiedName~The_caller_session_functions"
+    },
+    {
+      "name": "the grants check expects row rights on the caller-session table",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "AND t.qualified <> @session_table AND NOT (",
+      "new": "AND NOT (",
+      "filter": "FullyQualifiedName~The_caller_session_functions"
+    },
+    {
+      "name": "others on the index writer list are accepted",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        if (others.Length > 0)\n",
+      "new": "        if (others.Length < 0)\n",
+      "filter": "FullyQualifiedName~The_index_writer_list"
+    },
+    {
+      "name": "the application role is never listed as the index writer",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "            await insert.ExecuteNonQueryAsync(ct);\n",
+      "new": "",
+      "filter": "FullyQualifiedName~The_index_writer_list"
+    },
+    {
+      "name": "a login refused CONNECT counts as a wrong password",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.InsufficientPrivilege)",
+      "new": "        catch (PostgresException ex) when (ex.SqlState == \"none\")",
+      "filter": "FullyQualifiedName~A_search_role_new_to_an_existing_install"
+    },
+    {
+      "name": "the search role is not given CONNECT",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        var roles = $\"{Quote(options.AppRole)}, {Quote(options.SearchRole)}\";",
+      "new": "        var roles = Quote(options.AppRole);",
+      "filter": "FullyQualifiedName~A_search_role_new_to_an_existing_install"
+    },
+    {
+      "name": "two roles may share a name",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": ".Distinct().Count() != 3)",
+      "new": ".Distinct().Count() < 2)",
+      "filter": "FullyQualifiedName~The_three_roles_must_be_three_roles"
+    },
+    {
+      "name": "initdb listens on every address",
+      "file": "src/Premagentic.Cli/Setup/BundledPostgres.cs",
+      "old": "\"-c\", \"listen_addresses=localhost\", ",
+      "new": "",
+      "filter": "FullyQualifiedName~Initdb_is_given|FullyQualifiedName~Setup_makes_starts_and_uses_the_bundled_server"
+    },
+    {
+      "name": "the database service runs as LocalSystem",
+      "file": "src/Premagentic.Cli/Setup/BundledPostgres.cs",
+      "old": "\"-U\", ServiceAccount, ",
+      "new": "",
+      "filter": "FullyQualifiedName~The_database_service_runs"
+    },
+    {
+      "name": "the Visual C++ runtime is not looked for",
+      "file": "src/Premagentic.Cli/Setup/BundledPostgres.cs",
+      "old": "            if (RuntimeLibraries.Any(library => !File.Exists(Path.Combine(systemFolder, library))))",
+      "new": "            if (false)",
+      "filter": "FullyQualifiedName~Without_the_visual_cpp_runtime"
+    },
+    {
+      "name": "a library the bundle lacks is not named",
+      "file": "src/Premagentic.Cli/Setup/BundledPostgres.cs",
+      "old": "            if (code is DllNotFound or EntryPointNotFound)",
+      "new": "            if (false)",
+      "filter": "FullyQualifiedName~A_bundle_missing_a_library"
+    },
+    {
+      "name": "a port in use is not checked",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        else if (!BundledPostgres.IsPortFree(options.PostgresPort))",
+      "new": "        else if (false)",
+      "filter": "FullyQualifiedName~A_port_in_use"
+    },
+    {
+      "name": "a folder holding something else is made a cluster",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        else if (Directory.Exists(data) && Directory.EnumerateFileSystemEntries(data).Any())",
+      "new": "        else if (false)",
+      "filter": "FullyQualifiedName~A_folder_that_holds_something_else"
+    },
+    {
+      "name": "a plan goes past the server it did not start",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "                : \"would start the server as this account\") && false;",
+      "new": "                : \"would start the server as this account\") && true;",
+      "filter": "FullyQualifiedName~A_plan_goes_as_far_as_the_server"
+    },
+    {
+      "name": "administrators are not given the superuser file",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        if (reader is not null) CredentialsFile.GrantRead(path, reader);",
+      "new": "        if (false) CredentialsFile.GrantRead(path, reader!);",
+      "filter": "FullyQualifiedName~Setup_makes_starts_and_uses_the_bundled_server"
+    },
+    {
+      "name": "the data folder inherits its parent's access",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "            if (!Directory.Exists(data)) BundledPostgres.CreatePrivateDirectory(data);",
+      "new": "            if (!Directory.Exists(data)) Directory.CreateDirectory(data);",
+      "filter": "FullyQualifiedName~Setup_makes_starts_and_uses_the_bundled_server"
+    },
+    {
+      "name": "the API service does not wait for the database service",
+      "file": "src/Premagentic.Cli/Setup/WindowsServiceRegistration.cs",
+      "old": "        .. dependsOn is null ? Array.Empty<string[]>() : [[\"config\", ServiceName, \"depend=\", dependsOn]],",
+      "new": "        .. Array.Empty<string[]>(),",
+      "filter": "FullyQualifiedName~The_api_service_depends"
+    },
+    {
+      "name": "the text check, now in Core, always passes",
+      "file": "src/Premagentic.Core/Storage/TextCheck.cs",
+      "old": "        if (works) return null;",
+      "new": "        return null;",
+      "filter": "FullyQualifiedName~GlobalizationTests"
+    },
+    {
+      "name": "the search role is not given the text-match function",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "            sql.Append($\"GRANT EXECUTE ON FUNCTION {function} TO {search};\\n\");",
+      "new": "            sql.Append(\"\");",
+      "filter": "FullyQualifiedName~The_text_match_function"
+    },
+    {
+      "name": "the search check does not require the text-match function",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "unnest(@required)",
+      "new": "unnest(ARRAY[]::text[])",
+      "filter": "FullyQualifiedName~The_text_match_function"
+    },
+    {
+      "name": "anyone may run the security functions",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        if (others.Count > 0)\n",
+      "new": "        if (others.Count < 0)\n",
+      "filter": "FullyQualifiedName~The_text_match_function"
+    },
+    {
+      "name": "a tool's output is read before it has all arrived",
+      "file": "src/Premagentic.Cli/Setup/BundledPostgres.cs",
+      "old": "        outputEnded.Wait(outputGrace ?? TimeSpan.FromSeconds(30));\n",
+      "new": "",
+      "filter": "FullyQualifiedName~A_tools_whole_output"
+    },
+    {
+      "name": "two text-match functions are granted anyway",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        if (versions > 1)\n",
+      "new": "        if (versions < 0)\n",
+      "filter": "FullyQualifiedName~Two_functions_by_the_text_match_name"
+    },
+    {
+      "name": "the text-match function is not found by name",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "WHERE n.nspname || '.' || p.proname = @text_matches)",
+      "new": "WHERE false)",
+      "filter": "FullyQualifiedName~The_text_match_function"
+    }
+  ]
+}

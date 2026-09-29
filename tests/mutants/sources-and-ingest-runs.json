@@ -1,0 +1,181 @@
+{
+  "name": "Skipped formats, undeclared authorship, the run record, the sources registry and ingest by source name",
+  "commit": "hand run, 2026-09-21",
+  "mutants": [
+    {
+      "name": "hidden files counted as skipped",
+      "file": "src/Premagentic.Core/Sources/FileSystemSource.cs",
+      "old": "            if (relative.Split('/').Any(p => p.StartsWith('.'))) continue;",
+      "new": "            if (relative.Split('/').Any(p => p.StartsWith('.')) && relative.EndsWith(\".md\")) continue;",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "each extension counted once",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.cs",
+      "old": "skipped[skip.Extension] = skipped.GetValueOrDefault(skip.Extension) + 1;",
+      "new": "skipped[skip.Extension] = 1;",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "extension case kept",
+      "file": "src/Premagentic.Core/Models.cs",
+      "old": "? extension.ToLowerInvariant() : NoExtension",
+      "new": "? extension : NoExtension",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "undeclared concepts not counted",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.cs",
+      "old": "            if (doc.Okf is { DeclaresNoAuthor: true }) undeclared++;\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "unchanged check ignores authorship",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.cs",
+      "old": "              AND d.authorship = @okfAuthorship\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "undeclared setting never reaches a concept",
+      "file": "src/Premagentic.Core/Sources/FileSystemSource.cs",
+      "old": "UndeclaredIsMachine = UndeclaredAuthorshipIsMachine,",
+      "new": "UndeclaredIsMachine = false,",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "undeclared always machine in a bundle",
+      "file": "src/Premagentic.Core/Okf/OkfMetadata.cs",
+      "old": "null when BundleConcept && UndeclaredIsMachine => OkfAuthorship.Machine,",
+      "new": "null when BundleConcept => OkfAuthorship.Machine,",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "undeclared applies outside a bundle",
+      "file": "src/Premagentic.Core/Okf/OkfMetadata.cs",
+      "old": "null when BundleConcept && UndeclaredIsMachine => OkfAuthorship.Machine,",
+      "new": "null when UndeclaredIsMachine => OkfAuthorship.Machine,",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "unreadable frontmatter counted as undeclared",
+      "file": "src/Premagentic.Core/Okf/OkfMetadata.cs",
+      "old": "BundleConcept && Generated is null && FrontmatterState != FrontmatterState.Unparseable;",
+      "new": "BundleConcept && Generated is null;",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "undeclared counted outside a bundle",
+      "file": "src/Premagentic.Core/Okf/OkfMetadata.cs",
+      "old": "BundleConcept && Generated is null && FrontmatterState != FrontmatterState.Unparseable;",
+      "new": "Generated is null && FrontmatterState != FrontmatterState.Unparseable;",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "a failed run left running",
+      "file": "src/Premagentic.Core/Sources/Registry/IngestRuns.cs",
+      "old": "            await FailAsync(runId, $\"{ex.GetType().Name}: {ex.Message}\", CancellationToken.None);\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "a refused reconciliation recorded as completed",
+      "file": "src/Premagentic.Core/Sources/Registry/IngestRuns.cs",
+      "old": "summary.ReconciliationSkipped ? IngestRunOutcome.ReconciliationRefused : IngestRunOutcome.Completed",
+      "new": "IngestRunOutcome.Completed",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "scanned recorded as ingested",
+      "file": "src/Premagentic.Core/Sources/Registry/IngestRuns.cs",
+      "old": "cmd.Parameters.AddWithValue(\"scanned\", summary.Scanned);",
+      "new": "cmd.Parameters.AddWithValue(\"scanned\", summary.Ingested);",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "skipped total not recorded",
+      "file": "src/Premagentic.Core/Sources/Registry/IngestRuns.cs",
+      "old": "cmd.Parameters.AddWithValue(\"skipped\", summary.Skipped);",
+      "new": "cmd.Parameters.AddWithValue(\"skipped\", 0);",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "undeclared count not recorded",
+      "file": "src/Premagentic.Core/Sources/Registry/IngestRuns.cs",
+      "old": "cmd.Parameters.AddWithValue(\"undeclared\", summary.UndeclaredAuthorship);",
+      "new": "cmd.Parameters.AddWithValue(\"undeclared\", 0);",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "unreadable paths not recorded",
+      "file": "src/Premagentic.Core/Sources/Registry/IngestRuns.cs",
+      "old": "Value = JsonSerializer.Serialize(summary.FailureList.Select(f => new UnreadablePath(f.Path, f.Reason))),",
+      "new": "Value = \"[]\",",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "conformance issues not recorded",
+      "file": "src/Premagentic.Core/Sources/Registry/IngestRuns.cs",
+      "old": ": JsonSerializer.Serialize(report.Issues.Select(i => new ConformanceIssue(i.Path, i.Problem.ToString(), i.Detail))),",
+      "new": ": \"[]\",",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "a finished run can be failed afterwards",
+      "file": "src/Premagentic.Core/Sources/Registry/IngestRuns.cs",
+      "old": "outcome = 'failed', error = @error\n            WHERE tenant_id = @tenant AND id = @id AND outcome = 'running'",
+      "new": "outcome = 'failed', error = @error\n            WHERE tenant_id = @tenant AND id = @id",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "registered source loses its undeclared setting",
+      "file": "src/Premagentic.Core/Sources/Registry/SourceRegistry.cs",
+      "old": "UndeclaredAuthorshipIsMachine = UndeclaredIsMachine,",
+      "new": "UndeclaredAuthorshipIsMachine = false,",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "registered source loses bundle mode",
+      "file": "src/Premagentic.Core/Sources/Registry/SourceRegistry.cs",
+      "old": "        OkfBundle = OkfBundle,",
+      "new": "        OkfBundle = false,",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "a prefix inside another is allowed",
+      "file": "src/Premagentic.Core/Sources/Registry/SourceRegistry.cs",
+      "old": "        || b.StartsWith(a + \"/\", StringComparison.Ordinal);",
+      "new": "        ;",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "the whole index allowed beside another source",
+      "file": "src/Premagentic.Core/Sources/Registry/SourceRegistry.cs",
+      "old": "a.Length == 0 || b.Length == 0 || a == b",
+      "new": "a == b",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "source names compared case-sensitively",
+      "file": "src/Premagentic.Core/Sources/Registry/SourceRegistry.cs",
+      "old": "if (live.Any(s => s.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))",
+      "new": "if (live.Any(s => s.Name.Equals(name, StringComparison.Ordinal)))",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "source add not recorded",
+      "file": "src/Premagentic.Core/Sources/Registry/SourceRegistry.cs",
+      "old": "await ChangeRecord.AppendAsync(conn, tx, tenantId, AddKind, added.Name, null, Json(added), actor, ct);",
+      "new": "await Task.CompletedTask;",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    },
+    {
+      "name": "long form loses the undeclared flag",
+      "file": "src/Premagentic.Cli/Admin/SourcesCommands.cs",
+      "old": "UndeclaredAuthorshipIsMachine = args.Contains(\"--undeclared-as-machine\"),",
+      "new": "UndeclaredAuthorshipIsMachine = false,",
+      "filter": "FullyQualifiedName~Sources|FullyQualifiedName~Okf|FullyQualifiedName~TrustGate"
+    }
+  ]
+}

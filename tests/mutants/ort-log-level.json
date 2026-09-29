@@ -1,0 +1,20 @@
+{
+  "name": "ONNX Runtime's log level: the runtime's environment is created at log level ERROR",
+  "commit": "unrun",
+  "mutants": [
+    {
+      "name": "13a the runtime's environment is created at log level WARNING",
+      "file": "src/Premagentic.Core/Embeddings/OnnxTelemetry.cs",
+      "old": "logLevel = OrtLoggingLevel.ORT_LOGGING_LEVEL_ERROR",
+      "new": "logLevel = OrtLoggingLevel.ORT_LOGGING_LEVEL_WARNING",
+      "filter": "FullyQualifiedName~Premagentic.Tests.EmbeddingTelemetryTests"
+    },
+    {
+      "name": "13b the runtime's environment is left to Instance(), at the runtime's default level",
+      "file": "src/Premagentic.Core/Embeddings/OnnxTelemetry.cs",
+      "old": "if (OrtEnv.IsCreated) return OrtEnv.Instance();",
+      "new": "if (OrtEnv.IsCreated || !OrtEnv.IsCreated) return OrtEnv.Instance();",
+      "filter": "FullyQualifiedName~Premagentic.Tests.EmbeddingTelemetryTests"
+    }
+  ]
+}

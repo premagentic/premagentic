@@ -1,0 +1,48 @@
+{
+  "name": "What a source exposes and to whom",
+  "commit": "hand run, 2026-09-29",
+  "mutants": [
+    {
+      "name": "the denial is appended instead of put first, so an allow above it wins",
+      "file": "src/Premagentic.Core/Security/HostedHolds.cs",
+      "old": "        return AclSet.Create([denial, .. set.Entries.Where(e => e != denial)]);",
+      "new": "        return AclSet.Create([.. set.Entries.Where(e => e != denial), denial]);",
+      "filter": "FullyQualifiedName~ProfileTests|FullyQualifiedName~SourceExposureTests"
+    },
+    {
+      "name": "turning the switch back on leaves the hold in place",
+      "file": "src/Premagentic.Core/Security/AclStore.cs",
+      "old": "\"DELETE FROM prem_config.hosted_hold WHERE tenant_id = @tenant AND source = @source AND path_prefix = @prefix RETURNING legacy\"",
+      "new": "\"DELETE FROM prem_config.hosted_hold WHERE false AND tenant_id = @tenant AND source = @source AND path_prefix = @prefix RETURNING legacy\"",
+      "filter": "FullyQualifiedName~ProfileTests|FullyQualifiedName~SourceExposureTests"
+    },
+    {
+      "name": "a denial written by hand is reported as the switch being off",
+      "file": "src/Premagentic.Core/Sources/SourceExposure.cs",
+      "old": "            ? SourceExposureState.DeniedByHand",
+      "new": "            ? SourceExposureState.NeverLeaves",
+      "filter": "FullyQualifiedName~ProfileTests|FullyQualifiedName~SourceExposureTests"
+    },
+    {
+      "name": "the switch records a turn even when nothing differed",
+      "file": "src/Premagentic.Core/Sources/SourceExposureStore.cs",
+      "old": "                if (held || stamped > 0) Record(admin, pathPrefix, wasServed: held, mayBeServed, stamped);",
+      "new": "                Record(admin, pathPrefix, wasServed: held, mayBeServed, stamped);",
+      "filter": "FullyQualifiedName~ProfileTests|FullyQualifiedName~SourceExposureTests"
+    },
+    {
+      "name": "the switch leaves no trail in the change record",
+      "file": "src/Premagentic.Core/Sources/SourceExposureStore.cs",
+      "old": "                if (held || stamped > 0) Record(admin, pathPrefix, wasServed: held, mayBeServed, stamped);",
+      "new": "                if (false) Record(admin, pathPrefix, wasServed: held, mayBeServed, stamped);",
+      "filter": "FullyQualifiedName~ProfileTests|FullyQualifiedName~SourceExposureTests"
+    },
+    {
+      "name": "naming an owner leaves no trail in the change record",
+      "file": "src/Premagentic.Core/Sources/Registry/SourceRegistry.cs",
+      "old": "        await ChangeRecord.AppendAsync(conn, tx, tenantId, SetKind, after.Name, Json(before), Json(after), actor, ct);\n        await tx.CommitAsync(ct);\n        return (before, after, true);\n    }\n\n    /// <summary>\n    /// Removes a source from the registry.",
+      "new": "        await tx.CommitAsync(ct);\n        return (before, after, true);\n    }\n\n    /// <summary>\n    /// Removes a source from the registry.",
+      "filter": "FullyQualifiedName~ProfileTests|FullyQualifiedName~SourceExposureTests"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+text:       markdig.txt (upstream file, byte for byte)
+package:    Markdig 1.4.0
+nuspec:     license expression BSD-2-Clause
+repository: https://github.com/xoofx/markdig
+commit:     56e9c238584a44a169f174c881855c049768634c (the commit the package's nuspec names)
+file:       license.txt
+url:        https://raw.githubusercontent.com/xoofx/markdig/56e9c238584a44a169f174c881855c049768634c/license.txt
+read:       2026-09-24, read only, this one file
+sha256:     7423242b4ae72bccdf19a06cd3c20790df8519a164a08f37b31cb4a40034d827

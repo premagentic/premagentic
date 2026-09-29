@@ -1,0 +1,9 @@
+text:       npgsql.txt (upstream file, byte for byte)
+package:    Npgsql 10.0.3
+nuspec:     license expression PostgreSQL
+repository: https://github.com/npgsql/npgsql
+commit:     d3768398c17877b3a916c3c4d87e8e11698991fc (the commit the package's nuspec names)
+file:       LICENSE
+url:        https://raw.githubusercontent.com/npgsql/npgsql/d3768398c17877b3a916c3c4d87e8e11698991fc/LICENSE
+read:       2026-09-24, read only, this one file
+sha256:     2e1d9cc6ed4eb7fe6fa82091846c06b4f58571a2c3b54777db6baeca10dd2d74

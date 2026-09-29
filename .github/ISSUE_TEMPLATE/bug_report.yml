@@ -1,0 +1,70 @@
+name: Bug report
+description: Something PremAgentic did that it should not have, or did not do that it should have
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for the report. One reminder before you start: a document's text, a real path and a real person's name never go in an issue. Describe the shape of the thing, or invent a stand-in. If what you found lets a caller reach a document its groups and grants do not give it, stop here and use the private report under the repository's Security tab, as SECURITY.md says.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: printed
+    attributes:
+      label: The exact sentence the program printed
+      description: Copy it as printed. PremAgentic answers most failures with one sentence naming what is wrong, and that sentence is the fastest route to the cause. Leave out any password, token or connection string.
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: command-or-page
+    attributes:
+      label: The command or page
+      description: The prem command as typed, the HTTP route, the MCP tool, or the portal page.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: PremAgentic version
+      description: The commit you built from (git rev-parse --short HEAD), or the tagged release you installed.
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      description: Name and version, and whether PremAgentic runs as a service or from a console.
+    validations:
+      required: true
+  - type: input
+    id: postgresql
+    attributes:
+      label: PostgreSQL version
+      description: What SELECT version() prints, or the image tag if it runs in a container.
+    validations:
+      required: true
+  - type: dropdown
+    id: extension
+    attributes:
+      label: Was an extension loaded?
+      description: What prem extensions list says under Loaded.
+      options:
+        - "No"
+        - "Yes, one I wrote"
+        - "Yes, one from somewhere else"
+        - "I do not know"
+    validations:
+      required: true
+  - type: checkboxes
+    id: content
+    attributes:
+      label: Nothing from a real corpus
+      options:
+        - label: This report holds no document text, no real path and no real person's name.
+          required: true

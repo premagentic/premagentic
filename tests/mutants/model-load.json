@@ -1,0 +1,41 @@
+{
+  "name": "model load: a model or runtime that cannot be loaded refuses in one sentence",
+  "commit": "hand run, 2026-09-27",
+  "mutants": [
+    {
+      "name": "12b the runtime's load failure is not caught",
+      "file": "src/Premagentic.Core/Embeddings/LocalOnnxEmbeddingProvider.cs",
+      "old": "        catch (Exception ex) when (ModelLoadFailure.IsRuntimeLoadFailure(ex))\n",
+      "new": "        catch (Exception ex) when (ex is null)\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLoadFailureTests"
+    },
+    {
+      "name": "12c the model file's load failure is not caught",
+      "file": "src/Premagentic.Core/Embeddings/LocalOnnxEmbeddingProvider.cs",
+      "old": "        catch (OnnxRuntimeException ex)\n",
+      "new": "        catch (OnnxRuntimeException ex) when (ex is null)\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLoadFailureTests"
+    },
+    {
+      "name": "12d the runtime files not in bin are not named",
+      "file": "src/Premagentic.Core/Embeddings/ModelLoadFailure.cs",
+      "old": "(missing.Length > 0 ? $\"Not in {binDir}: {string.Join(\", \", missing)}. \" : \"\") +",
+      "new": "\"\" +",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLoadFailureTests"
+    },
+    {
+      "name": "12e the Windows remedy is blank",
+      "file": "src/Premagentic.Core/Embeddings/ModelLoadFailure.cs",
+      "old": "               \"Reinstall Premagentic from its archive: on Windows, bin\\\\ holds onnxruntime.dll and the four Visual C++ \" +\n               \"runtime files msvcp140.dll, msvcp140_1.dll, vcruntime140.dll and vcruntime140_1.dll.\";",
+      "new": "               \"\";",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLoadFailureTests"
+    },
+    {
+      "name": "12f setup records a model that cannot be loaded under setup, not health",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "        catch (StartupRefusedException refused)\n        {\n            // A provider that cannot be made,",
+      "new": "        catch (StartupRefusedException refused) when (refused is null)\n        {\n            // A provider that cannot be made,",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupEngineTests.A_model_that_cannot_be_loaded_is_recorded_as_the_failed_health_check_with_its_sentence"
+    }
+  ]
+}

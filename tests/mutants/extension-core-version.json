@@ -1,0 +1,20 @@
+{
+  "name": "An extension built against a newer or an older contracts library",
+  "commit": "hand run, 2026-09-25",
+  "mutants": [
+    {
+      "name": "core version: the comparison flipped, so an older request is refused and a newer one gets the host",
+      "file": "src/Premagentic.Core/Extensions/ExtensionLoadContext.cs",
+      "old": "Contracts.GetName().Version is { } have && wanted > have)",
+      "new": "Contracts.GetName().Version is { } have && wanted < have)",
+      "filter": "FullyQualifiedName~ExtensionCoreVersionTests"
+    },
+    {
+      "name": "core version: the check removed, so the runtime decides by version again",
+      "file": "src/Premagentic.Core/Extensions/ExtensionLoadContext.cs",
+      "old": "        if (string.Equals(name.Name, Contracts.GetName().Name, StringComparison.OrdinalIgnoreCase))\n        {",
+      "new": "        if (false)\n        {",
+      "filter": "FullyQualifiedName~ExtensionCoreVersionTests"
+    }
+  ]
+}

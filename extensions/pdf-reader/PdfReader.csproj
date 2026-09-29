@@ -1,0 +1,63 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <AssemblyName>Premagentic.PdfReader</AssemblyName>
+    <RootNamespace>Premagentic.Extensions.Pdf</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Premagentic.Readers.Tests" />
+  </ItemGroup>
+
+  <!-- The contracts come from the process that loads this. PdfPig is this
+       extension's own: exactly this id and version, and never the lookalike
+       UglyToad.PdfPig, which a test refuses. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Premagentic.Core\Premagentic.Core.csproj" Private="false" />
+    <PackageReference Include="PdfPig" Version="0.1.16" />
+    <Compile Include="..\shared\ReaderBytes.cs" Link="ReaderBytes.cs" />
+    <Compile Include="..\shared\ReaderMarkdown.cs" Link="ReaderMarkdown.cs" />
+    <Compile Include="..\shared\Sizes.cs" Link="Sizes.cs" />
+  </ItemGroup>
+
+  <!-- A library does not copy its packages beside itself, and the core's
+       packages must not be copied at all: the process already has them. So
+       PdfPig's assemblies alone are copied, by package id, and listed in the
+       manifest with their hashes, which are not known until they exist. -->
+  <Target Name="WriteExtensionManifest" AfterTargets="Build">
+    <ItemGroup>
+      <OwnAssembly Include="@(RuntimeCopyLocalItems)" Condition="'%(RuntimeCopyLocalItems.NuGetPackageId)' == 'PdfPig' And '%(Extension)' == '.dll'" />
+    </ItemGroup>
+    <Error Condition="'@(OwnAssembly)' == ''" Text="No PdfPig assembly was resolved, so the extension would load without the library it needs." />
+    <Copy SourceFiles="@(OwnAssembly)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <ItemGroup>
+      <CopiedAssembly Include="@(OwnAssembly->'$(TargetDir)%(Filename)%(Extension)')" />
+    </ItemGroup>
+    <GetFileHash Files="$(TargetPath)" Algorithm="SHA256" HashEncoding="hex">
+      <Output TaskParameter="Items" ItemName="HashedAssembly" />
+    </GetFileHash>
+    <GetFileHash Files="@(CopiedAssembly)" Algorithm="SHA256" HashEncoding="hex">
+      <Output TaskParameter="Items" ItemName="HashedLibrary" />
+    </GetFileHash>
+    <PropertyGroup>
+      <AssemblyHash>@(HashedAssembly->'%(FileHash)')</AssemblyHash>
+      <FileEntries>@(HashedLibrary->'    { "file": "%(Filename)%(Extension)", "sha256": "%(FileHash)" }', ',%0A')</FileEntries>
+      <ManifestText>{
+  "name": "pdf-reader",
+  "version": "$(Version)",
+  "assemblyFile": "$(TargetFileName)",
+  "sha256": "$(AssemblyHash)",
+  "files": [
+$(FileEntries)
+  ],
+  "seams": { "reader": 2 }
+}</ManifestText>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(TargetDir)extension.json" Lines="$(ManifestText)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+  </Target>
+
+</Project>

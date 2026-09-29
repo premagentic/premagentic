@@ -1,0 +1,111 @@
+{
+  "name": "the access gate, the permitted sets, the folder rules, ingest, scopes, the resolver and the evaluation's names",
+  "commit": "hand run, 2026-09-25",
+  "mutants": [
+    {
+      "name": "gate removed",
+      "file": "src/Premagentic.Core/Retrieval/Gates/AccessGate.cs",
+      "old": "\"(@unrestricted OR d.acl_set_id = ANY(@permitted))\"",
+      "new": "\"(@unrestricted OR TRUE OR d.acl_set_id = ANY(@permitted))\"",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AccessGateTests.|FullyQualifiedName~Premagentic.Tests.IdentityGateTests.|FullyQualifiedName~Premagentic.Tests.DatastoreConcurrencyTests.|FullyQualifiedName~Premagentic.Tests.DatastoreVectorTests."
+    },
+    {
+      "name": "gate replaced by any set",
+      "file": "src/Premagentic.Core/Retrieval/Gates/AccessGate.cs",
+      "old": "\"(@unrestricted OR d.acl_set_id = ANY(@permitted))\"",
+      "new": "\"(@unrestricted OR d.acl_set_id IS NOT NULL OR d.acl_set_id = ANY(@permitted))\"",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AccessGateTests.|FullyQualifiedName~Premagentic.Tests.IdentityGateTests.|FullyQualifiedName~Premagentic.Tests.DatastoreConcurrencyTests.|FullyQualifiedName~Premagentic.Tests.DatastoreVectorTests."
+    },
+    {
+      "name": "permitted reader permits every list",
+      "file": "src/Premagentic.Core/Security/PermittedSetReader.cs",
+      "old": "PermittedSets.ResolveWith(sets, scope.CanRead)",
+      "new": "PermittedSets.ResolveWith(sets, _ => true)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AccessGateTests.|FullyQualifiedName~Premagentic.Tests.IdentityGateTests."
+    },
+    {
+      "name": "rule change also moves documents under a longer rule",
+      "file": "src/Premagentic.Core/Security/AclStore.cs",
+      "old": "AND length(r.path_prefix) > length(@prefix)",
+      "new": "AND false",
+      "filter": "FullyQualifiedName~Premagentic.Tests.IdentityGateTests."
+    },
+    {
+      "name": "rule change also moves connector-decided documents",
+      "file": "src/Premagentic.Core/Security/AclStore.cs",
+      "old": "              AND d.acl_from_rule\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.IdentityGateTests."
+    },
+    {
+      "name": "removed rule leaves its folder readable by everyone",
+      "file": "src/Premagentic.Core/Security/AclStore.cs",
+      "old": "var inherited = pathPrefix.Length == 0 ? AclSet.Empty : remaining.AclFor(source, pathPrefix);",
+      "new": "var inherited = AclSet.Of(AclEntry.Allow(Principal.Everyone));",
+      "filter": "FullyQualifiedName~Premagentic.Tests.IdentityGateTests."
+    },
+    {
+      "name": "folder rules read as allow everyone",
+      "file": "src/Premagentic.Core/Security/AccessDecision.cs",
+      "old": "return new DocumentAcl(rules.AclFor(source, path), FromFolderRule: true);",
+      "new": "return new DocumentAcl(AclSet.Of(AclEntry.Allow(Principal.Everyone)), FromFolderRule: true);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AclAccessSurfaceTests."
+    },
+    {
+      "name": "ingest ignores a changed access list",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.cs",
+      "old": "              AND d.acl_set_id = @aclSet\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AccessGateTests."
+    },
+    {
+      "name": "a malformed host principal is dropped instead of fatal",
+      "file": "src/Premagentic.Core/Security/Access.cs",
+      "old": "var holds = PrincipalSet.TryParse(given, out var parsed)\n            ? PrincipalSet.From(parsed.Append(Principal.Everyone))\n            : PrincipalSet.Empty;",
+      "new": "var holds = PrincipalSet.From(given.Select(g => Principal.TryParse(g, out var p) ? p : null).OfType<Principal>().Append(Principal.Everyone));",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AclAccessSurfaceTests."
+    },
+    {
+      "name": "a refused caller still holds everyone",
+      "file": "src/Premagentic.Core/Security/Access.cs",
+      "old": "return new AccessScope([], PrincipalSet.Empty, unrestricted: false,\n                \"refused:\"",
+      "new": "return new AccessScope([], PrincipalSet.Of(Principal.Everyone), unrestricted: false,\n                \"refused:\"",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AclAccessSurfaceTests.|FullyQualifiedName~Premagentic.Tests.IdentityGateTests."
+    },
+    {
+      "name": "an unresolved scope reads as no lists",
+      "file": "src/Premagentic.Core/Retrieval/Gates/AccessGate.cs",
+      "old": ": throw new InvalidOperationException(",
+      "new": ": Array.Empty<long>() ?? throw new InvalidOperationException(",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AclAccessSurfaceTests."
+    },
+    {
+      "name": "a service agent outlives a disabled owner",
+      "file": "src/Premagentic.Core/Identity/CallerResolver.cs",
+      "old": "if (owner.Disabled) return",
+      "new": "if (owner.Disabled && agent.Mode == AgentMode.ActsForUser) return",
+      "filter": "FullyQualifiedName~Premagentic.Tests.IdentityCallerResolverTests.|FullyQualifiedName~Premagentic.Tests.IdentityGateTests."
+    },
+    {
+      "name": "token use recorded even when refused",
+      "file": "src/Premagentic.Core/Identity/CallerAccess.cs",
+      "old": "if (caller.IsResolved && caller.TokenId is { } tokenId)",
+      "new": "if (caller.TokenId is { } tokenId)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.IdentityGateTests."
+    },
+    {
+      "name": "eval passes raw names through untranslated",
+      "file": "src/Premagentic.Core/Evaluation/EvalRunner.cs",
+      "old": "principals.Add((await names.ToPrincipalAsync(name)).ToString());",
+      "new": "principals.Add(name); await Task.CompletedTask;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AdminEvalGoldenSetTests."
+    },
+    {
+      "name": "eval runs an unresolved name as a caller holding nothing",
+      "file": "src/Premagentic.Core/Evaluation/EvalRunner.cs",
+      "old": "return ([], $\"'as' name '{name}' does not resolve: {ex.Message}\");",
+      "new": "_ = ex; return ([], null);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AdminEvalGoldenSetTests."
+    }
+  ]
+}

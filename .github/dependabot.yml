@@ -1,0 +1,19 @@
+# Dependabot: a pinned action or package that picks up a fix or an advisory
+# arrives as a pull request, which CI then proves. Actions pinned to commit
+# SHAs get no alerts without this.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    ignore:
+      # ONNX Runtime stays at 1.27.0 until a newer one is measured and proven
+      # here; the Known state page says why.
+      - dependency-name: "Microsoft.ML.OnnxRuntime*"
+        versions: [">1.27.0"]

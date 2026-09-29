@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <AssemblyName>InertMapper</AssemblyName>
+    <RootNamespace>Premagentic.Tests.Extensions</RootNamespace>
+  </PropertyGroup>
+
+  <!-- A test extension, never a sample: a deployment has one principal mapper,
+       so a sample that carried one would refuse whichever came second, and a
+       sample is a template people copy. The contracts come from the process
+       that loads this; see the sentence-chunker sample for Private="false". -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Premagentic.Core\Premagentic.Core.csproj" Private="false" />
+  </ItemGroup>
+
+  <!-- A principal mapper is a seam like any other, so the manifest declares
+       it: an older PremAgentic then refuses this by name. -->
+  <Target Name="WriteExtensionManifest" AfterTargets="Build">
+    <GetFileHash Files="$(TargetPath)" Algorithm="SHA256" HashEncoding="hex">
+      <Output TaskParameter="Items" ItemName="HashedAssembly" />
+    </GetFileHash>
+    <PropertyGroup>
+      <AssemblyHash>@(HashedAssembly->'%(FileHash)')</AssemblyHash>
+      <ManifestText>{
+  "name": "inert-mapper",
+  "version": "$(Version)",
+  "assemblyFile": "$(TargetFileName)",
+  "sha256": "$(AssemblyHash)",
+  "seams": { "principals": 1 }
+}</ManifestText>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(TargetDir)extension.json" Lines="$(ManifestText)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+  </Target>
+
+</Project>

@@ -1,0 +1,69 @@
+{
+  "name": "the forms that change nothing, the backfill, the migration runner, the renamed labels, the groups remove refusal and the earlier-revision client",
+  "commit": "hand run, 2026-09-25",
+  "mutants": [
+    {
+      "name": "the portal user form writes without comparing first",
+      "file": "src/Premagentic.Portal/Pages/UserPages.cs",
+      "old": "                || current.Disabled == !enable",
+      "new": "                || false",
+      "filter": "FullyQualifiedName~PortalUserCompareFirstTests"
+    },
+    {
+      "name": "0068 backfills the agents nobody connected instead",
+      "file": "src/Premagentic.Core/Storage/Migrations/0068_agent_created_by.sql",
+      "old": "WHERE assistant_kind IS NOT NULL;",
+      "new": "WHERE assistant_kind IS NULL;",
+      "filter": "FullyQualifiedName~MigrationBackfillTests"
+    },
+    {
+      "name": "migrating to a version does not stop there",
+      "file": "tests/Premagentic.Tests/MigrationBackfillTests.cs",
+      "old": "        var upto = Migration.LoadEmbedded().Where(m => m.Version <= version).ToArray();",
+      "new": "        var upto = Migration.LoadEmbedded().ToArray();",
+      "filter": "FullyQualifiedName~MigrationBackfillTests"
+    },
+    {
+      "name": "the source state says it never leaves the network again",
+      "file": "src/Premagentic.Core/Sources/SourceExposure.cs",
+      "old": "        SourceExposureState.NeverLeaves => \"never served to hosted-model agents\",",
+      "new": "        SourceExposureState.NeverLeaves => \"never leaves the network\",",
+      "filter": "FullyQualifiedName~PortalAuditHealthAndSourcesTests"
+    },
+    {
+      "name": "the usage figure says left the network again",
+      "file": "src/Premagentic.Portal/Pages/UsagePages.cs",
+      "old": "{Figure(\"Passages served to hosted-model agents\",",
+      "new": "{Figure(\"Passages that left the network\",",
+      "filter": "FullyQualifiedName~PortalConnectUsageTests"
+    },
+    {
+      "name": "the audit row marker says left the network again",
+      "file": "src/Premagentic.Portal/Pages/AuditPages.cs",
+      "old": "M.H($\"<strong>to a hosted-model agent</strong>\")",
+      "new": "M.H($\"<strong>left the network</strong>\")",
+      "filter": "FullyQualifiedName~PortalAuditHealthAndSourcesTests"
+    },
+    {
+      "name": "groups remove removes a group a rule names without --force",
+      "file": "src/Premagentic.Cli/Admin/AdminCommands.cs",
+      "old": "        if (naming.Count > 0 && !args.Contains(\"--force\"))",
+      "new": "        if (false && !args.Contains(\"--force\"))",
+      "filter": "FullyQualifiedName~CliGroupRemoveRefusalTests"
+    },
+    {
+      "name": "the store writes an agent already in the state asked for",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "            WHERE tenant_id = @tenant AND id = @id AND deleted_at IS NULL AND disabled <> @value",
+      "new": "            WHERE tenant_id = @tenant AND id = @id AND deleted_at IS NULL",
+      "filter": "FullyQualifiedName~PortalAgentCompareFirstTests"
+    },
+    {
+      "name": "a legacy initialize is answered without the instructions",
+      "file": "src/Premagentic.Api/Callers/CallerServices.cs",
+      "old": "                    server.ServerInstructions = http.RequestServices.GetRequiredService<McpInstructionsState>().Current?.Text;",
+      "new": "                    server.ServerInstructions = null;",
+      "filter": "FullyQualifiedName~A_client_pinned_to_2025_11_25"
+    }
+  ]
+}

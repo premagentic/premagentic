@@ -1,0 +1,10 @@
+text:       modelcontextprotocol.txt (upstream file, byte for byte)
+package:    ModelContextProtocol, ModelContextProtocol.Core and ModelContextProtocol.AspNetCore 2.2.0
+nuspec:     license expression Apache-2.0
+repository: https://github.com/modelcontextprotocol/csharp-sdk
+commit:     6fa3825973949a9c4f0cd8af344e15a8db09dc35 (the commit the package's nuspec names)
+file:       LICENSE
+url:        https://raw.githubusercontent.com/modelcontextprotocol/csharp-sdk/6fa3825973949a9c4f0cd8af344e15a8db09dc35/LICENSE
+read:       2026-09-24, read only, this one file
+sha256:     7c6a686d2b34b86ad8c726e0ac4d76903b525f251d73e617f8db3879fa8f11fc
+note:       The upstream file is a composite: Apache-2.0 for contributions with relicensing consent, the MIT License for contributions without it, and a CC-BY-4.0 mention for documentation. The nuspec says Apache-2.0 alone; the file is shipped whole because it covers both. That was decided on 2026-09-24.

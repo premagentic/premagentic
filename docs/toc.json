@@ -1,0 +1,52 @@
+{
+  "sections": [
+    {
+      "title": "Start",
+      "pages": [
+        { "slug": "what-it-is", "title": "What PremAgentic is", "description": "What PremAgentic does, the claim it makes about the network and how that claim is tested, what setup needs once, and what it does not do." },
+        { "slug": "getting-started", "title": "Getting started", "description": "From a fresh clone to a cited answer, with the access gate proven, in the first ten minutes." },
+        { "slug": "connect-an-assistant", "title": "Connect an assistant", "description": "How an assistant connects over MCP with an agent token, what it can reach, and the portal's connect page where a person does it for themself." }
+      ]
+    },
+    {
+      "title": "How it decides",
+      "pages": [
+        { "slug": "access", "title": "Access", "description": "How who may read a document is decided: ordered access lists and folder rules, agents and where their models run, and the second line of access control in the database." },
+        { "slug": "lifecycle-trust-freshness", "title": "Lifecycle, trust and freshness", "description": "The lifecycle, trust and freshness gates, Open Knowledge Format frontmatter, undeclared authorship in a bundle, and the review queue." },
+        { "slug": "administration", "title": "Administration", "description": "The administration portal, every setting in one catalog, the change record, the audit trail with its usage page, self-serve agents, reminders, with screenshots." }
+      ]
+    },
+    {
+      "title": "Operate",
+      "pages": [
+        { "slug": "installing", "title": "Installing", "description": "Installing on a PostgreSQL you already run, the roles and files setup makes, HTTPS from the first start, the bundled PostgreSQL on Windows, and installing from an archive built from the source." },
+        { "slug": "running", "title": "Running it", "description": "Running the API as a Windows service or a systemd unit, and what to set behind a reverse proxy." },
+        { "slug": "upgrading-and-removing", "title": "Upgrading and removing", "description": "How to upgrade and roll back, and how prem remove takes away the services with or without the data." },
+        { "slug": "configuration", "title": "Configuration", "description": "The environment variables every host reads, their defaults, and what switching the embedding provider means." },
+        { "slug": "authorization-flow", "title": "The authorization flow", "description": "The MCP authorization flow, built and off by default: what turning it on takes, what off means, how an assistant registers and a person approves it, how a grant ends, and the settings." },
+        { "slug": "storage", "title": "Storage", "description": "Plain PostgreSQL with no extension, the two schemas and their promises, migrations, the audit trail, and the vectors held in memory." }
+      ]
+    },
+    {
+      "title": "Extend",
+      "pages": [
+        { "slug": "sources-readers-chunkers", "title": "Sources, readers and chunkers", "description": "Registering a folder as a source with its owner and hosted-model switch, the readers that read its files and the chunkers that cut them, and what a run did not read." },
+        { "slug": "extensions", "title": "Extensions", "description": "How a reader, a chunker, an embedding provider or a way of signing in is added from a folder, allowed by hash with every file it loads, and refused with a reason." },
+        { "slug": "writing-an-extension", "title": "Writing an extension", "description": "A walkthrough for writing an extension, proving it with the conformance kit, and allowing it in a deployment." },
+        { "slug": "connectors", "title": "Connectors", "description": "The IDocumentSource extension point and the filesystem reference connector." },
+        { "slug": "profiles", "title": "Profiles", "description": "A folder of plain files carrying a whole configuration, validated as a whole, applied as a whole, and compared with a deployment." },
+        { "slug": "tuning-and-the-golden-set", "title": "Tuning and the golden set", "description": "The retrieval settings that are per deployment, how to judge a change with the golden set, and why the golden set is the deliverable." }
+      ]
+    },
+    {
+      "title": "Reference",
+      "pages": [
+        { "slug": "surfaces", "title": "Surfaces", "description": "The projects in the repository, the three ways a caller reaches the HTTP surface, the portal's pages, agents over MCP, and your own words on the tools." },
+        { "slug": "cli", "title": "The prem command", "description": "Every prem command with its arguments and options, as the program prints them." },
+        { "slug": "benchmark", "title": "Measuring it yourself", "description": "The benchmark in the repository: what it times, how to run it on a throwaway database, and why every number depends on the machine." },
+        { "slug": "status", "title": "Known state", "description": "What is built and tested, how the guards were checked, what the clean-install script and the archive proofs show, and what is not built." },
+        { "slug": "roadmap", "title": "Roadmap", "description": "What comes next for PremAgentic." }
+      ]
+    }
+  ]
+}

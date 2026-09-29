@@ -1,0 +1,27 @@
+{
+  "name": "vocabulary load: a vocabulary that cannot be loaded refuses in one sentence",
+  "commit": "hand run, 2026-09-27",
+  "mutants": [
+    {
+      "name": "14a the vocabulary's load failure is not caught",
+      "file": "src/Premagentic.Core/Embeddings/LocalOnnxEmbeddingProvider.cs",
+      "old": "when (ModelLoadFailure.IsVocabularyLoadFailure(ex))",
+      "new": "when (ex is null)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLoadFailureTests"
+    },
+    {
+      "name": "14b the vocabulary is refused with the model file's sentence",
+      "file": "src/Premagentic.Core/Embeddings/LocalOnnxEmbeddingProvider.cs",
+      "old": "Sentence(ModelLoadStage.Vocabulary, ex, modelDir,",
+      "new": "Sentence(ModelLoadStage.ModelFile, ex, modelDir,",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLoadFailureTests"
+    },
+    {
+      "name": "14c the tokenizer's refusal of the vocabulary does not count as a load failure",
+      "file": "src/Premagentic.Core/Embeddings/ModelLoadFailure.cs",
+      "old": "ex is ArgumentException or IOException or UnauthorizedAccessException",
+      "new": "ex is IOException or UnauthorizedAccessException",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLoadFailureTests"
+    }
+  ]
+}

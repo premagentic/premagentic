@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/premagentic/premagentic/discussions
+    about: Ask how something works, or float an idea that is not yet a concrete proposal.
+  - name: Report a vulnerability
+    url: https://github.com/premagentic/premagentic/security/policy
+    about: A way for a caller to reach what its groups and grants do not give it, or anything else SECURITY.md lists. Private, and always answered.

@@ -1,0 +1,17 @@
+# Which license text covers which package.
+#
+# One line per package id, lower case: the id, a space, the text file in this
+# folder. build.sh takes a package's own license file first and reads this
+# folder only for a package that ships none. A package that has neither is
+# refused. The Microsoft.Extensions.* and System.* packages built from the
+# .NET repository are covered by the LICENSE.TXT of the .NET runtime pack the
+# archive redistributes, and are not listed here.
+markdig markdig.txt
+modelcontextprotocol modelcontextprotocol.txt
+modelcontextprotocol.core modelcontextprotocol.txt
+modelcontextprotocol.aspnetcore modelcontextprotocol.txt
+npgsql npgsql.txt
+yamldotnet yamldotnet.txt
+google.protobuf google.protobuf.txt
+microsoft.extensions.ai.abstractions microsoft.extensions.ai.abstractions.txt
+pdfpig pdfpig.txt

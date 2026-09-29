@@ -1,0 +1,76 @@
+{
+  "name": "the extension host: manifests, hashes, seams and refusals",
+  "commit": "hand run, 2026-09-25",
+  "mutants": [
+    {
+      "name": "the hash check compares the manifest with itself",
+      "file": "src/Premagentic.Core/Extensions/ExtensionHost.cs",
+      "old": "        if (!sha256.Equals(manifest.Sha256, StringComparison.OrdinalIgnoreCase))",
+      "new": "        if (!manifest.Sha256.Equals(manifest.Sha256, StringComparison.OrdinalIgnoreCase))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionHostTests.An_assembly_that_does_not_hash_to_its_manifest"
+    },
+    {
+      "name": "the allow list is not consulted",
+      "file": "src/Premagentic.Core/Extensions/ExtensionHost.cs",
+      "old": "        if (!allowed.Any(a =>",
+      "new": "        if (false && !allowed.Any(a =>",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionHostTests.An_extension_nobody_allowed_is_refused"
+    },
+    {
+      "name": "every seam version is met",
+      "file": "src/Premagentic.Core/Extensions/ExtensionHost.cs",
+      "old": "        if (manifest.SeamTooNew(SeamVersions.Of) is { } tooNew)",
+      "new": "        if (manifest.SeamTooNew(_ => int.MaxValue) is { } tooNew)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionHostTests.A_seam_this_version_does_not_offer_is_refused"
+    },
+    {
+      "name": "a seam this version does not have is treated as met",
+      "file": "src/Premagentic.Core/Extensions/ExtensionManifest.cs",
+      "old": "            if (offered is null)\n                return $\"It was built for the \\\"{Clip(seam)}\\\" seam, which this version does not have.\";",
+      "new": "            if (offered is null)\n                continue;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionHostTests.A_seam_this_version_does_not_offer_is_refused"
+    },
+    {
+      "name": "the manifest may name an assembly outside its own folder",
+      "file": "src/Premagentic.Core/Extensions/ExtensionManifest.cs",
+      "old": "        file.Length > 0 && file == Path.GetFileName(file) && file is not (\".\" or \"..\")\n        && file.IndexOfAny(['/', '\\\\', ':']) < 0;",
+      "new": "        file.Length > 0;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionHostTests.An_assembly_outside_the_extension_folder"
+    },
+    {
+      "name": "the environment beats the extensions.folder setting",
+      "file": "src/Premagentic.Core/Extensions/ExtensionSettings.cs",
+      "old": "        if (stored is { } value && TryReadFolder(value, out var folder, out problem)) return folder;\n        return string.IsNullOrWhiteSpace(environment) ? null : environment;",
+      "new": "        if (!string.IsNullOrWhiteSpace(environment)) return environment;\n        if (stored is { } value && TryReadFolder(value, out var folder, out problem)) return folder;\n        return null;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionSettingsTests.The_setting_says_where_extensions_are"
+    },
+    {
+      "name": "an allow list entry's hash is not measured",
+      "file": "src/Premagentic.Core/Extensions/ExtensionSettings.cs",
+      "old": "            if (sha256 is null || sha256.Length != HexDigits || !sha256.All(char.IsAsciiHexDigit))",
+      "new": "            if (sha256 is null || !sha256.All(char.IsAsciiHexDigit))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionSettingsTests.An_allow_list_that_cannot_be_used"
+    },
+    {
+      "name": "composition: the API keeps its own built-in chunkers",
+      "file": "src/Premagentic.Api/Program.cs",
+      "old": "builder.Services.AddSingleton(sp => sp.GetRequiredService<ExtensionHost>().Chunkers);",
+      "new": "builder.Services.AddSingleton(_ => Premagentic.Core.Ingestion.ChunkerRegistry.BuiltIn);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ApiExtensionsTests.The_api_serves_the_chunkers_an_allowed_extension_brought"
+    },
+    {
+      "name": "composition: the CLI keeps its own built-in chunkers",
+      "file": "src/Premagentic.Cli/Program.cs",
+      "old": "if (args[0] == SourcesCommands.Verb) return await SourcesCommands.RunAsync(args, db, tenantId, extensions.Chunkers);",
+      "new": "if (args[0] == SourcesCommands.Verb) return await SourcesCommands.RunAsync(args, db, tenantId);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionsCommandTests.An_extension_is_refused_until_it_is_allowed"
+    },
+    {
+      "name": "seams: an extension may take a built-in embedding provider name",
+      "file": "src/Premagentic.Core/Extensions/ExtensionRegistrations.cs",
+      "old": "        if (EmbeddingProviderFactory.BuiltInNames.Contains(name, StringComparer.OrdinalIgnoreCase))",
+      "new": "        if (false && EmbeddingProviderFactory.BuiltInNames.Contains(name, StringComparer.OrdinalIgnoreCase))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionRegistrationsTests.An_extension_cannot_register_an_embedding_provider"
+    }
+  ]
+}

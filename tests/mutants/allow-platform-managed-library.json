@@ -1,0 +1,13 @@
+{
+  "name": "the extension host: the allow refuses a managed library built for one platform",
+  "commit": "hand run, 2026-09-26",
+  "mutants": [
+    {
+      "name": "11p the allow takes a managed library built for one platform",
+      "file": "src/Premagentic.Core/Extensions/ExtensionAllowList.cs",
+      "old": "                if (ExtensionManifest.IsPlatformManagedPath(relative))\n                    throw new ArgumentException(ExtensionManifest.PlatformManagedRefusal(relative));\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionsCommandTests"
+    }
+  ]
+}

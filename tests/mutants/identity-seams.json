@@ -1,0 +1,246 @@
+{
+  "name": "where an agent's model runs, the sign-in adapter seam, the identity mapping, the tool text and the retention",
+  "commit": "hand run, 2026-09-26",
+  "mutants": [
+    {
+      "name": "registering a hosted agent does not join it to the reserved group",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "                SELECT @tenant, c.id, {ReservedGroupId}\n                FROM created c WHERE @model = 'hosted')",
+      "new": "                SELECT @tenant, c.id, {ReservedGroupId}\n                FROM created c WHERE false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLocation"
+    },
+    {
+      "name": "moving an agent to a hosted model does not join it to the reserved group",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "                SELECT @tenant, c.id, {ReservedGroupId}\n                FROM changed c WHERE @model = 'hosted'\n                ON CONFLICT DO NOTHING),",
+      "new": "                SELECT @tenant, c.id, {ReservedGroupId}\n                FROM changed c WHERE false\n                ON CONFLICT DO NOTHING),",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLocation"
+    },
+    {
+      "name": "moving an agent to a local model leaves it in the reserved group",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "                WHERE @model <> 'hosted' AND a.tenant_id = @tenant AND a.agent_id = c.id AND a.group_id = g.id",
+      "new": "                WHERE false AND a.tenant_id = @tenant AND a.agent_id = c.id AND a.group_id = g.id",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLocation"
+    },
+    {
+      "name": "the commands do not recognize a system group",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "WHERE g.tenant_id = @tenant AND g.id = @id AND g.system_key IS NOT NULL\");",
+      "new": "WHERE g.tenant_id = @tenant AND g.id = @id AND g.system_key IS NULL\");",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLocation"
+    },
+    {
+      "name": "the database lets a system group be renamed",
+      "file": "src/Premagentic.Core/Storage/Migrations/0040_agent_model_location.sql",
+      "old": "    IF NEW.name <> OLD.name THEN",
+      "new": "    IF false THEN",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLocation"
+    },
+    {
+      "name": "the database lets a system group be deleted",
+      "file": "src/Premagentic.Core/Storage/Migrations/0040_agent_model_location.sql",
+      "old": "    IF NEW.deleted_at IS NOT NULL AND OLD.deleted_at IS NULL THEN",
+      "new": "    IF false THEN",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLocation"
+    },
+    {
+      "name": "the resolver forgets the system groups an agent is in",
+      "file": "src/Premagentic.Core/Identity/CallerResolver.cs",
+      "old": "        var systemGroups = (await directory.SystemGroupsOfAgentAsync(agentId, ct))\n            .Select(g => Principal.Group(IdText(g.Id)))\n            .ToArray();",
+      "new": "        var systemGroups = Array.Empty<Principal>();",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLocation"
+    },
+    {
+      "name": "a service agent HOLDS the reserved group instead of being narrowed by it",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "              AND g.system_key IS NULL\n            ORDER BY g.name",
+      "new": "              AND true\n            ORDER BY g.name",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLocation"
+    },
+    {
+      "name": "the audit row never says where the model ran",
+      "file": "src/Premagentic.Core/Retrieval/HybridSearch.cs",
+      "old": "            options.Scope.ModelLocation is { } where ? Identity.ModelLocations.Text(where) : DBNull.Value);",
+      "new": "            DBNull.Value);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLocation"
+    },
+    {
+      "name": "a person's own read is recorded as having left the network",
+      "file": "src/Premagentic.Core/Security/Access.cs",
+      "old": "            caller.Agent?.ModelLocation ?? Identity.ModelLocation.Local);",
+      "new": "            caller.Agent?.ModelLocation ?? Identity.ModelLocation.Hosted);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLocation"
+    },
+    {
+      "name": "an agent registered before the model location existed is assumed local",
+      "file": "src/Premagentic.Core/Storage/Migrations/0040_agent_model_location.sql",
+      "old": "    ADD COLUMN model_location TEXT NOT NULL DEFAULT 'hosted',",
+      "new": "    ADD COLUMN model_location TEXT NOT NULL DEFAULT 'local',",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLocation"
+    },
+    {
+      "name": "the migration marks old agents hosted but leaves them out of the group",
+      "file": "src/Premagentic.Core/Storage/Migrations/0040_agent_model_location.sql",
+      "old": "WHERE a.model_location = 'hosted' AND a.deleted_at IS NULL",
+      "new": "WHERE false AND a.deleted_at IS NULL",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLocation"
+    },
+    {
+      "name": "a tenant made after the migration gets no reserved group",
+      "file": "src/Premagentic.Core/Storage/PremagenticDatabase.cs",
+      "old": "                SELECT t.id, @hostedName, @hostedKey FROM tenant t",
+      "new": "                SELECT t.id, @hostedName, @hostedKey FROM tenant t WHERE false",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLocation"
+    },
+    {
+      "name": "the command line chooses local when nobody said",
+      "file": "src/Premagentic.Cli/Admin/AdminCommands.cs",
+      "old": "        if (ModelLocations.TryParse(CliArgs.Value(args, \"--model\"), out var model)) return model;\n        throw new ArgumentException(\n            \"--model is local (the model runs inside your network) or hosted (it runs on someone else's). \" +\n            \"Name the vendor of a hosted model with --vendor.\");",
+      "new": "        return ModelLocations.TryParse(CliArgs.Value(args, \"--model\"), out var model) ? model : ModelLocation.Local;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLocation"
+    },
+    {
+      "name": "the portal chooses local when the form did not say",
+      "file": "src/Premagentic.Portal/Pages/AgentPages.cs",
+      "old": "        if (!ModelLocations.TryParse(form[\"model\"].ToString(), out var model))\n            return Layout.After(\"/portal/agents\", error: \"Say whether this agent's model runs inside your network or outside it.\");",
+      "new": "        if (!ModelLocations.TryParse(form[\"model\"].ToString(), out var model)) model = ModelLocation.Local;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLocation"
+    },
+    {
+      "name": "a local model may carry a vendor and a hosted one may not",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "        if (location == ModelLocation.Local)\n            throw new ArgumentException(\"A local model has no vendor.",
+      "new": "        if (location == ModelLocation.Hosted)\n            throw new ArgumentException(\"A local model has no vendor.",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLocation"
+    },
+    {
+      "name": "a membership that cannot be written is skipped instead of stopping the write",
+      "edits": [
+        {
+          "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+          "old": "                FROM created c WHERE @model = 'hosted')",
+          "new": "                FROM created c WHERE @model = 'hosted' AND {ReservedGroupId} IS NOT NULL)"
+        },
+        {
+          "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+          "old": "                FROM changed c WHERE @model = 'hosted'\n                ON CONFLICT DO NOTHING),",
+          "new": "                FROM changed c WHERE @model = 'hosted' AND {ReservedGroupId} IS NOT NULL\n                ON CONFLICT DO NOTHING),"
+        }
+      ],
+      "filter": "FullyQualifiedName~Premagentic.Tests.ModelLocation"
+    },
+    {
+      "name": "a dead session says the request was not its own, so it falls through",
+      "file": "src/Premagentic.Core/Identity/SignIn/BuiltInSignInAdapters.cs",
+      "old": "        return user is null ? SignInResolution.Nobody : new SignInResolution(user.Name);",
+      "new": "        return user is null ? null : new SignInResolution(user.Name);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SignInAdapterTests.|FullyQualifiedName~Premagentic.Tests.SignInMappingTests.|FullyQualifiedName~Premagentic.Tests.ApiSignInTests.|FullyQualifiedName~Premagentic.Tests.IdentitySignInTests.|FullyQualifiedName~Premagentic.Tests.ApiCallerTests.|FullyQualifiedName~Premagentic.Tests.ApiExtensionsTests."
+    },
+    {
+      "name": "the middleware treats a claim that proves nobody as no claim at all",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "            if (resolution.SignInName is not { } name)\n            {\n                await RefuseAsync(http, $\"a {adapter.Name} credential that proves nobody\");\n                return;\n            }",
+      "new": "            if (resolution.SignInName is not { } name) continue;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SignInAdapterTests.|FullyQualifiedName~Premagentic.Tests.SignInMappingTests.|FullyQualifiedName~Premagentic.Tests.ApiSignInTests.|FullyQualifiedName~Premagentic.Tests.IdentitySignInTests.|FullyQualifiedName~Premagentic.Tests.ApiCallerTests.|FullyQualifiedName~Premagentic.Tests.ApiExtensionsTests."
+    },
+    {
+      "name": "an extension's adapters are asked before the two built in",
+      "file": "src/Premagentic.Api/Callers/SignInAdapters.cs",
+      "old": "        ordered.AddRange(extra ?? []);",
+      "new": "        ordered.InsertRange(0, extra ?? []);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SignInAdapterTests.|FullyQualifiedName~Premagentic.Tests.SignInMappingTests.|FullyQualifiedName~Premagentic.Tests.ApiSignInTests.|FullyQualifiedName~Premagentic.Tests.IdentitySignInTests.|FullyQualifiedName~Premagentic.Tests.ApiCallerTests.|FullyQualifiedName~Premagentic.Tests.ApiExtensionsTests."
+    },
+    {
+      "name": "the trusted header claims a request that carries no name",
+      "file": "src/Premagentic.Core/Identity/SignIn/BuiltInSignInAdapters.cs",
+      "old": "        return Task.FromResult<SignInResolution?>(name.Length == 0 ? null : new SignInResolution(name));",
+      "new": "        return Task.FromResult<SignInResolution?>(new SignInResolution(name));",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SignInAdapterTests.|FullyQualifiedName~Premagentic.Tests.SignInMappingTests.|FullyQualifiedName~Premagentic.Tests.ApiSignInTests.|FullyQualifiedName~Premagentic.Tests.IdentitySignInTests.|FullyQualifiedName~Premagentic.Tests.ApiCallerTests.|FullyQualifiedName~Premagentic.Tests.ApiExtensionsTests."
+    },
+    {
+      "name": "the session adapter claims a request that carries no cookie",
+      "file": "src/Premagentic.Core/Identity/SignIn/BuiltInSignInAdapters.cs",
+      "old": "        if (request.Cookie(cookieName) is not { Length: > 0 } value) return null;",
+      "new": "        var value = request.Cookie(cookieName) ?? \"\";",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SignInAdapterTests.|FullyQualifiedName~Premagentic.Tests.SignInMappingTests.|FullyQualifiedName~Premagentic.Tests.ApiSignInTests.|FullyQualifiedName~Premagentic.Tests.IdentitySignInTests.|FullyQualifiedName~Premagentic.Tests.ApiCallerTests.|FullyQualifiedName~Premagentic.Tests.ApiExtensionsTests."
+    },
+    {
+      "name": "the trusted-header mode starts with no header to read",
+      "file": "src/Premagentic.Core/Identity/SignIn/BuiltInSignInAdapters.cs",
+      "old": "        ? throw new ArgumentException(\"The trusted-header mode needs the name of the header the proxy writes.\", nameof(headerName))",
+      "new": "        ? \"\"",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SignInAdapterTests.|FullyQualifiedName~Premagentic.Tests.SignInMappingTests.|FullyQualifiedName~Premagentic.Tests.ApiSignInTests.|FullyQualifiedName~Premagentic.Tests.IdentitySignInTests.|FullyQualifiedName~Premagentic.Tests.ApiCallerTests.|FullyQualifiedName~Premagentic.Tests.ApiExtensionsTests."
+    },
+    {
+      "name": "the session's value never reaches the anti-forgery check",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "            var sessionValue = source == CallerSource.Session ? http.Request.Cookies[SessionCookie] : null;",
+      "new": "            string? sessionValue = null;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SignInAdapterTests.|FullyQualifiedName~Premagentic.Tests.SignInMappingTests.|FullyQualifiedName~Premagentic.Tests.ApiSignInTests.|FullyQualifiedName~Premagentic.Tests.IdentitySignInTests.|FullyQualifiedName~Premagentic.Tests.ApiCallerTests.|FullyQualifiedName~Premagentic.Tests.ApiExtensionsTests."
+    },
+    {
+      "name": "a caller the session adapter resolved is not recorded as a session",
+      "file": "src/Premagentic.Api/Callers/SignInAdapters.cs",
+      "old": "        if (ReferenceEquals(adapter, Session)) return CallerSource.Session;",
+      "new": "        if (false) return CallerSource.Session;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SignInAdapterTests.|FullyQualifiedName~Premagentic.Tests.SignInMappingTests.|FullyQualifiedName~Premagentic.Tests.ApiSignInTests.|FullyQualifiedName~Premagentic.Tests.IdentitySignInTests.|FullyQualifiedName~Premagentic.Tests.ApiCallerTests.|FullyQualifiedName~Premagentic.Tests.ApiExtensionsTests."
+    },
+    {
+      "name": "a deleted group leaves its mappings behind",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "        foreach (var table in new[] { \"group_membership\", \"agent_group_grant\", \"identity_mapping\" })",
+      "new": "        foreach (var table in new[] { \"group_membership\", \"agent_group_grant\" })",
+      "filter": "FullyQualifiedName~Premagentic.Tests.IdentityMappingTests.|FullyQualifiedName~Premagentic.Tests.SignInMappingTests.|FullyQualifiedName~Premagentic.Tests.SignInAdapterTests."
+    },
+    {
+      "name": "the run counts no unmapped principals",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.Access.cs",
+      "old": "        public IReadOnlyCollection<string> UnmappedPrincipals =>\n            _external.Where(e => e.Value is null).Select(e => e.Key).ToArray();",
+      "new": "        public IReadOnlyCollection<string> UnmappedPrincipals => [];",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ConnectorMappingTests."
+    },
+    {
+      "name": "a connector's principals reach nobody even when they are mapped",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.Access.cs",
+      "old": "            return access.WithResolvedExternals(\n                access.ExternalPrincipals.Select(p => _external[p]).OfType<Principal>());",
+      "new": "            return access.WithResolvedExternals([]);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ConnectorMappingTests."
+    },
+    {
+      "name": "a directory's mapped groups are not added to what a person holds",
+      "file": "src/Premagentic.Core/Identity/CallerAccess.cs",
+      "old": "        if (caller.IsResolved && fromDirectory.Count > 0)",
+      "new": "        if (false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.IdentityMappingTests.|FullyQualifiedName~Premagentic.Tests.SignInMappingTests.|FullyQualifiedName~Premagentic.Tests.SignInAdapterTests."
+    },
+    {
+      "name": "the middleware never reads the adapter's groups",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "            if (resolution.ExternalGroups.Count > 0)",
+      "new": "            if (false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.IdentityMappingTests.|FullyQualifiedName~Premagentic.Tests.SignInMappingTests.|FullyQualifiedName~Premagentic.Tests.SignInAdapterTests."
+    },
+    {
+      "name": "the tool text accepts a tool that does not exist",
+      "file": "src/Premagentic.Core/Mcp/McpToolDescriptions.cs",
+      "old": "            if (!ToolNames.Contains(member.Name, StringComparer.Ordinal))",
+      "new": "            if (false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.McpToolTextTests."
+    },
+    {
+      "name": "the tool text accepts a blank description",
+      "file": "src/Premagentic.Core/Mcp/McpToolDescriptions.cs",
+      "old": "            if (string.IsNullOrWhiteSpace(text))",
+      "new": "            if (false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.McpToolTextTests."
+    },
+    {
+      "name": "the tool text has no ceiling",
+      "file": "src/Premagentic.Core/Mcp/McpToolDescriptions.cs",
+      "old": "            if (text.Length > MaxLength)",
+      "new": "            if (false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.McpToolTextTests."
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <AssemblyName>ParagraphChunker</AssemblyName>
+    <RootNamespace>Premagentic.Samples.Chunking</RootNamespace>
+  </PropertyGroup>
+
+  <!-- The contracts come from the process that loads this, as for the sentence
+       chunker. The library is this extension's own, so it is copied beside the
+       assembly and listed in the manifest. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Premagentic.Core\Premagentic.Core.csproj" Private="false" />
+    <ProjectReference Include="..\paragraph-rules\ParagraphRules.csproj" />
+  </ItemGroup>
+
+  <!-- The manifest carries the hash of the assembly and of every other file
+       the extension loads, which are not known until they exist. -->
+  <Target Name="WriteExtensionManifest" AfterTargets="Build">
+    <GetFileHash Files="$(TargetPath)" Algorithm="SHA256" HashEncoding="hex">
+      <Output TaskParameter="Items" ItemName="HashedAssembly" />
+    </GetFileHash>
+    <GetFileHash Files="$(TargetDir)ParagraphRules.dll" Algorithm="SHA256" HashEncoding="hex">
+      <Output TaskParameter="Items" ItemName="HashedLibrary" />
+    </GetFileHash>
+    <PropertyGroup>
+      <AssemblyHash>@(HashedAssembly->'%(FileHash)')</AssemblyHash>
+      <LibraryHash>@(HashedLibrary->'%(FileHash)')</LibraryHash>
+      <ManifestText>{
+  "name": "paragraph-chunker",
+  "version": "$(Version)",
+  "assemblyFile": "$(TargetFileName)",
+  "sha256": "$(AssemblyHash)",
+  "files": [
+    { "file": "ParagraphRules.dll", "sha256": "$(LibraryHash)" }
+  ],
+  "seams": { "chunker": 1 }
+}</ManifestText>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(TargetDir)extension.json" Lines="$(ManifestText)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+  </Target>
+
+</Project>

@@ -1,0 +1,20 @@
+{
+  "name": "the Clients page after a document form past its bounds, and the document forms' bound",
+  "commit": "hand run, 2026-09-26",
+  "mutants": [
+    {
+      "name": "the sentence the document forms are refused with is blanked",
+      "file": "src/Premagentic.Portal/PortalEndpoints.cs",
+      "old": ".WithMetadata(new PortalFormBounds(OAuthPaths.Clients, OAuthClientDocument.TooLarge));",
+      "new": ".WithMetadata(new PortalFormBounds(OAuthPaths.Clients, \"\"));",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalOAuthPagesTests.A_document_form_over_its_bounds_lands_on_the_clients_page"
+    },
+    {
+      "name": "the file field no longer says the bound",
+      "file": "src/Premagentic.Portal/Pages/OAuthPages.cs",
+      "old": "<label>Or its file, at most {OAuthClientDocument.MaxBytes / 1024} KB <input",
+      "new": "<label>Or its file <input",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalOAuthPagesTests.The_clients_page_offers_an_add_from_a_document"
+    }
+  ]
+}

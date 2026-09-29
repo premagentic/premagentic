@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!-- The first-party readers' own tests, with the readers referenced the
+       ordinary way so their limits can be set small. They are a project of
+       their own on purpose: a process that already holds a reader's library
+       hands it to the extension host, so the tests that load a reader from its
+       folder, by hash, live in Premagentic.Tests, which references none. -->
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="10.0.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Premagentic.Core\Premagentic.Core.csproj" />
+    <ProjectReference Include="..\Premagentic.Conformance\Premagentic.Conformance.csproj" />
+    <ProjectReference Include="..\..\extensions\pdf-reader\PdfReader.csproj" />
+    <!-- The container guards are shared source compiled into each reader that
+         opens a zip, so their own tests name them through this alias. -->
+    <ProjectReference Include="..\..\extensions\docx-reader\DocxReader.csproj" Aliases="global,docx" />
+    <ProjectReference Include="..\..\extensions\xlsx-reader\XlsxReader.csproj" />
+  </ItemGroup>
+
+</Project>

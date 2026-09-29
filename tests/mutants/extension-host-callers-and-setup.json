@@ -1,0 +1,27 @@
+{
+  "name": "the extension host's follow-up: callers, sources and setup",
+  "commit": "hand run, 2026-09-22",
+  "mutants": [
+    {
+      "name": "readers: the API keeps the built-in readers",
+      "file": "src/Premagentic.Api/Program.cs",
+      "old": "builder.Services.AddSingleton(sp => sp.GetRequiredService<ExtensionHost>().Readers);",
+      "new": "builder.Services.AddSingleton(_ => Premagentic.Core.Ingestion.Readers.ReaderRegistry.BuiltIn);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ApiExtensionsTests.The_api_serves_the_chunkers_an_allowed_extension_brought"
+    },
+    {
+      "name": "setup: the health check is given no providers",
+      "file": "src/Premagentic.Cli/Setup/SetupEngine.cs",
+      "old": "            embedder = options.EmbedderFactory(extensions.EmbeddingProviders);",
+      "new": "            embedder = options.EmbedderFactory(null);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupEngineTests.The_health_check_is_given_the_providers_the_deployment_has"
+    },
+    {
+      "name": "signin: the API never gives the host's adapters to the seam",
+      "file": "src/Premagentic.Api/Callers/CallerServices.cs",
+      "old": "            sp.GetRequiredService<ApiSettings>(), sp.GetRequiredService<SessionStore>(),\n            sp.GetRequiredService<ExtensionHost>().SignInAdapters));",
+      "new": "            sp.GetRequiredService<ApiSettings>(), sp.GetRequiredService<SessionStore>()));",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ApiExtensionsTests.A_sign_in_adapter_an_extension_brought_is_asked_about_a_request"
+    }
+  ]
+}

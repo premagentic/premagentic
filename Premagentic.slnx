@@ -1,0 +1,31 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Premagentic.Api/Premagentic.Api.csproj" />
+    <Project Path="src/Premagentic.Cli/Premagentic.Cli.csproj" />
+    <Project Path="src/Premagentic.Core/Premagentic.Core.csproj" />
+    <Project Path="src/Premagentic.McpServer/Premagentic.McpServer.csproj" />
+    <Project Path="src/Premagentic.Portal/Premagentic.Portal.csproj" />
+  </Folder>
+  <Folder Name="/extensions/">
+    <Project Path="extensions/docx-reader/DocxReader.csproj" />
+    <Project Path="extensions/pdf-reader/PdfReader.csproj" />
+    <Project Path="extensions/xlsx-reader/XlsxReader.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/extensions/greeting-command/GreetingCommand.csproj" />
+    <Project Path="samples/extensions/mail-reminders/MailReminders.csproj" />
+    <Project Path="samples/extensions/native-lines/NativeLines.csproj" />
+    <Project Path="samples/extensions/paragraph-chunker/ParagraphChunker.csproj" />
+    <Project Path="samples/extensions/paragraph-rules/ParagraphRules.csproj" />
+    <Project Path="samples/extensions/sentence-chunker/SentenceChunker.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Premagentic.Benchmark/Premagentic.Benchmark.csproj" />
+    <Project Path="tests/Premagentic.Conformance/Premagentic.Conformance.csproj" />
+    <Project Path="tests/Premagentic.Readers.Tests/Premagentic.Readers.Tests.csproj" />
+    <Project Path="tests/Premagentic.Tests/Premagentic.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/extensions/">
+    <Project Path="tests/extensions/inert-mapper/InertMapper.csproj" />
+  </Folder>
+</Solution>

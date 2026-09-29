@@ -1,0 +1,16 @@
+[
+  {
+    "name": "open",
+    "folder": "../../../sample-docs/open",
+    "prefix": "open",
+    "chunker": "markdown",
+    "rule": ["allow everyone"]
+  },
+  {
+    "name": "hr",
+    "folder": "../../../sample-docs/hr",
+    "prefix": "hr",
+    "chunker": "markdown",
+    "rule": ["allow group:hr"]
+  }
+]

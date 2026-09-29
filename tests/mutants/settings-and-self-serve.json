@@ -1,0 +1,160 @@
+{
+  "name": "the settings catalog, the self-serve bounds, the usage window, the rules record, the search role refusal and the headers",
+  "commit": "hand run, 2026-09-24",
+  "mutants": [
+    {
+      "name": "the settings store writes a key the catalog does not define",
+      "file": "src/Premagentic.Core/Identity/SettingsStore.cs",
+      "old": "        if (!(settings ?? DeploymentSettings.BuiltIn).Contains(key))",
+      "new": "        if (false && !(settings ?? DeploymentSettings.BuiltIn).Contains(key))",
+      "filter": "FullyQualifiedName~IdentityStoreTests"
+    },
+    {
+      "name": "the settings store stores a value its definition refuses",
+      "file": "src/Premagentic.Core/Evaluation/TuningSettingsStore.cs",
+      "old": "        if (definition.Problem(value) is { } problem) throw new ArgumentException(problem);",
+      "new": "        _ = definition;",
+      "filter": "FullyQualifiedName~SettingsTuningCommandTests|FullyQualifiedName~SettingsCatalogCommandTests"
+    },
+    {
+      "name": "set on a key with no default prints the default of a retrieval key",
+      "file": "src/Premagentic.Cli/Admin/SettingsCommands.cs",
+      "old": "        : d.Default is { } def ? $\"the default, {Plain(def)}\" : \"not set\";",
+      "new": "        : $\"the default, {Plain(RetrievalSettings.DefaultValue(d.Key))}\";",
+      "filter": "FullyQualifiedName~SettingsCatalogCommandTests"
+    },
+    {
+      "name": "a person may make one more than the bound",
+      "file": "src/Premagentic.Core/Identity/SelfServeAgents.cs",
+      "old": "            if (live >= bound)",
+      "new": "            if (live > bound)",
+      "filter": "FullyQualifiedName~SelfServeAgentsTests"
+    },
+    {
+      "name": "a bound of zero does not turn the form off",
+      "file": "src/Premagentic.Core/Identity/SelfServeAgents.cs",
+      "old": "            if (bound == 0)",
+      "new": "            if (bound < 0)",
+      "filter": "FullyQualifiedName~SelfServeAgentsTests"
+    },
+    {
+      "name": "a person's list shows everybody's agents",
+      "file": "src/Premagentic.Core/Identity/SelfServeAgents.cs",
+      "old": "            WHERE a.tenant_id = @tenant AND a.owner_user_id = @owner",
+      "new": "            WHERE a.tenant_id = @tenant AND (a.owner_user_id = @owner OR true)",
+      "filter": "FullyQualifiedName~SelfServeAgentsTests"
+    },
+    {
+      "name": "revoking leaves the tokens live",
+      "file": "src/Premagentic.Core/Identity/SelfServeAgents.cs",
+      "old": "                if (token.RevokedAt is null && await change.Identity.RevokeTokenAsync(token.Id, ct))",
+      "new": "                if (false && token.RevokedAt is null && await change.Identity.RevokeTokenAsync(token.Id, ct))",
+      "filter": "FullyQualifiedName~SelfServeAgentsTests"
+    },
+    {
+      "name": "the usage window allows two years",
+      "file": "src/Premagentic.Core/Audit/UsageQueries.cs",
+      "old": "        if (to - from > TimeSpan.FromDays(MaximumDays))",
+      "new": "        if (to - from > TimeSpan.FromDays(MaximumDays * 2))",
+      "filter": "FullyQualifiedName~UsageQueriesTests"
+    },
+    {
+      "name": "a query takes a widened window without checking it",
+      "file": "src/Premagentic.Core/Audit/UsageQueries.cs",
+      "old": "        ArgumentNullException.ThrowIfNull(window);\n        Check(window.From, window.To);",
+      "new": "        ArgumentNullException.ThrowIfNull(window);",
+      "filter": "FullyQualifiedName~UsageQueriesTests"
+    },
+    {
+      "name": "hosted only narrows nothing",
+      "file": "src/Premagentic.Core/Audit/UsageQueries.cs",
+      "old": "          AND (NOT @hostedOnly OR e.model_location = 'hosted')\n        \"\"\";",
+      "new": "          AND (true OR @hostedOnly OR e.model_location = 'hosted')\n        \"\"\";",
+      "filter": "FullyQualifiedName~UsageQueriesTests"
+    },
+    {
+      "name": "a section fetch counts as a question",
+      "file": "src/Premagentic.Core/Audit/UsageQueries.cs",
+      "old": "                   count(e.kind) FILTER (WHERE e.kind = 'search'),\n",
+      "new": "                   count(e.kind),\n",
+      "filter": "FullyQualifiedName~UsageQueriesTests"
+    },
+    {
+      "name": "the export ignores the hosted filter",
+      "file": "src/Premagentic.Core/Admin/AuditTrail.cs",
+      "old": "              AND (NOT @hostedOnly OR e.model_location = 'hosted')\n            ORDER BY e.created_at, e.id",
+      "new": "              AND (true OR @hostedOnly)\n            ORDER BY e.created_at, e.id",
+      "filter": "FullyQualifiedName~UsageQueriesTests"
+    },
+    {
+      "name": "a rule set at the command line is not recorded",
+      "file": "src/Premagentic.Cli/Admin/AdminCommands.cs",
+      "old": "            change.Record(RuleSetKind, RuleTarget(source, prefix),",
+      "new": "            if (false) change.Record(RuleSetKind, RuleTarget(source, prefix),",
+      "filter": "FullyQualifiedName~RulesCommandRecordTests"
+    },
+    {
+      "name": "a rule removed at the command line is not recorded",
+      "file": "src/Premagentic.Cli/Admin/AdminCommands.cs",
+      "old": "            if (removed)\n                change.Record(RuleRemoveKind,",
+      "new": "            if (removed && false)\n                change.Record(RuleRemoveKind,",
+      "filter": "FullyQualifiedName~RulesCommandRecordTests"
+    },
+    {
+      "name": "a deployment by connection string starts with no search role and no word",
+      "file": "src/Premagentic.Api/Hosting/SearchRoleRequirement.cs",
+      "old": "        if (setting(AllowKey) == \"1\") return null;\n\n        return",
+      "new": "        return null;\n\n        return",
+      "filter": "FullyQualifiedName~InstallHostingTests"
+    },
+    {
+      "name": "the API never asks whether it may run without a search role",
+      "file": "src/Premagentic.Api/Program.cs",
+      "old": "    if (SearchRoleRequirement.Refusal(key => app.Configuration[key]) is { } refusal)",
+      "new": "    if (false && SearchRoleRequirement.Refusal(key => app.Configuration[key]) is { } refusal)",
+      "filter": "FullyQualifiedName~InstallHostingTests"
+    },
+    {
+      "name": "an api response may be stored",
+      "file": "src/Premagentic.Api/Hosting/ApiResponseHeaders.cs",
+      "old": "                    headers.CacheControl = \"no-store\";",
+      "new": "                    _ = headers;",
+      "filter": "FullyQualifiedName~ApiResponseHeadersTests"
+    },
+    {
+      "name": "hsts goes out over plain http too",
+      "file": "src/Premagentic.Api/Hosting/ApiResponseHeaders.cs",
+      "old": "        var hsts = options.Hsts && request.IsHttps;",
+      "new": "        var hsts = options.Hsts;",
+      "filter": "FullyQualifiedName~ApiResponseHeadersTests"
+    },
+    {
+      "name": "hsts behind a trusted proxy",
+      "file": "src/Premagentic.Api/Hosting/ApiResponseHeaders.cs",
+      "old": "        return new ApiResponseHeaderOptions(ownCertificate && !behindProxy);",
+      "new": "        return new ApiResponseHeaderOptions(ownCertificate);",
+      "filter": "FullyQualifiedName~ApiResponseHeadersTests"
+    },
+    {
+      "name": "the model folder is not looked for above the executable",
+      "file": "src/Premagentic.Core/Embeddings/ModelFolder.cs",
+      "old": "folder is not null; folder = folder.Parent)",
+      "new": "folder is not null; folder = null)",
+      "filter": "FullyQualifiedName~ModelFolderTests"
+    },
+    {
+      "name": "the refusal names only the first folder",
+      "file": "src/Premagentic.Core/Embeddings/EmbeddingProviderFactory.cs",
+      "old": "$\"folder, and none was found. Looked in: {string.Join(\"; \", lookup.LookedIn)}. An installed release \" +",
+      "new": "$\"folder, and none was found. Looked in: {lookup.LookedIn[0]}. An installed release \" +",
+      "filter": "FullyQualifiedName~ModelFolderTests"
+    },
+    {
+      "name": "the MCP server types its version",
+      "file": "src/Premagentic.Api/Callers/CallerServices.cs",
+      "old": "Version = Premagentic.Core.BuildVersion.Informational })",
+      "new": "Version = \"0.1.0\" })",
+      "filter": "FullyQualifiedName~McpHttpTests"
+    }
+  ]
+}

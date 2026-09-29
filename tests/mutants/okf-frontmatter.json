@@ -1,0 +1,92 @@
+{
+  "name": "OKF frontmatter: the YAML guard, lifecycle, trust tier, staleness and bundle mode",
+  "commit": "hand run, 2026-09-21",
+  "mutants": [
+    {
+      "name": "guard off",
+      "file": "src/Premagentic.Core/Sources/Frontmatter.cs",
+      "old": "if (!WithinLimits(yamlText)) return unparseable;",
+      "new": "if (false && !WithinLimits(yamlText)) return unparseable;",
+      "filter": "FullyQualifiedName~Okf|FullyQualifiedName~LifecycleTests|FullyQualifiedName~FileSystemSourceTests",
+      "expect": "crash"
+    },
+    {
+      "name": "depth guard off",
+      "file": "src/Premagentic.Core/Sources/Frontmatter.cs",
+      "old": "if (open.Count >= MaxDepth) return false;",
+      "new": "if (open.Count >= 100000) return false;",
+      "filter": "FullyQualifiedName~Okf|FullyQualifiedName~LifecycleTests|FullyQualifiedName~FileSystemSourceTests",
+      "expect": "crash"
+    },
+    {
+      "name": "deprecated unmapped",
+      "file": "src/Premagentic.Core/Models.cs",
+      "old": "\"superseded\" or \"replaced\" or \"deprecated\" => Superseded,",
+      "new": "\"superseded\" or \"replaced\" => Superseded,",
+      "filter": "FullyQualifiedName~Okf|FullyQualifiedName~LifecycleTests|FullyQualifiedName~FileSystemSourceTests"
+    },
+    {
+      "name": "human check ignored",
+      "file": "src/Premagentic.Core/Okf/OkfMetadata.cs",
+      "old": ": Verified.Any(v => v.By.IsHuman) ? OkfTrustTier.HumanReviewed",
+      "new": ": false ? OkfTrustTier.HumanReviewed",
+      "filter": "FullyQualifiedName~Okf|FullyQualifiedName~LifecycleTests|FullyQualifiedName~FileSystemSourceTests"
+    },
+    {
+      "name": "stale boundary >",
+      "file": "src/Premagentic.Core/Okf/OkfMetadata.cs",
+      "old": "now >= staleAfter",
+      "new": "now > staleAfter",
+      "filter": "FullyQualifiedName~Okf|FullyQualifiedName~LifecycleTests|FullyQualifiedName~FileSystemSourceTests"
+    },
+    {
+      "name": "no offset read as local",
+      "file": "src/Premagentic.Core/Okf/OkfMetadata.cs",
+      "old": "DateTimeStyles.AssumeUniversal",
+      "new": "DateTimeStyles.AssumeLocal",
+      "filter": "FullyQualifiedName~Okf|FullyQualifiedName~LifecycleTests|FullyQualifiedName~FileSystemSourceTests"
+    },
+    {
+      "name": "unreadable stale ignored",
+      "file": "src/Premagentic.Core/Okf/OkfMetadata.cs",
+      "old": "StaleAfterUnreadable || (StaleAfter",
+      "new": "false || (StaleAfter",
+      "filter": "FullyQualifiedName~Okf|FullyQualifiedName~LifecycleTests|FullyQualifiedName~FileSystemSourceTests"
+    },
+    {
+      "name": "malformed generated is unknown",
+      "file": "src/Premagentic.Core/Okf/OkfMetadata.cs",
+      "old": "            return new OkfGeneration(null, null);",
+      "new": "            return null;",
+      "filter": "FullyQualifiedName~Okf|FullyQualifiedName~LifecycleTests|FullyQualifiedName~FileSystemSourceTests"
+    },
+    {
+      "name": "bare verified dropped",
+      "file": "src/Premagentic.Core/Okf/OkfMetadata.cs",
+      "old": "IReadOnlyDictionary<string, object> one => new object[] { one },",
+      "new": "IReadOnlyDictionary<string, object> one => null,",
+      "filter": "FullyQualifiedName~Okf|FullyQualifiedName~LifecycleTests|FullyQualifiedName~FileSystemSourceTests"
+    },
+    {
+      "name": "reserved not skipped",
+      "file": "src/Premagentic.Core/Sources/FileSystemSource.cs",
+      "old": "if (OkfBundle && ReservedBundleNames.Contains(",
+      "new": "if (false && ReservedBundleNames.Contains(",
+      "filter": "FullyQualifiedName~Okf|FullyQualifiedName~LifecycleTests|FullyQualifiedName~FileSystemSourceTests"
+    },
+    {
+      "name": "reserved skipped when off",
+      "file": "src/Premagentic.Core/Sources/FileSystemSource.cs",
+      "old": "if (OkfBundle && ReservedBundleNames.Contains(",
+      "new": "if (ReservedBundleNames.Contains(",
+      "filter": "FullyQualifiedName~Okf|FullyQualifiedName~LifecycleTests|FullyQualifiedName~FileSystemSourceTests"
+    },
+    {
+      "name": "missing type not reported",
+      "file": "src/Premagentic.Core/Sources/FileSystemSource.cs",
+      "old": "if (okf.Type is null)",
+      "new": "if (false)",
+      "filter": "FullyQualifiedName~Okf|FullyQualifiedName~LifecycleTests|FullyQualifiedName~FileSystemSourceTests"
+    }
+  ]
+}

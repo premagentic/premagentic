@@ -1,0 +1,73 @@
+[
+  {
+    "id": "q01",
+    "question": "How long do I have to submit an expense claim?",
+    "category": "policy-lookup",
+    "expectedSourcePaths": [
+      "open/handbook.md"
+    ],
+    "expectedHeading": "Expense claims",
+    "forbiddenSourcePaths": [
+      "open/travel-policy-old.md"
+    ],
+    "archiveAllowed": false,
+    "expectNoAnswer": false,
+    "notes": "The current answer is thirty days. The 2024 policy says ninety and is marked superseded, so the lifecycle gate must keep it out. Listing it as forbidden makes a regression in that gate fail this case rather than pass quietly."
+  },
+  {
+    "id": "q02",
+    "question": "What were the expense claim rules under the old 2024 travel policy?",
+    "category": "historical",
+    "expectedSourcePaths": [
+      "open/travel-policy-old.md"
+    ],
+    "expectedHeading": "Expense claims",
+    "forbiddenSourcePaths": [],
+    "archiveAllowed": true,
+    "expectNoAnswer": false,
+    "notes": "The same document the previous case forbids, now reachable because the case sets archiveAllowed. Together the two prove the historical flag gates rather than hides."
+  },
+  {
+    "id": "q03",
+    "question": "What is the compensation review cycle for band four engineers?",
+    "category": "access-denied",
+    "expectedSourcePaths": [],
+    "expectedHeading": null,
+    "forbiddenSourcePaths": [
+      "hr/salary-bands.md"
+    ],
+    "archiveAllowed": false,
+    "expectNoAnswer": true,
+    "notes": "Asked as an engineer, not as HR. The answer exists in the index and must not be reachable. This is the case that catches an authorization regression: as is set, so the query runs through the gate rather than around it.",
+    "as": [
+      "group:engineering"
+    ]
+  },
+  {
+    "id": "q04",
+    "question": "What is the compensation review cycle for band four engineers?",
+    "category": "access-allowed",
+    "expectedSourcePaths": [
+      "hr/salary-bands.md"
+    ],
+    "expectedHeading": "Band four",
+    "forbiddenSourcePaths": [],
+    "archiveAllowed": false,
+    "expectNoAnswer": false,
+    "notes": "The same question as q03, asked by HR. This is the control: without it, q03 would also pass against a build that returned nothing to anybody.",
+    "as": [
+      "group:hr"
+    ]
+  },
+  {
+    "id": "q05",
+    "question": "What is the company policy on submarine maintenance?",
+    "category": "no-answer",
+    "expectedSourcePaths": [],
+    "expectedHeading": null,
+    "forbiddenSourcePaths": [],
+    "archiveAllowed": false,
+    "expectNoAnswer": true,
+    "notes": "Nothing in the corpus addresses this. The no-answer floor must hold, which is what recalibrating that floor per corpus is for."
+  }
+]

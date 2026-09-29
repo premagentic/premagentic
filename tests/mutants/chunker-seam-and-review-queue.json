@@ -1,0 +1,111 @@
+{
+  "name": "The chunker seam, the review queue and its tier filter, and who may reach the review pages",
+  "commit": "hand run, 2026-09-22",
+  "mutants": [
+    {
+      "name": "fail closed: an unknown chunker falls back to markdown",
+      "file": "src/Premagentic.Core/Ingestion/ChunkerRegistry.cs",
+      "old": "public IChunker Resolve(string name) => Find(name) ?? throw new UnknownChunkerException(name, Names);",
+      "new": "public IChunker Resolve(string name) => Find(name) ?? MarkdownChunker.Instance;",
+      "filter": "FullyQualifiedName~Chunk|FullyQualifiedName~Review|FullyQualifiedName~SourcesCommandTests|FullyQualifiedName~PortalAccessTests"
+    },
+    {
+      "name": "fail closed: the pipeline cuts with the default whatever the run names",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.cs",
+      "old": "var cutter = (chunkers ?? ChunkerRegistry.BuiltIn).Resolve(chunker);",
+      "new": "var cutter = (chunkers ?? ChunkerRegistry.BuiltIn).Resolve(ChunkerRegistry.DefaultName);",
+      "filter": "FullyQualifiedName~Chunk|FullyQualifiedName~Review|FullyQualifiedName~SourcesCommandTests|FullyQualifiedName~PortalAccessTests"
+    },
+    {
+      "name": "bump: the unchanged check ignores the chunker",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.cs",
+      "old": "              AND d.chunker = @chunker\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Chunk|FullyQualifiedName~Review|FullyQualifiedName~SourcesCommandTests|FullyQualifiedName~PortalAccessTests"
+    },
+    {
+      "name": "bump: the chunker that cut a document is not stored",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.cs",
+      "old": "@okfFrontmatterState, @chunker)",
+      "new": "@okfFrontmatterState, 'markdown')",
+      "filter": "FullyQualifiedName~Chunk|FullyQualifiedName~Review|FullyQualifiedName~SourcesCommandTests|FullyQualifiedName~PortalAccessTests"
+    },
+    {
+      "name": "add time: an unknown chunker is accepted",
+      "file": "src/Premagentic.Core/Sources/Registry/SourceRegistry.cs",
+      "old": "        var chunkerName = Chunkers.Canonical(chunker);\n",
+      "new": "        var chunkerName = chunker;\n",
+      "filter": "FullyQualifiedName~Chunk|FullyQualifiedName~Review|FullyQualifiedName~SourcesCommandTests|FullyQualifiedName~PortalAccessTests"
+    },
+    {
+      "name": "set time: an unknown chunker is accepted",
+      "file": "src/Premagentic.Core/Sources/Registry/SourceRegistry.cs",
+      "old": "var chunkerName = chunker is null ? null : Chunkers.Canonical(chunker);",
+      "new": "var chunkerName = chunker;",
+      "filter": "FullyQualifiedName~Chunk|FullyQualifiedName~Review|FullyQualifiedName~SourcesCommandTests|FullyQualifiedName~PortalAccessTests"
+    },
+    {
+      "name": "the run records the default, not the chunker it was asked for",
+      "file": "src/Premagentic.Core/Sources/Registry/IngestRuns.cs",
+      "old": "        cmd.Parameters.AddWithValue(\"chunker\", chunker);\n",
+      "new": "        cmd.Parameters.AddWithValue(\"chunker\", ChunkerRegistry.DefaultName);\n",
+      "filter": "FullyQualifiedName~Chunk|FullyQualifiedName~Review|FullyQualifiedName~SourcesCommandTests|FullyQualifiedName~PortalAccessTests"
+    },
+    {
+      "name": "the queue takes human-reviewed documents too",
+      "file": "src/Premagentic.Core/Okf/ReviewQueue.cs",
+      "old": "\"d.trust_tier < 2 AND",
+      "new": "\"d.trust_tier <= 2 AND",
+      "filter": "FullyQualifiedName~Chunk|FullyQualifiedName~Review|FullyQualifiedName~SourcesCommandTests|FullyQualifiedName~PortalAccessTests"
+    },
+    {
+      "name": "the queue drops unverified concepts written by people",
+      "file": "src/Premagentic.Core/Okf/ReviewQueue.cs",
+      "old": "(d.authorship = 2 OR d.okf_concept_id IS NOT NULL)",
+      "new": "(d.authorship = 2)",
+      "filter": "FullyQualifiedName~Chunk|FullyQualifiedName~Review|FullyQualifiedName~SourcesCommandTests|FullyQualifiedName~PortalAccessTests"
+    },
+    {
+      "name": "the queue drops machine-written files outside a bundle",
+      "file": "src/Premagentic.Core/Okf/ReviewQueue.cs",
+      "old": "(d.authorship = 2 OR d.okf_concept_id IS NOT NULL)",
+      "new": "(d.okf_concept_id IS NOT NULL)",
+      "filter": "FullyQualifiedName~Chunk|FullyQualifiedName~Review|FullyQualifiedName~SourcesCommandTests|FullyQualifiedName~PortalAccessTests"
+    },
+    {
+      "name": "the tier filter is ignored",
+      "file": "src/Premagentic.Core/Okf/ReviewQueue.cs",
+      "old": "AND (@tier IS NULL OR d.trust_tier = @tier)",
+      "new": "AND (@tier IS NULL OR TRUE)",
+      "filter": "FullyQualifiedName~Chunk|FullyQualifiedName~Review|FullyQualifiedName~SourcesCommandTests|FullyQualifiedName~PortalAccessTests"
+    },
+    {
+      "name": "a folder given by hand is placed by its first run",
+      "file": "src/Premagentic.Core/Okf/ReviewQueue.cs",
+      "old": "ORDER BY r.path_prefix, r.started_at DESC",
+      "new": "ORDER BY r.path_prefix, r.started_at",
+      "filter": "FullyQualifiedName~Chunk|FullyQualifiedName~Review|FullyQualifiedName~SourcesCommandTests|FullyQualifiedName~PortalAccessTests"
+    },
+    {
+      "name": "the queue page's form posts",
+      "file": "src/Premagentic.Portal/Pages/ReviewPages.cs",
+      "old": "<form method=\"get\" action=\"/portal/review\"",
+      "new": "<form method=\"post\" action=\"/portal/review\"",
+      "filter": "FullyQualifiedName~Chunk|FullyQualifiedName~Review|FullyQualifiedName~SourcesCommandTests|FullyQualifiedName~PortalAccessTests"
+    },
+    {
+      "name": "the health page shows no queue count",
+      "file": "src/Premagentic.Portal/Pages/HealthPages.cs",
+      "old": "            <dt>Review queue</dt><dd>{Layout.Link(\"/portal/review\", $\"{awaitingReview} document(s) below human-reviewed\")}</dd>\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Chunk|FullyQualifiedName~Review|FullyQualifiedName~SourcesCommandTests|FullyQualifiedName~PortalAccessTests"
+    },
+    {
+      "name": "a member reads the review queue",
+      "file": "src/Premagentic.Portal/PortalEndpoints.cs",
+      "old": "people.MapGet(\"/review\", (Delegate)ReviewPages.Queue).Needs(PortalNeed.Reader);",
+      "new": "people.MapGet(\"/review\", (Delegate)ReviewPages.Queue).Needs(PortalNeed.Person);",
+      "filter": "FullyQualifiedName~Chunk|FullyQualifiedName~Review|FullyQualifiedName~SourcesCommandTests|FullyQualifiedName~PortalAccessTests"
+    }
+  ]
+}

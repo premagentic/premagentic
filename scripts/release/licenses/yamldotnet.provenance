@@ -1,0 +1,9 @@
+text:       yamldotnet.txt (upstream file, byte for byte)
+package:    YamlDotNet 18.1.0
+nuspec:     license expression MIT
+repository: https://github.com/aaubry/YamlDotNet
+commit:     748334a8fa7c227740018b284b71ad95cc6b7fc7 (the commit the package's nuspec names)
+file:       LICENSE.txt
+url:        https://raw.githubusercontent.com/aaubry/YamlDotNet/748334a8fa7c227740018b284b71ad95cc6b7fc7/LICENSE.txt
+read:       2026-09-24, read only, this one file
+sha256:     daea8b7f1b2bab48ea12ad50b0ce91634669d99d7dd0cb64aed8dffeeef69ed3

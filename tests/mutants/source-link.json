@@ -1,0 +1,13 @@
+{
+  "name": "the link to the source at the foot of every portal page",
+  "commit": "hand run, 2026-09-28",
+  "mutants": [
+    {
+      "name": "the portal's pages carry no link to the source",
+      "file": "src/Premagentic.Portal/Html/Layout.cs",
+      "old": "        <footer class=\"source\"><a href=\"{BuildVersion.SourceUrl}\">Source</a></footer>\n        </main>",
+      "new": "        </main>",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalSourceLinkTests."
+    }
+  ]
+}

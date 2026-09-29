@@ -1,0 +1,5 @@
+{
+  "trust.agents_minimum_tier": "human-reviewed",
+  "trust.people_minimum_tier": "unverified",
+  "trust.stale": "shown-to-people-only"
+}

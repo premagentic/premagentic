@@ -1,0 +1,13 @@
+{
+  "name": "the extension host: the allow refuses a file under runtimes/ its manifest does not list",
+  "commit": "hand run, 2026-09-27",
+  "mutants": [
+    {
+      "name": "12a the allow takes a file under runtimes/ its manifest does not list",
+      "file": "src/Premagentic.Core/Extensions/ExtensionAllowList.cs",
+      "old": "                if (!files.Any(f => f.File.Equals(relative, StringComparison.OrdinalIgnoreCase)))\n                    throw new ArgumentException(ExtensionManifest.UnlistedRuntimeRefusal(relative));\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionsCommandTests"
+    }
+  ]
+}

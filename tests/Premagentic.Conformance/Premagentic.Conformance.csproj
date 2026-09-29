@@ -1,0 +1,62 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- A library of fixtures to inherit, not a test project: it carries no
+         runner, and `dotnet test` over the solution would otherwise try to run
+         it and report a test host that exited with an error. The fixtures run
+         in whatever project inherits them. -->
+    <IsTestProject>false</IsTestProject>
+  </PropertyGroup>
+
+  <!-- The conformance kit as a package, so an extension author takes the
+       fixtures from a feed and not from a checkout of this repository. Its
+       version is the product version it is built with, the property Version
+       (Directory.Build.props, or -p:Version at a release). The seam versions it
+       proves are read from SeamVersions.cs, where they are kept, into the
+       KitSeams attribute and the description; each fixture checks them against
+       the PremAgentic the extension builds against when it runs. -->
+  <PropertyGroup>
+    <SeamVersionsText>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\..\src\Premagentic.Core\Extensions\SeamVersions.cs'))</SeamVersionsText>
+    <KitReader>$([System.Text.RegularExpressions.Regex]::Match($(SeamVersionsText), 'const int Reader = (\d+);').Groups[1].Value)</KitReader>
+    <KitChunker>$([System.Text.RegularExpressions.Regex]::Match($(SeamVersionsText), 'const int Chunker = (\d+);').Groups[1].Value)</KitChunker>
+    <KitSource>$([System.Text.RegularExpressions.Regex]::Match($(SeamVersionsText), 'const int Source = (\d+);').Groups[1].Value)</KitSource>
+    <KitEmbedding>$([System.Text.RegularExpressions.Regex]::Match($(SeamVersionsText), 'const int Embedding = (\d+);').Groups[1].Value)</KitEmbedding>
+    <KitSignIn>$([System.Text.RegularExpressions.Regex]::Match($(SeamVersionsText), 'const int SignIn = (\d+);').Groups[1].Value)</KitSignIn>
+    <KitReminder>$([System.Text.RegularExpressions.Regex]::Match($(SeamVersionsText), 'const int Reminder = (\d+);').Groups[1].Value)</KitReminder>
+    <KitSeams>reader=$(KitReader);chunker=$(KitChunker);source=$(KitSource);embedding=$(KitEmbedding);signin=$(KitSignIn);reminder=$(KitReminder)</KitSeams>
+    <IsPackable>true</IsPackable>
+    <PackageId>Premagentic.Conformance</PackageId>
+    <Description>Test fixtures an extension author inherits to prove a PremAgentic reader, chunker, connector, embedding provider, sign-in adapter or reminder sink keeps its contract. This version proves reader seam $(KitReader), chunker seam $(KitChunker), source seam $(KitSource), embedding seam $(KitEmbedding), sign-in seam $(KitSignIn) and reminder seam $(KitReminder), and each fixture checks them against the PremAgentic your extension builds against. The contracts themselves come from that PremAgentic; this package does not carry them.</Description>
+    <PackageTags>premagentic;extension;conformance;xunit</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="Premagentic.Conformance.KitSeamsAttribute">
+      <_Parameter1>$(KitSeams)</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <Target Name="RefuseAKitWithoutSeamVersions" BeforeTargets="Build;Pack">
+    <Error Condition="'$(KitReader)' == '' Or '$(KitChunker)' == '' Or '$(KitSource)' == '' Or '$(KitEmbedding)' == '' Or '$(KitSignIn)' == '' Or '$(KitReminder)' == ''"
+           Text="The seam versions could not be read from SeamVersions.cs, so the kit could not say which seams it proves." />
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="xunit" Version="2.9.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <!-- The contracts come from the PremAgentic the author's extension builds
+       against, never from this package, so a kit and an extension cannot
+       carry two copies of them. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Premagentic.Core\Premagentic.Core.csproj" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

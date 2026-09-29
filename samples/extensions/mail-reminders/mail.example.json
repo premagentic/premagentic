@@ -1,0 +1,12 @@
+{
+  "host": "smtp.example.org",
+  "port": 587,
+  "tls": true,
+  "from": "premagentic@example.org",
+  "credentialsFile": "C:\\ProgramData\\Premagentic\\mail.credentials",
+  "userDomain": "example.org",
+  "addresses": {
+    "administrators": "it@example.org",
+    "user:alice": "alice.lindqvist@example.org"
+  }
+}

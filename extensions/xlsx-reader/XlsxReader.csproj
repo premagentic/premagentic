@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <AssemblyName>Premagentic.XlsxReader</AssemblyName>
+    <RootNamespace>Premagentic.Extensions.Xlsx</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Premagentic.Readers.Tests" />
+  </ItemGroup>
+
+  <!-- The contracts come from the process that loads this. The zip and XML
+       readers are the base library's, so the extension loads no other file
+       and its manifest lists none. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Premagentic.Core\Premagentic.Core.csproj" Private="false" />
+    <Compile Include="..\shared\ReaderBytes.cs" Link="ReaderBytes.cs" />
+    <Compile Include="..\shared\ReaderMarkdown.cs" Link="ReaderMarkdown.cs" />
+    <Compile Include="..\shared\Sizes.cs" Link="Sizes.cs" />
+    <Compile Include="..\shared\ZipParts.cs" Link="ZipParts.cs" />
+  </ItemGroup>
+
+  <Target Name="WriteExtensionManifest" AfterTargets="Build">
+    <GetFileHash Files="$(TargetPath)" Algorithm="SHA256" HashEncoding="hex">
+      <Output TaskParameter="Items" ItemName="HashedAssembly" />
+    </GetFileHash>
+    <PropertyGroup>
+      <AssemblyHash>@(HashedAssembly->'%(FileHash)')</AssemblyHash>
+      <ManifestText>{
+  "name": "xlsx-reader",
+  "version": "$(Version)",
+  "assemblyFile": "$(TargetFileName)",
+  "sha256": "$(AssemblyHash)",
+  "seams": { "reader": 2 }
+}</ManifestText>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(TargetDir)extension.json" Lines="$(ManifestText)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+  </Target>
+
+</Project>

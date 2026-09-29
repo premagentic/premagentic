@@ -1,0 +1,62 @@
+{
+  "name": "reader skips, unread files kept or removed, and the run record",
+  "commit": "hand run, 2026-09-25",
+  "mutants": [
+    {
+      "name": "f1 a skip with no reader is not counted as seen, so the earlier document is removed",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.cs",
+      "old": "                    if (!RemoveUnread) seenPaths.Add(skip.Path);",
+      "new": "                    _ = RemoveUnread;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ReaderSeamIngestTests|FullyQualifiedName~Premagentic.Tests.SourcesCommandTests"
+    },
+    {
+      "name": "f2 --remove-unread is ignored, so an unread document can never be removed",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.cs",
+      "old": "                    if (!RemoveUnread) seenPaths.Add(skip.Path);",
+      "new": "                    seenPaths.Add(skip.Path);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ReaderSeamIngestTests|FullyQualifiedName~Premagentic.Tests.SourcesCommandTests"
+    },
+    {
+      "name": "f3 the CLI does not pass --remove-unread to the pipeline",
+      "file": "src/Premagentic.Cli/Admin/SourcesCommands.cs",
+      "old": "            RemoveUnread = args.Contains(\"--remove-unread\"),",
+      "new": "            RemoveUnread = false,",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SourcesCommandTests"
+    },
+    {
+      "name": "f4 a reader's reason is dropped, so a file with no text keeps its stale entry",
+      "file": "src/Premagentic.Core/Ingestion/Readers/DocumentSourceReading.cs",
+      "old": "({why})\", why);",
+      "new": "({why})\");",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ReaderSeam"
+    },
+    {
+      "name": "f5 what was kept without a reader is not counted",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.cs",
+      "old": "            KeptWithoutReader: kept.Count, RemovedNowSkipped: removedNowSkipped);",
+      "new": "            KeptWithoutReader: 0, RemovedNowSkipped: removedNowSkipped);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ReaderSeamIngestTests|FullyQualifiedName~Premagentic.Tests.SourcesCommandTests"
+    },
+    {
+      "name": "f6 a document removed because its reader found no text is not counted",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.cs",
+      "old": "                removedNowSkipped++;\n                log?.Invoke($\"  removed, now skipped: {path} ({reason})\");",
+      "new": "                log?.Invoke($\"  removed, now skipped: {path} ({reason})\");",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ReaderSeamIngestTests"
+    },
+    {
+      "name": "f7 the run record does not write what was kept",
+      "file": "src/Premagentic.Core/Sources/Registry/IngestRuns.cs",
+      "old": "        cmd.Parameters.AddWithValue(\"kept\", summary.KeptWithoutReader);",
+      "new": "        cmd.Parameters.AddWithValue(\"kept\", 0);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ReaderSeamIngestTests.The_recorded_run_keeps_what_was_kept_without_a_reader_and_what_was_removed_because_now_skipped"
+    },
+    {
+      "name": "f8 the run record does not read what was kept",
+      "file": "src/Premagentic.Core/Sources/Registry/IngestRuns.cs",
+      "old": "                KeptWithoutReader: r.IsDBNull(26) ? 0 : r.GetInt32(26),",
+      "new": "                KeptWithoutReader: 0,",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ReaderSeamIngestTests.The_recorded_run_keeps_what_was_kept_without_a_reader_and_what_was_removed_because_now_skipped"
+    }
+  ]
+}

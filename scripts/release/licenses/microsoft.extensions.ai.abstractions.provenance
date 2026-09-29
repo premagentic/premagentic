@@ -1,0 +1,9 @@
+text:       microsoft.extensions.ai.abstractions.txt (upstream file, byte for byte)
+package:    Microsoft.Extensions.AI.Abstractions 10.8.3
+nuspec:     license expression MIT
+repository: https://github.com/dotnet/extensions
+commit:     ccb356f31db9d894807c4fd0c97c2f41553d1524 (the commit the package's nuspec names)
+file:       LICENSE
+url:        https://raw.githubusercontent.com/dotnet/extensions/ccb356f31db9d894807c4fd0c97c2f41553d1524/LICENSE
+read:       2026-09-24, read only, this one file
+sha256:     47f0ad8ba753eae5de6178291cd8f38bbb42d2368b177f8e11714ad17c701275

@@ -1,0 +1,51 @@
+name: Feature request
+description: A concrete proposal for something PremAgentic should do
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A proposal is concrete when it names the situation, the wanted outcome, and where in PremAgentic it lands. An idea that is not there yet is welcome in Discussions first. No document text, real path or real person's name here either.
+  - type: textarea
+    id: situation
+    attributes:
+      label: The situation
+      description: Who is doing what, with what kind of corpus or deployment, and what gets in the way today.
+    validations:
+      required: true
+  - type: textarea
+    id: wanted
+    attributes:
+      label: What you would want to happen
+      description: The behavior you want, in the words you would use with the person it helps. If a command or a page is involved, sketch it.
+    validations:
+      required: true
+  - type: dropdown
+    id: touches
+    attributes:
+      label: Which gate or surface it touches
+      description: Pick the closest. The four gates are hard SQL conditions that define the candidate set before ranking, and a proposal that turns one into a ranking signal or a post-filter will be declined.
+      multiple: true
+      options:
+        - The access gate
+        - The lifecycle gate
+        - The trust gate
+        - The freshness gate
+        - A reader, chunker, connector, embedding or sign-in seam (extensions)
+        - The prem command
+        - The HTTP API
+        - The MCP endpoint
+        - The administration portal
+        - Ingest and sources
+        - Tuning, profiles and the golden set
+        - Documentation
+        - None of these
+    validations:
+      required: true
+  - type: checkboxes
+    id: invariants
+    attributes:
+      label: The invariants
+      options:
+        - label: This proposal gives no agent a way to write, store or change anything. Agents read and never write.
+          required: true

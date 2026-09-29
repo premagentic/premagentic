@@ -1,0 +1,90 @@
+{
+  "name": "the clients seam's document add and in-place replace",
+  "commit": "hand run, 2026-09-26",
+  "mutants": [
+    {
+      "name": "a replace keeps the old hash",
+      "file": "src/Premagentic.Core/Identity/OAuthClients.cs",
+      "old": "SET name = @name, redirect_uris = @uris, application_type = @app, software_id = @sid, software_version = @sv,\n                    document_sha256 = @sha, document_stored_at = @now",
+      "new": "SET name = @name, redirect_uris = @uris, application_type = @app, software_id = @sid, software_version = @sv,\n                    document_sha256 = @previous, document_stored_at = @now",
+      "filter": "FullyQualifiedName~Premagentic.Tests.OAuthClientDocumentSeamTests."
+    },
+    {
+      "name": "a replace keeps the old stored date",
+      "file": "src/Premagentic.Core/Identity/OAuthClients.cs",
+      "old": "document_sha256 = @sha, document_stored_at = @now\n                WHERE tenant_id = @tenant AND id = @id AND deleted_at IS NULL",
+      "new": "document_sha256 = @sha, document_stored_at = document_stored_at\n                WHERE tenant_id = @tenant AND id = @id AND deleted_at IS NULL",
+      "filter": "FullyQualifiedName~Premagentic.Tests.OAuthClientDocumentSeamTests."
+    },
+    {
+      "name": "a replace keeps the old redirect addresses",
+      "file": "src/Premagentic.Core/Identity/OAuthClients.cs",
+      "old": "SET name = @name, redirect_uris = @uris, application_type = @app, software_id = @sid, software_version = @sv,\n                    document_sha256 = @sha",
+      "new": "SET name = @name, redirect_uris = redirect_uris, application_type = @app, software_id = @sid, software_version = @sv,\n                    document_sha256 = @sha",
+      "filter": "FullyQualifiedName~Premagentic.Tests.OAuthClientDocumentSeamTests."
+    },
+    {
+      "name": "a replace ends every grant the old document had",
+      "file": "src/Premagentic.Core/Identity/OAuthClients.cs",
+      "old": "            change.Record(\"oauth.client.replace\", read.ClientId,",
+      "new": "            foreach (var grant in await OAuthStore.ListGrantsAsync(tx.Connection!, tx, tenantId,\n                         \"g.client_id = @client AND g.revoked_at IS NULL\", _time.GetUtcNow(), ct, (\"client\", read.ClientId)))\n                await OAuthStore.RevokeAsync(change, tenantId, grant, OAuthStore.ClientDisabledReason, disableAgent: true, _time.GetUtcNow(), ct);\n            change.Record(\"oauth.client.replace\", read.ClientId,",
+      "filter": "FullyQualifiedName~Premagentic.Tests.OAuthClientDocumentSeamTests."
+    },
+    {
+      "name": "a code is exchanged for a redirect the new document dropped",
+      "file": "src/Premagentic.Core/Identity/OAuthTokenService.cs",
+      "old": "if (!client.RedirectUris.Any(r => RedirectUris.Matches(r, code.RedirectUri)))",
+      "new": "if (false && !client.RedirectUris.Any(r => RedirectUris.Matches(r, code.RedirectUri)))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.OAuthClientDocumentSeamTests."
+    },
+    {
+      "name": "a document naming another address is taken",
+      "file": "src/Premagentic.Core/Identity/OAuthClientDocument.cs",
+      "old": "if (!string.Equals(documentId.GetString(), id, StringComparison.Ordinal))",
+      "new": "if (false && !string.Equals(documentId.GetString(), id, StringComparison.Ordinal))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.OAuthClientDocumentSeamTests."
+    },
+    {
+      "name": "a client typed in by hand has a document to replace",
+      "file": "src/Premagentic.Core/Identity/OAuthClients.cs",
+      "old": "if (client.DocumentSha256 is not { } previous)",
+      "new": "if ((client.DocumentSha256 ?? new string('0', 64)) is not { } previous)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.OAuthClientDocumentSeamTests."
+    },
+    {
+      "name": "the stored document again moves the date and records a row",
+      "file": "src/Premagentic.Core/Identity/OAuthClients.cs",
+      "old": "if (string.Equals(previous, read.Sha256, StringComparison.Ordinal)) return new OAuthClientDocumentReplaced(read, previous);",
+      "new": "if (false && string.Equals(previous, read.Sha256, StringComparison.Ordinal)) return new OAuthClientDocumentReplaced(read, previous);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.OAuthClientDocumentSeamTests."
+    },
+    {
+      "name": "the seam's add parses only the first 64 KB",
+      "file": "src/Premagentic.Core/Identity/OAuthClients.cs",
+      "old": "var read = OAuthClientDocument.Parse(document.Span, id);\n        await AddFromDocumentAsync(",
+      "new": "var read = OAuthClientDocument.Parse(document.Span[..Math.Min(document.Length, OAuthClientDocument.MaxBytes)], id);\n        await AddFromDocumentAsync(",
+      "filter": "FullyQualifiedName~Premagentic.Tests.OAuthClientDocumentSeamTests."
+    },
+    {
+      "name": "the seam's replace parses only the first 64 KB",
+      "file": "src/Premagentic.Core/Identity/OAuthClients.cs",
+      "old": "var read = OAuthClientDocument.Parse(document.Span, id);\n        return await new AdminChanges(",
+      "new": "var read = OAuthClientDocument.Parse(document.Span[..Math.Min(document.Length, OAuthClientDocument.MaxBytes)], id);\n        return await new AdminChanges(",
+      "filter": "FullyQualifiedName~Premagentic.Tests.OAuthClientDocumentSeamTests."
+    },
+    {
+      "name": "an upload is read whole",
+      "file": "src/Premagentic.Core/Identity/OAuthClientDocument.cs",
+      "old": "var read = stream.ReadAtLeast(buffer, buffer.Length, throwOnEndOfStream: false);\n        return buffer.AsSpan(0, read).ToArray();",
+      "new": "using var whole = new MemoryStream();\n        stream.CopyTo(whole);\n        return whole.ToArray();",
+      "filter": "FullyQualifiedName~Premagentic.Tests.OAuthClientDocumentSeamTests."
+    },
+    {
+      "name": "a replace takes --model beside the document",
+      "file": "src/Premagentic.Cli/Admin/OAuthCommands.cs",
+      "old": "|| CliArgs.Values(args, \"--redirect\").Count > 0 || CliArgs.Value(args, \"--model\") is not null || CliArgs.Value(args, \"--vendor\") is not null)",
+      "new": "|| CliArgs.Values(args, \"--redirect\").Count > 0 || CliArgs.Value(args, \"--vendor\") is not null)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.OAuthClientDocumentReplaceCliTests."
+    }
+  ]
+}

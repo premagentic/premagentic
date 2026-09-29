@@ -1,0 +1,139 @@
+{
+  "name": "sign-in, sessions, the caller middleware, the throttles, the trust policy per caller, MCP over HTTP and the stdio bridge",
+  "commit": "hand run, 2026-09-21",
+  "mutants": [
+    {
+      "name": "dummy-hash path removed",
+      "file": "src/Premagentic.Core/Identity/SignInService.cs",
+      "old": "var passwordMatches = _hasher.Verify(password, account?.PasswordHash ?? _dummyHash);",
+      "new": "var passwordMatches = account?.PasswordHash is { } realHash && _hasher.Verify(password, realHash);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Api|FullyQualifiedName~Premagentic.Tests.Mcp|FullyQualifiedName~Premagentic.Tests.Identity|FullyQualifiedName~Premagentic.Tests.Acl|FullyQualifiedName~Premagentic.Tests.Admin"
+    },
+    {
+      "name": "plain-HTTP refusal removed",
+      "file": "src/Premagentic.Api/Callers/ApiEndpoints.cs",
+      "old": "if (!http.Request.IsHttps && !settings.AllowHttpSignIn)",
+      "new": "if (false && !http.Request.IsHttps && !settings.AllowHttpSignIn)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Api|FullyQualifiedName~Premagentic.Tests.Mcp|FullyQualifiedName~Premagentic.Tests.Identity|FullyQualifiedName~Premagentic.Tests.Acl|FullyQualifiedName~Premagentic.Tests.Admin"
+    },
+    {
+      "name": "disabled user keeps a session",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "WHERE @value AND s.tenant_id = @tenant AND s.user_id = changed.id)",
+      "new": "WHERE FALSE AND s.tenant_id = @tenant AND s.user_id = changed.id)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Api|FullyQualifiedName~Premagentic.Tests.Mcp|FullyQualifiedName~Premagentic.Tests.Identity|FullyQualifiedName~Premagentic.Tests.Acl|FullyQualifiedName~Premagentic.Tests.Admin"
+    },
+    {
+      "name": "rate limit off",
+      "file": "src/Premagentic.Api/Callers/Throttles.cs",
+      "old": "if (recent.Count >= requestsPerMinute)",
+      "new": "if (false && recent.Count >= requestsPerMinute)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Api|FullyQualifiedName~Premagentic.Tests.Mcp|FullyQualifiedName~Premagentic.Tests.Identity|FullyQualifiedName~Premagentic.Tests.Acl|FullyQualifiedName~Premagentic.Tests.Admin"
+    },
+    {
+      "name": "no caller falls through",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "await RefuseAsync(http, \"no credentials\");",
+      "new": "await next(http);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Api|FullyQualifiedName~Premagentic.Tests.Mcp|FullyQualifiedName~Premagentic.Tests.Identity|FullyQualifiedName~Premagentic.Tests.Acl|FullyQualifiedName~Premagentic.Tests.Admin"
+    },
+    {
+      "name": "new password keeps sessions",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "                WHERE s.tenant_id = @tenant AND s.user_id = changed.id)",
+      "new": "                WHERE FALSE AND s.tenant_id = @tenant AND s.user_id = changed.id)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Api|FullyQualifiedName~Premagentic.Tests.Mcp|FullyQualifiedName~Premagentic.Tests.Identity|FullyQualifiedName~Premagentic.Tests.Acl|FullyQualifiedName~Premagentic.Tests.Admin"
+    },
+    {
+      "name": "lock ignored",
+      "file": "src/Premagentic.Core/Identity/SignInService.cs",
+      "old": "if (account.LockedUntil is { } lockedUntil && lockedUntil > identity.Time.GetUtcNow())",
+      "new": "if (false && account.LockedUntil is { } lockedUntil && lockedUntil > identity.Time.GetUtcNow())",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Api|FullyQualifiedName~Premagentic.Tests.Mcp|FullyQualifiedName~Premagentic.Tests.Identity|FullyQualifiedName~Premagentic.Tests.Acl|FullyQualifiedName~Premagentic.Tests.Admin"
+    },
+    {
+      "name": "no rehash",
+      "file": "src/Premagentic.Core/Identity/SignInService.cs",
+      "old": "if (_hasher.NeedsRehash(storedHash))",
+      "new": "if (false && _hasher.NeedsRehash(storedHash))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Api|FullyQualifiedName~Premagentic.Tests.Mcp|FullyQualifiedName~Premagentic.Tests.Identity|FullyQualifiedName~Premagentic.Tests.Acl|FullyQualifiedName~Premagentic.Tests.Admin"
+    },
+    {
+      "name": "idle timeout ignored",
+      "file": "src/Premagentic.Core/Identity/SessionStore.cs",
+      "old": "AND s.expires_at > @now AND s.last_seen_at > @idleCutoff\n              AND u.deleted_at",
+      "new": "AND s.expires_at > @now\n              AND u.deleted_at",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Api|FullyQualifiedName~Premagentic.Tests.Mcp|FullyQualifiedName~Premagentic.Tests.Identity|FullyQualifiedName~Premagentic.Tests.Acl|FullyQualifiedName~Premagentic.Tests.Admin"
+    },
+    {
+      "name": "address throttle off",
+      "file": "src/Premagentic.Api/Callers/Throttles.cs",
+      "old": "if (failures.Count < options.MaxFailures) return false;",
+      "new": "return false;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Api|FullyQualifiedName~Premagentic.Tests.Mcp|FullyQualifiedName~Premagentic.Tests.Identity|FullyQualifiedName~Premagentic.Tests.Acl|FullyQualifiedName~Premagentic.Tests.Admin"
+    },
+    {
+      "name": "cookie readable by script",
+      "file": "src/Premagentic.Api/Callers/ApiEndpoints.cs",
+      "old": "HttpOnly = true,",
+      "new": "HttpOnly = false,",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Api|FullyQualifiedName~Premagentic.Tests.Mcp|FullyQualifiedName~Premagentic.Tests.Identity|FullyQualifiedName~Premagentic.Tests.Acl|FullyQualifiedName~Premagentic.Tests.Admin"
+    },
+    {
+      "name": "a session reaches the agents-only endpoint",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "if (requirement.AgentsOnly)",
+      "new": "if (false && requirement.AgentsOnly)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Api|FullyQualifiedName~Premagentic.Tests.Mcp|FullyQualifiedName~Premagentic.Tests.Identity|FullyQualifiedName~Premagentic.Tests.Acl|FullyQualifiedName~Premagentic.Tests.Admin"
+    },
+    {
+      "name": "agent gets a person's trust policy",
+      "file": "src/Premagentic.Core/Identity/CallerAccess.cs",
+      "old": "public CallerKind Kind => Resolved.AgentId is null ? CallerKind.Person : CallerKind.Agent;",
+      "new": "public CallerKind Kind => CallerKind.Person;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Api|FullyQualifiedName~Premagentic.Tests.Mcp|FullyQualifiedName~Premagentic.Tests.Identity|FullyQualifiedName~Premagentic.Tests.Acl|FullyQualifiedName~Premagentic.Tests.Admin"
+    },
+    {
+      "name": "agent's own minimum ignored",
+      "file": "src/Premagentic.Core/Identity/CallerAccess.cs",
+      "old": "caller.Kind, caller.Agent?.MinimumTrustTier, ct);",
+      "new": "caller.Kind, null, ct);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Api|FullyQualifiedName~Premagentic.Tests.Mcp|FullyQualifiedName~Premagentic.Tests.Identity|FullyQualifiedName~Premagentic.Tests.Acl|FullyQualifiedName~Premagentic.Tests.Admin"
+    },
+    {
+      "name": "MCP sessions on",
+      "file": "src/Premagentic.Api/Callers/CallerServices.cs",
+      "old": "options.SessionMode = HttpServerSessionMode.Stateless",
+      "new": "options.SessionMode = HttpServerSessionMode.Stateful",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Api|FullyQualifiedName~Premagentic.Tests.Mcp|FullyQualifiedName~Premagentic.Tests.Identity|FullyQualifiedName~Premagentic.Tests.Acl|FullyQualifiedName~Premagentic.Tests.Admin"
+    },
+    {
+      "name": "bridge passes every tool",
+      "file": "src/Premagentic.McpServer/ApiBridge.cs",
+      "old": ".Where(t => t.Annotations?.ReadOnlyHint == true)",
+      "new": ".Where(t => true)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Api|FullyQualifiedName~Premagentic.Tests.Mcp|FullyQualifiedName~Premagentic.Tests.Identity|FullyQualifiedName~Premagentic.Tests.Acl|FullyQualifiedName~Premagentic.Tests.Admin"
+    },
+    {
+      "name": "bridge sends a token over plain http",
+      "file": "src/Premagentic.McpServer/ApiBridge.cs",
+      "old": "(apiBase.Scheme == Uri.UriSchemeHttp && apiBase.IsLoopback)",
+      "new": "apiBase.Scheme == Uri.UriSchemeHttp",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Api|FullyQualifiedName~Premagentic.Tests.Mcp|FullyQualifiedName~Premagentic.Tests.Identity|FullyQualifiedName~Premagentic.Tests.Acl|FullyQualifiedName~Premagentic.Tests.Admin"
+    },
+    {
+      "name": "every body read as JSON, before routing",
+      "file": "src/Premagentic.Api/Program.cs",
+      "old": "app.UseRouting();",
+      "new": "app.Use((c, n) => { c.Request.ContentType = \"application/json\"; return n(c); }); app.UseRouting();",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Api|FullyQualifiedName~Premagentic.Tests.Mcp|FullyQualifiedName~Premagentic.Tests.Identity|FullyQualifiedName~Premagentic.Tests.Acl|FullyQualifiedName~Premagentic.Tests.Admin"
+    },
+    {
+      "name": "an unknown name skips the dummy verification",
+      "file": "src/Premagentic.Core/Identity/SignInService.cs",
+      "old": "var passwordMatches = _hasher.Verify(password, account?.PasswordHash ?? _dummyHash);",
+      "new": "var passwordMatches = account?.PasswordHash is { } stored && _hasher.Verify(password, stored);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.IdentitySignInTests.An_unknown_name_costs_as_much_as_a_wrong_password"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+<Project>
+
+  <PropertyGroup>
+    <Version>0.1.0</Version>
+    <Authors>Agave Information Solutions, LLC</Authors>
+    <Company>Agave Information Solutions, LLC</Company>
+    <Copyright>Copyright 2026 Agave Information Solutions, LLC</Copyright>
+    <PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <!-- Every project restores from a committed packages.lock.json: CI and the
+       release restore in locked mode, so a package id or version that moves
+       without its lock file changing fails the restore instead of building. -->
+  <PropertyGroup>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+
+  <!-- The per-runtime lock files (packages.linux-x64.lock.json and
+       packages.win-x64.lock.json) are no project item: the web SDK publishes
+       every JSON file in the API's folder and leaves out only the plain
+       packages.lock.json, so without this they would ship in bin/. -->
+  <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);**/packages.*.lock.json</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <!-- ONNX Runtime's package carries import libraries for Windows beside its DLLs
+       (onnxruntime.lib, onnxruntime_providers_shared.lib). They are for linking C
+       code against it; a .NET program loads the DLL and never reads them. Left out
+       of a publish for a runtime, and so of its deps.json and the archives. -->
+  <Target Name="LeaveOutNativeImportLibraries" AfterTargets="ResolvePackageAssets">
+    <ItemGroup>
+      <NativeCopyLocalItems Remove="@(NativeCopyLocalItems)" Condition="'%(Extension)' == '.lib'" />
+    </ItemGroup>
+  </Target>
+
+</Project>

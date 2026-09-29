@@ -1,0 +1,88 @@
+PremAgentic @VERSION@ for Linux x64
+
+This archive runs as it is. It needs no .NET install, no build and no
+network connection: the programs, their runtime and the embedding model are
+all in it.
+
+What it does not include: a database. PremAgentic stores everything in a
+PostgreSQL 14 or later that you already run (it is tested on 17), and needs
+no extension in it.
+
+What is in this folder
+
+  bin/prem                   the command line: setup, ingest, search, users, ...
+  bin/Premagentic.Api        the server: people over HTTPS, agents over MCP
+  bin/Premagentic.McpServer  a bridge for an assistant that only starts a local program
+                             (the three programs share the one .NET runtime in bin/)
+  models/minilm/             the embedding model, found by the programs on their own
+@EXTENSIONS@
+  extensions/                the PDF, Word and Excel readers; none loads until allowed (step 6)
+@END-EXTENSIONS@
+  samples/profiles/starter/  a sample configuration; sample-docs/ is its documents
+  deploy/systemd/            a unit file for running the server as a service
+  licenses/                  the license text of everything this archive redistributes
+  LICENSE, NOTICE, THIRD-PARTY-NOTICES.md
+
+1. Unpack it where it will live. The service unit expects /opt/premagentic:
+
+     sudo mkdir -p /opt/premagentic
+     sudo tar -xzf premagentic-@VERSION@-linux-x64.tar.gz -C /opt/premagentic --strip-components=1
+
+2. Give setup a way into PostgreSQL. Write a file, readable by you only,
+   whose one line names a role that can create roles and databases:
+
+     connection=Host=localhost;Username=postgres;Password=...;Database=postgres
+
+   Setup uses it once and stores it nowhere.
+
+3. Run setup. It creates the database and three roles with generated
+   passwords, the first administrator (whose password it asks for), and a
+   self-signed HTTPS certificate for the name clients will use:
+
+     sudo /opt/premagentic/bin/prem setup --admin-connection-file <that file> \
+       --credentials-dir /etc/premagentic --admin-user <your sign-in name> \
+       --host-name <this server's name>
+
+   It ends by searching, to prove the install works, and says what it did.
+   Run it again at any time; a finished install is left as it is.
+   prem setup --plan shows every step and changes nothing.
+
+4. Start the server. As a service: follow the comments at the top of
+   deploy/systemd/premagentic-api.service (they have been followed as
+   written on a fresh Ubuntu 24.04 with systemd; the manual's Known state
+   page says what has been proven). To try it first, from a shell that can
+   read /etc/premagentic:
+
+     PREM_CREDENTIALS_FILE=/etc/premagentic/app.credentials /opt/premagentic/bin/Premagentic.Api
+
+   It listens on https://<host name>:8443. Give clients
+   /etc/premagentic/https.crt to trust. Sign in to /portal/ as the first
+   administrator.
+
+5. Put documents in. With PREM_CREDENTIALS_FILE set as above:
+
+     /opt/premagentic/bin/prem profile apply /opt/premagentic/samples/profiles/starter
+     /opt/premagentic/bin/prem ingest --source open
+     /opt/premagentic/bin/prem ingest --source hr
+
+   The first registers the sample configuration: two sources over
+   sample-docs/, two groups, and the rule for who may read each. The other
+   two index them. For your own documents, point prem ingest or
+   prem sources add at a folder. prem --help lists every command.
+@EXTENSIONS@
+
+6. Read PDF, Word and Excel files. The archive ships three readers in
+   extensions/. Nothing loads until it is allowed: point PremAgentic at
+   that folder and allow each reader by its hash, once, with
+   PREM_CREDENTIALS_FILE set:
+
+     /opt/premagentic/bin/prem settings set extensions.folder /opt/premagentic/extensions
+     /opt/premagentic/bin/prem extensions allow /opt/premagentic/extensions/pdf-reader
+     /opt/premagentic/bin/prem extensions allow /opt/premagentic/extensions/docx-reader
+     /opt/premagentic/bin/prem extensions allow /opt/premagentic/extensions/xlsx-reader
+
+   prem extensions list says what is loaded. A running API uses them after
+   it is restarted.
+@END-EXTENSIONS@
+
+The manual: https://premagentic.com/docs/

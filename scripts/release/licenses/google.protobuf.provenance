@@ -1,0 +1,9 @@
+text:       google.protobuf.txt (upstream file, byte for byte)
+package:    Google.Protobuf 3.30.2
+nuspec:     license expression BSD-3-Clause
+repository: https://github.com/protocolbuffers/protobuf
+commit:     43e1626812c1b543e56a7bec59dc09eb18248bd2 (the commit the package's nuspec names)
+file:       LICENSE
+url:        https://raw.githubusercontent.com/protocolbuffers/protobuf/43e1626812c1b543e56a7bec59dc09eb18248bd2/LICENSE
+read:       2026-09-24, read only, this one file
+sha256:     6e5e117324afd944dcf67f36cf329843bc1a92229a8cd9bb573d7a83130fea7d

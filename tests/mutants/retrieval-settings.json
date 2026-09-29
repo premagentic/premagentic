@@ -1,0 +1,146 @@
+{
+  "name": "the retrieval settings: their parsing, their bounds, their change record and their use in search",
+  "commit": "hand run, 2026-09-22",
+  "mutants": [
+    {
+      "name": "load reads each key on its own",
+      "file": "src/Premagentic.Core/Retrieval/RetrievalSettings.cs",
+      "old": "        FromStored(await settings.GetManyAsync(Keys, ct));",
+      "new": "        FromStored(await OneByOneAsync(settings, ct));\n\n    private static async Task<IReadOnlyDictionary<string, JsonElement>> OneByOneAsync(SettingsStore settings, CancellationToken ct)\n    {\n        var stored = new Dictionary<string, JsonElement>();\n        foreach (var key in Keys)\n            if (await settings.GetAsync(key, ct) is { } value) stored[key] = value;\n        return stored;\n    }",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalSettings"
+    },
+    {
+      "name": "the store ignores the caller's transaction",
+      "file": "src/Premagentic.Core/Identity/SettingsStore.cs",
+      "old": "        var cmd = transaction is null\n            ? db.DataSource.CreateCommand(sql)",
+      "new": "        var cmd = transaction is null || true\n            ? db.DataSource.CreateCommand(sql)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalSettings"
+    },
+    {
+      "name": "load ignores the tenant",
+      "file": "src/Premagentic.Core/Identity/SettingsStore.cs",
+      "old": "WHERE tenant_id = @tenant AND key = ANY(@keys)",
+      "new": "WHERE (tenant_id = @tenant OR TRUE) AND key = ANY(@keys)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalSettings"
+    },
+    {
+      "name": "the floor admits 0",
+      "file": "src/Premagentic.Core/Retrieval/RetrievalSettings.cs",
+      "old": "floor > 0 && floor < 2",
+      "new": "floor >= 0 && floor < 2",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalSettings"
+    },
+    {
+      "name": "the floor admits 2",
+      "file": "src/Premagentic.Core/Retrieval/RetrievalSettings.cs",
+      "old": "floor > 0 && floor < 2",
+      "new": "floor > 0 && floor <= 2",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalSettings"
+    },
+    {
+      "name": "rrf_k admits 0",
+      "file": "src/Premagentic.Core/Retrieval/RetrievalSettings.cs",
+      "old": "k is >= 1 and <= 1000",
+      "new": "k is >= 0 and <= 1000",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalSettings"
+    },
+    {
+      "name": "rrf_k admits 1001",
+      "file": "src/Premagentic.Core/Retrieval/RetrievalSettings.cs",
+      "old": "k is >= 1 and <= 1000",
+      "new": "k is >= 1 and <= 1001",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalSettings"
+    },
+    {
+      "name": "the fallback weight admits below 0",
+      "file": "src/Premagentic.Core/Retrieval/RetrievalSettings.cs",
+      "old": "weight is >= 0 and <= 1",
+      "new": "weight is >= -1 and <= 1",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalSettings"
+    },
+    {
+      "name": "the fallback weight admits above 1",
+      "file": "src/Premagentic.Core/Retrieval/RetrievalSettings.cs",
+      "old": "weight is >= 0 and <= 1",
+      "new": "weight is >= 0 and <= 2",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalSettings"
+    },
+    {
+      "name": "infinite numbers pass",
+      "file": "src/Premagentic.Core/Retrieval/RetrievalSettings.cs",
+      "old": " && double.IsFinite(number);",
+      "new": ";",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalSettings"
+    },
+    {
+      "name": "a weight of 0 is allowed",
+      "file": "src/Premagentic.Core/Retrieval/RetrievalSettings.cs",
+      "old": "TryNumber(value, out weight) && weight > 0;",
+      "new": "TryNumber(value, out weight) && weight >= 0;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalSettings"
+    },
+    {
+      "name": "class names are compared by case",
+      "file": "src/Premagentic.Core/Retrieval/RetrievalSettings.cs",
+      "old": "var byClass = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);",
+      "new": "var byClass = new Dictionary<string, double>(StringComparer.Ordinal);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalSettings"
+    },
+    {
+      "name": "an unknown member is ignored",
+      "file": "src/Premagentic.Core/Retrieval/RetrievalSettings.cs",
+      "old": "                default:\n                    return Refuse(out problem,\n                        $\"{Authority} takes only",
+      "new": "                default:\n                    if (member.Name.Length > 0) break;\n                    return Refuse(out problem,\n                        $\"{Authority} takes only",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalSettings"
+    },
+    {
+      "name": "a member given twice is taken",
+      "file": "src/Premagentic.Core/Retrieval/RetrievalSettings.cs",
+      "old": "if (!members.Add(member.Name))",
+      "new": "if (!members.Add(member.Name) && false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalSettings"
+    },
+    {
+      "name": "a blank class name is allowed",
+      "file": "src/Premagentic.Core/Retrieval/RetrievalSettings.cs",
+      "old": "if (string.IsNullOrWhiteSpace(entry.Name))",
+      "new": "if (string.IsNullOrEmpty(entry.Name) && false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalSettings"
+    },
+    {
+      "name": "an unknown key is allowed",
+      "file": "src/Premagentic.Core/Retrieval/RetrievalSettings.cs",
+      "old": "                problem = UnknownKey(key).Message;\n                return false;",
+      "new": "                return true;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalSettings"
+    },
+    {
+      "name": "a stored problem is not reported",
+      "file": "src/Premagentic.Core/Retrieval/RetrievalSettings.cs",
+      "old": "problems.Add(new RetrievalSettingProblem(key, problem!));",
+      "new": "_ = problem;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalSettings"
+    },
+    {
+      "name": "a stored rrf_k is not applied",
+      "file": "src/Premagentic.Core/Retrieval/RetrievalSettings.cs",
+      "old": "case RrfK: tuning = tuning with { RrfK = (int)parsed! }; break;",
+      "new": "case RrfK: break;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalSettings"
+    },
+    {
+      "name": "a stored authority table is not applied",
+      "file": "src/Premagentic.Core/Retrieval/RetrievalSettings.cs",
+      "old": "case Authority: authority = (AuthorityWeights)parsed!; break;",
+      "new": "case Authority: break;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalSettings"
+    },
+    {
+      "name": "a quoted value is never clipped",
+      "file": "src/Premagentic.Core/Retrieval/RetrievalSettings.cs",
+      "old": "text.Length <= QuotedLength ? text :",
+      "new": "text.Length >= 0 ? text :",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalSettings"
+    }
+  ]
+}

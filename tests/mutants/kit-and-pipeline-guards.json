@@ -1,0 +1,153 @@
+{
+  "name": "the kit's sign-in and reminder fixtures, and the pipeline's size limit and storable-text check",
+  "commit": "hand run, 2026-09-25",
+  "mutants": [
+    {
+      "name": "5a an adapter may sign in a request with nothing on it",
+      "file": "tests/Premagentic.Conformance/SignInAdapterConformance.cs",
+      "old": "        Assert.True(resolution?.SignInName is null,\n            $\"The adapter '{Adapter.Name}' signed a request with no headers",
+      "new": "        Assert.True(true,\n            $\"The adapter '{Adapter.Name}' signed a request with no headers",
+      "filter": "FullyQualifiedName~Premagentic.Tests.KitFixturesCanFailTests|FullyQualifiedName~Premagentic.Tests.KitFake|FullyQualifiedName~Premagentic.Tests.MailReminderSinkConformanceTests|FullyQualifiedName~Premagentic.Tests.ConformanceKitTests"
+    },
+    {
+      "name": "5b an adapter may sign in a forged request",
+      "file": "tests/Premagentic.Conformance/SignInAdapterConformance.cs",
+      "old": "        Assert.True(resolution?.SignInName is null,\n            $\"The adapter '{Adapter.Name}' signed a request in as",
+      "new": "        Assert.True(true,\n            $\"The adapter '{Adapter.Name}' signed a request in as",
+      "filter": "FullyQualifiedName~Premagentic.Tests.KitFixturesCanFailTests|FullyQualifiedName~Premagentic.Tests.KitFake|FullyQualifiedName~Premagentic.Tests.MailReminderSinkConformanceTests|FullyQualifiedName~Premagentic.Tests.ConformanceKitTests"
+    },
+    {
+      "name": "5c the forged request carries nothing",
+      "file": "tests/Premagentic.Conformance/SignInAdapterConformance.cs",
+      "old": "        if (!forged) return \"\";\n        if (!_headers",
+      "new": "        return \"\";\n        if (!_headers",
+      "filter": "FullyQualifiedName~Premagentic.Tests.KitFixturesCanFailTests|FullyQualifiedName~Premagentic.Tests.KitFake|FullyQualifiedName~Premagentic.Tests.MailReminderSinkConformanceTests|FullyQualifiedName~Premagentic.Tests.ConformanceKitTests"
+    },
+    {
+      "name": "5d the store scan finds nothing",
+      "file": "tests/Premagentic.Conformance/SignInAdapterConformance.cs",
+      "old": "            if (StoreNamespaces.Contains(ns) || StoreTypes.Contains(full) || ns.StartsWith(\"Npgsql\", StringComparison.Ordinal))",
+      "new": "            if (ns == \"nothing\")",
+      "filter": "FullyQualifiedName~Premagentic.Tests.KitFixturesCanFailTests|FullyQualifiedName~Premagentic.Tests.KitFake|FullyQualifiedName~Premagentic.Tests.MailReminderSinkConformanceTests|FullyQualifiedName~Premagentic.Tests.ConformanceKitTests"
+    },
+    {
+      "name": "5e an unusable adapter name passes",
+      "file": "tests/Premagentic.Conformance/SignInAdapterConformance.cs",
+      "old": "        Assert.True(ChunkerRegistry.IsName(Adapter.Name) && Adapter.Name == Adapter.Name.ToLowerInvariant(),",
+      "new": "        Assert.True(true,",
+      "filter": "FullyQualifiedName~Premagentic.Tests.KitFixturesCanFailTests|FullyQualifiedName~Premagentic.Tests.KitFake|FullyQualifiedName~Premagentic.Tests.MailReminderSinkConformanceTests|FullyQualifiedName~Premagentic.Tests.ConformanceKitTests"
+    },
+    {
+      "name": "5f a sink may deliver before a run is handed to it",
+      "file": "tests/Premagentic.Conformance/ReminderSinkConformance.cs",
+      "old": "        Assert.True(Delivered().Count == 0,\n            $\"The sink '{Sink.Name}' delivered to",
+      "new": "        Assert.True(true,\n            $\"The sink '{Sink.Name}' delivered to",
+      "filter": "FullyQualifiedName~Premagentic.Tests.KitFixturesCanFailTests|FullyQualifiedName~Premagentic.Tests.KitFake|FullyQualifiedName~Premagentic.Tests.MailReminderSinkConformanceTests|FullyQualifiedName~Premagentic.Tests.ConformanceKitTests"
+    },
+    {
+      "name": "5g a sink may deliver one owner's reminders to another",
+      "file": "tests/Premagentic.Conformance/ReminderSinkConformance.cs",
+      "old": "                Assert.False(text!.Contains(other, StringComparison.Ordinal),",
+      "new": "                Assert.False(false,",
+      "filter": "FullyQualifiedName~Premagentic.Tests.KitFixturesCanFailTests|FullyQualifiedName~Premagentic.Tests.KitFake|FullyQualifiedName~Premagentic.Tests.MailReminderSinkConformanceTests|FullyQualifiedName~Premagentic.Tests.ConformanceKitTests"
+    },
+    {
+      "name": "5h an owner with nothing delivered is not noticed",
+      "file": "tests/Premagentic.Conformance/ReminderSinkConformance.cs",
+      "old": "            Assert.True(delivered.TryGetValue(summary.OwnerPrincipal, out var text),",
+      "new": "            delivered.TryGetValue(summary.OwnerPrincipal, out var text);\n            Assert.True(true,",
+      "filter": "FullyQualifiedName~Premagentic.Tests.KitFixturesCanFailTests|FullyQualifiedName~Premagentic.Tests.KitFake|FullyQualifiedName~Premagentic.Tests.MailReminderSinkConformanceTests|FullyQualifiedName~Premagentic.Tests.ConformanceKitTests"
+    },
+    {
+      "name": "5i the unreachable owner comes last, so stopping at it loses nobody",
+      "file": "tests/Premagentic.Conformance/ReminderSinkConformance.cs",
+      "old": "        var run = Run(Owners[0], Unreachable, Owners[1]);",
+      "new": "        var run = Run(Owners[0], Owners[1], Unreachable);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.KitFixturesCanFailTests|FullyQualifiedName~Premagentic.Tests.KitFake|FullyQualifiedName~Premagentic.Tests.MailReminderSinkConformanceTests|FullyQualifiedName~Premagentic.Tests.ConformanceKitTests"
+    },
+    {
+      "name": "5j a sink that says which owners it could not reach fails the rule",
+      "file": "tests/Premagentic.Conformance/ReminderSinkConformance.cs",
+      "old": "        try\n        {\n            await Sink.DeliverAsync(run, Now, CancellationToken.None);\n        }\n        catch (Exception ex) when (ex is not OperationCanceledException)\n        {\n        }\n",
+      "new": "        await Sink.DeliverAsync(run, Now, CancellationToken.None);\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.KitFixturesCanFailTests|FullyQualifiedName~Premagentic.Tests.KitFake|FullyQualifiedName~Premagentic.Tests.MailReminderSinkConformanceTests|FullyQualifiedName~Premagentic.Tests.ConformanceKitTests"
+    },
+    {
+      "name": "5k the kit does not say it proves the sign-in and reminder seams",
+      "file": "tests/Premagentic.Conformance/Premagentic.Conformance.csproj",
+      "old": ";signin=$(KitSignIn);reminder=$(KitReminder)</KitSeams>",
+      "new": "</KitSeams>",
+      "filter": "FullyQualifiedName~Premagentic.Tests.KitFixturesCanFailTests|FullyQualifiedName~Premagentic.Tests.KitFake|FullyQualifiedName~Premagentic.Tests.MailReminderSinkConformanceTests|FullyQualifiedName~Premagentic.Tests.ConformanceKitTests"
+    },
+    {
+      "name": "11a a stream that states its length is read before it is refused",
+      "file": "src/Premagentic.Core/Ingestion/Readers/DocumentSourceReading.cs",
+      "old": "        if (stated > limit) throw TooLarge(limit);\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PipelineReadLimitTests"
+    },
+    {
+      "name": "11b the copy asks for a whole chunk, reading past the limit",
+      "file": "src/Premagentic.Core/Ingestion/Readers/DocumentSourceReading.cs",
+      "old": "(int)Math.Min(chunk.Length, limit + 1 - total)",
+      "new": "chunk.Length",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PipelineReadLimitTests"
+    },
+    {
+      "name": "11c nothing refuses a file longer than the limit",
+      "file": "src/Premagentic.Core/Ingestion/Readers/DocumentSourceReading.cs",
+      "old": "            if (total > limit) throw TooLarge(limit);\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PipelineReadLimitTests"
+    },
+    {
+      "name": "11d a file exactly as long as the limit is refused",
+      "file": "src/Premagentic.Core/Ingestion/Readers/DocumentSourceReading.cs",
+      "old": "            if (total > limit) throw TooLarge(limit);\n",
+      "new": "            if (total >= limit) throw TooLarge(limit);\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PipelineReadLimitTests"
+    },
+    {
+      "name": "11e the entry point every run uses is not held to the default",
+      "file": "src/Premagentic.Core/Ingestion/Readers/DocumentSourceReading.cs",
+      "old": "        ReadAsync(content, readers, MaxFileBytes, ct);",
+      "new": "        ReadAsync(content, readers, MaxFileBytes * 4, ct);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PipelineReadLimitTests"
+    },
+    {
+      "name": "12a a NUL passes the read step",
+      "file": "src/Premagentic.Core/Ingestion/Readers/DocumentSourceReading.cs",
+      "old": "            if (c == '\\0') return false;\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PipelineStorableText"
+    },
+    {
+      "name": "12b half of a surrogate pair passes the read step",
+      "file": "src/Premagentic.Core/Ingestion/Readers/DocumentSourceReading.cs",
+      "old": "            if (char.IsSurrogate(c)) return false;\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PipelineStorableText"
+    },
+    {
+      "name": "12c what a reader returned is never judged",
+      "file": "src/Premagentic.Core/Ingestion/Readers/DocumentSourceReading.cs",
+      "old": "        if (!Storable(read))\n            return SourceRead.Failed(content.Path, UnstorableReason);\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PipelineStorableText"
+    },
+    {
+      "name": "12d the frontmatter a reader returned is not judged",
+      "file": "src/Premagentic.Core/Ingestion/Readers/DocumentSourceReading.cs",
+      "old": "        && (read.Frontmatter?.All(f => Storable(f.Key) && Storable(f.Value)) ?? true)\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PipelineStorableText"
+    },
+    {
+      "name": "12e nested frontmatter values are not judged",
+      "file": "src/Premagentic.Core/Ingestion/Readers/DocumentSourceReading.cs",
+      "old": " && StorableValue(parsed.Values)));",
+      "new": "));",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PipelineStorableText"
+    }
+  ]
+}

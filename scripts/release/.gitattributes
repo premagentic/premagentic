@@ -1,0 +1,2 @@
+# The upstream license texts are shipped byte for byte; no line-ending conversion.
+licenses/*.txt -text

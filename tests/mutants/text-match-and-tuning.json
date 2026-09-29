@@ -1,0 +1,160 @@
+{
+  "name": "the text match function's single list condition and the stored tuning's loader",
+  "commit": "hand run, 2026-09-22",
+  "mutants": [
+    {
+      "name": "the caller's lists are ignored where the session reads the whole index",
+      "file": "src/Premagentic.Core/Retrieval/TextMatchFunction.cs",
+      "old": "$\"    reads_all BOOLEAN := whole AND {unrestricted};\",",
+      "new": "$\"    reads_all BOOLEAN := whole;\",",
+      "filter": "(FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.TextMatchFunctionTests)&FullyQualifiedName!~The_generated_body_is_the_checked_in_text"
+    },
+    {
+      "name": "the session's lists replace the caller's where the session reads the whole index",
+      "file": "src/Premagentic.Core/Retrieval/TextMatchFunction.cs",
+      "old": "$\"        WHEN whole THEN {permitted}\",",
+      "new": "$\"        WHEN whole THEN lists\",",
+      "filter": "(FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.TextMatchFunctionTests)&FullyQualifiedName!~The_generated_body_is_the_checked_in_text"
+    },
+    {
+      "name": "every caller reads the whole index (the session binding absent)",
+      "file": "src/Premagentic.Core/Retrieval/TextMatchFunction.cs",
+      "old": "\"    whole BOOLEAN := prem_config.reads_whole_index(session_user)\",",
+      "new": "\"    whole BOOLEAN := TRUE OR prem_config.reads_whole_index(session_user)\",",
+      "filter": "(FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.TextMatchFunctionTests)&FullyQualifiedName!~The_generated_body_is_the_checked_in_text"
+    },
+    {
+      "name": "a caller claiming every list escapes its session",
+      "file": "src/Premagentic.Core/Retrieval/TextMatchFunction.cs",
+      "old": "$\"    reads_all BOOLEAN := whole AND {unrestricted};\",",
+      "new": "$\"    reads_all BOOLEAN := whole OR {unrestricted};\",",
+      "filter": "(FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.TextMatchFunctionTests)&FullyQualifiedName!~The_generated_body_is_the_checked_in_text"
+    },
+    {
+      "name": "the session is not cut down to the caller's lists",
+      "file": "src/Premagentic.Core/Retrieval/TextMatchFunction.cs",
+      "old": "$\"        ELSE ARRAY(SELECT l FROM unnest(lists) l WHERE l = ANY ({permitted}))\",",
+      "new": "\"        ELSE lists\",",
+      "filter": "(FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.TextMatchFunctionTests)&FullyQualifiedName!~The_generated_body_is_the_checked_in_text"
+    },
+    {
+      "name": "the caller's lists are not cut down to the session's",
+      "file": "src/Premagentic.Core/Retrieval/TextMatchFunction.cs",
+      "old": "$\"        ELSE ARRAY(SELECT l FROM unnest(lists) l WHERE l = ANY ({permitted}))\",",
+      "new": "$\"        ELSE {permitted}\",",
+      "filter": "(FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.TextMatchFunctionTests)&FullyQualifiedName!~The_generated_body_is_the_checked_in_text"
+    },
+    {
+      "name": "a body renders without the access gate",
+      "file": "src/Premagentic.Core/Retrieval/TextMatchFunction.cs",
+      "old": "if (!parameters.Contains(AccessGate.UnrestrictedParameter) || !parameters.Contains(AccessGate.PermittedParameter))",
+      "new": "if (false && (!parameters.Contains(AccessGate.UnrestrictedParameter) || !parameters.Contains(AccessGate.PermittedParameter)))",
+      "filter": "(FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.TextMatchFunctionTests)&FullyQualifiedName!~The_generated_body_is_the_checked_in_text"
+    },
+    {
+      "name": "the gate's own condition is not folded (plan only; the checked-in text must catch it)",
+      "file": "src/Premagentic.Core/Retrieval/TextMatchFunction.cs",
+      "old": "parameters.Select(p => p == AccessGate.UnrestrictedParameter ? \"TRUE\" : \"g_\" + p)",
+      "new": "parameters.Select(p => \"g_\" + p)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.TextMatchFunctionTests"
+    },
+    {
+      "name": "DECISIVE gate removed, gate tests (expected to fail)",
+      "file": "src/Premagentic.Core/Retrieval/Gates/AccessGate.cs",
+      "old": "\"(@unrestricted OR d.acl_set_id = ANY(@permitted))\"",
+      "new": "\"(@unrestricted OR TRUE OR d.acl_set_id = ANY(@permitted))\"",
+      "filter": "FullyQualifiedName~Premagentic.Tests.IdentityGate"
+    },
+    {
+      "name": "the search ignores its loader and ranks with the fixed tuning",
+      "file": "src/Premagentic.Core/Retrieval/HybridSearch.cs",
+      "old": "        var inForce = storedTuning is null\n",
+      "new": "        var inForce = storedTuning is null || true\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalTuningSearchTests|FullyQualifiedName~Premagentic.Tests.ApiRetrievalTuningTests|FullyQualifiedName~Premagentic.Tests.SearchCliTuningTests"
+    },
+    {
+      "name": "the text leg's RRF k is the fixed one",
+      "file": "src/Premagentic.Core/Retrieval/HybridSearch.cs",
+      "old": "var score = (fallback ? tuning.FallbackRrfWeight : 1.0) / (tuning.RrfK + i + 1);",
+      "new": "var score = (fallback ? tuning.FallbackRrfWeight : 1.0) / (_tuning.RrfK + i + 1);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalTuningSearchTests|FullyQualifiedName~Premagentic.Tests.ApiRetrievalTuningTests|FullyQualifiedName~Premagentic.Tests.SearchCliTuningTests"
+    },
+    {
+      "name": "the vector leg's RRF k is the fixed one",
+      "file": "src/Premagentic.Core/Retrieval/HybridSearch.cs",
+      "old": "var score = 1.0 / (tuning.RrfK + i + 1);",
+      "new": "var score = 1.0 / (_tuning.RrfK + i + 1);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalTuningSearchTests|FullyQualifiedName~Premagentic.Tests.ApiRetrievalTuningTests|FullyQualifiedName~Premagentic.Tests.SearchCliTuningTests"
+    },
+    {
+      "name": "the fallback weight is the fixed one",
+      "file": "src/Premagentic.Core/Retrieval/HybridSearch.cs",
+      "old": "var score = (fallback ? tuning.FallbackRrfWeight : 1.0) / (tuning.RrfK + i + 1);",
+      "new": "var score = (fallback ? _tuning.FallbackRrfWeight : 1.0) / (tuning.RrfK + i + 1);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalTuningSearchTests|FullyQualifiedName~Premagentic.Tests.ApiRetrievalTuningTests|FullyQualifiedName~Premagentic.Tests.SearchCliTuningTests"
+    },
+    {
+      "name": "the authority weights are the fixed ones",
+      "file": "src/Premagentic.Core/Retrieval/HybridSearch.cs",
+      "old": "Score = v.Score * authority.For(docClasses.GetValueOrDefault(id))",
+      "new": "Score = v.Score * _authority.For(docClasses.GetValueOrDefault(id))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalTuningSearchTests|FullyQualifiedName~Premagentic.Tests.ApiRetrievalTuningTests|FullyQualifiedName~Premagentic.Tests.SearchCliTuningTests"
+    },
+    {
+      "name": "fixed tuning and a loader are both accepted",
+      "file": "src/Premagentic.Core/Retrieval/HybridSearch.cs",
+      "old": "_authority = storedTuning is not null && (authority is not null || tuning is not null)",
+      "new": "_authority = false && storedTuning is not null && (authority is not null || tuning is not null)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalTuningSearchTests|FullyQualifiedName~Premagentic.Tests.ApiRetrievalTuningTests|FullyQualifiedName~Premagentic.Tests.SearchCliTuningTests"
+    },
+    {
+      "name": "the result carries the fixed reading, not the one it ranked under",
+      "file": "src/Premagentic.Core/Retrieval/HybridSearch.cs",
+      "old": "hits, sw.ElapsedMilliseconds, inForce);",
+      "new": "hits, sw.ElapsedMilliseconds, new RetrievalSettingsReading(_tuning, _authority, []));",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalTuningSearchTests|FullyQualifiedName~Premagentic.Tests.ApiRetrievalTuningTests|FullyQualifiedName~Premagentic.Tests.SearchCliTuningTests"
+    },
+    {
+      "name": "the result drops the reading's problems",
+      "file": "src/Premagentic.Core/Retrieval/HybridSearch.cs",
+      "old": "hits, sw.ElapsedMilliseconds, inForce);",
+      "new": "hits, sw.ElapsedMilliseconds, inForce with { Problems = [] });",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalTuningSearchTests|FullyQualifiedName~Premagentic.Tests.ApiRetrievalTuningTests|FullyQualifiedName~Premagentic.Tests.SearchCliTuningTests"
+    },
+    {
+      "name": "the loader reports a problem on every search",
+      "file": "src/Premagentic.Core/Retrieval/RetrievalSettingsLoader.cs",
+      "old": "if (_reported.TryAdd(problem.Key, 0))",
+      "new": "if (_reported.TryAdd(problem.Key, 0) || true)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalTuningSearchTests|FullyQualifiedName~Premagentic.Tests.ApiRetrievalTuningTests|FullyQualifiedName~Premagentic.Tests.SearchCliTuningTests"
+    },
+    {
+      "name": "the loader never reports",
+      "file": "src/Premagentic.Core/Retrieval/RetrievalSettingsLoader.cs",
+      "old": "                report?.Invoke(problem);",
+      "new": "                _ = report;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalTuningSearchTests|FullyQualifiedName~Premagentic.Tests.ApiRetrievalTuningTests|FullyQualifiedName~Premagentic.Tests.SearchCliTuningTests"
+    },
+    {
+      "name": "the API host builds its search without a loader",
+      "file": "src/Premagentic.Api/Program.cs",
+      "old": "storedTuning: new RetrievalSettingsLoader(",
+      "new": "storedTuning: true ? null : new RetrievalSettingsLoader(",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalTuningSearchTests|FullyQualifiedName~Premagentic.Tests.ApiRetrievalTuningTests|FullyQualifiedName~Premagentic.Tests.SearchCliTuningTests"
+    },
+    {
+      "name": "the API host logs an unusable setting below warning",
+      "file": "src/Premagentic.Api/Program.cs",
+      "old": "problem => log.LogWarning(",
+      "new": "problem => log.LogInformation(",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalTuningSearchTests|FullyQualifiedName~Premagentic.Tests.ApiRetrievalTuningTests|FullyQualifiedName~Premagentic.Tests.SearchCliTuningTests"
+    },
+    {
+      "name": "the CLI search runs without a loader",
+      "file": "src/Premagentic.Cli/Program.cs",
+      "old": "searchRole: searchRole, storedTuning: storedTuning);",
+      "new": "searchRole: searchRole, storedTuning: null);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.RetrievalTuningSearchTests|FullyQualifiedName~Premagentic.Tests.ApiRetrievalTuningTests|FullyQualifiedName~Premagentic.Tests.SearchCliTuningTests"
+    }
+  ]
+}

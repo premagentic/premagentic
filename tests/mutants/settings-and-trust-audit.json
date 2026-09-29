@@ -1,0 +1,132 @@
+{
+  "name": "Trust settings from the database, their change record, the policy in the audit row and the settings command",
+  "commit": "hand run, 2026-09-21",
+  "mutants": [
+    {
+      "name": "settings never read from the database",
+      "file": "src/Premagentic.Core/Okf/TrustSettingsStore.cs",
+      "old": "        FromStored(await ReadStoredAsync(ct));",
+      "new": "        FromStored(new Dictionary<string, string>());",
+      "filter": "FullyQualifiedName~Settings|FullyQualifiedName~TrustAudit|FullyQualifiedName~TrustPolicy"
+    },
+    {
+      "name": "unreadable value reads as the default",
+      "file": "src/Premagentic.Core/Okf/TrustSettingsStore.cs",
+      "old": ": (StrictestValue(key), TrustSettingSource.Unreadable);",
+      "new": ": (DefaultValue(key), TrustSettingSource.Unreadable);",
+      "filter": "FullyQualifiedName~Settings|FullyQualifiedName~TrustAudit|FullyQualifiedName~TrustPolicy"
+    },
+    {
+      "name": "people tier read from the agents key",
+      "file": "src/Premagentic.Core/Okf/TrustSettingsStore.cs",
+      "old": "PersonMinimumTier: TierOf(PeopleMinimumTier),",
+      "new": "PersonMinimumTier: TierOf(AgentsMinimumTier),",
+      "filter": "FullyQualifiedName~Settings|FullyQualifiedName~TrustAudit|FullyQualifiedName~TrustPolicy"
+    },
+    {
+      "name": "stale looser check reversed",
+      "file": "src/Premagentic.Core/Okf/TrustSettingsStore.cs",
+      "old": "Stale => Array.IndexOf(StaleValues, to) > Array.IndexOf(StaleValues, from),",
+      "new": "Stale => Array.IndexOf(StaleValues, to) < Array.IndexOf(StaleValues, from),",
+      "filter": "FullyQualifiedName~Settings|FullyQualifiedName~TrustAudit|FullyQualifiedName~TrustPolicy"
+    },
+    {
+      "name": "a repeat of the stored value is written and recorded",
+      "file": "src/Premagentic.Core/Okf/TrustSettingsStore.cs",
+      "old": "if (before.Source == TrustSettingSource.Stored && StoredString(oldJson) == normalized)",
+      "new": "if (false)",
+      "filter": "FullyQualifiedName~Settings|FullyQualifiedName~TrustAudit|FullyQualifiedName~TrustPolicy"
+    },
+    {
+      "name": "setting change not recorded",
+      "file": "src/Premagentic.Core/Okf/TrustSettingsStore.cs",
+      "old": "        await ChangeRecord.AppendAsync(conn, tx, tenantId, ChangeKind, key, oldJson, newJson, actor, ct);\n        await tx.CommitAsync(ct);",
+      "new": "        await tx.CommitAsync(ct);",
+      "filter": "FullyQualifiedName~Settings|FullyQualifiedName~TrustAudit|FullyQualifiedName~TrustPolicy"
+    },
+    {
+      "name": "setting committed before its record is written",
+      "file": "src/Premagentic.Core/Okf/TrustSettingsStore.cs",
+      "old": "        await ChangeRecord.AppendAsync(conn, tx, tenantId, ChangeKind, key, oldJson, newJson, actor, ct);\n        await tx.CommitAsync(ct);",
+      "new": "        await tx.CommitAsync(ct);\n        await ChangeRecord.AppendAsync(conn, null!, tenantId, ChangeKind, key, oldJson, newJson, actor, ct);",
+      "filter": "FullyQualifiedName~Settings|FullyQualifiedName~TrustAudit|FullyQualifiedName~TrustPolicy"
+    },
+    {
+      "name": "an agent's own minimum ignored",
+      "file": "src/Premagentic.Core/Okf/TrustPolicy.cs",
+      "old": "var minimum = string.IsNullOrWhiteSpace(agentMinimumTier)",
+      "new": "var minimum = true",
+      "filter": "FullyQualifiedName~Settings|FullyQualifiedName~TrustAudit|FullyQualifiedName~TrustPolicy"
+    },
+    {
+      "name": "audit row records a fixed tier",
+      "file": "src/Premagentic.Core/Retrieval/HybridSearch.cs",
+      "old": "(short)gate.Trust.MinimumMachineTier",
+      "new": "(short)Okf.OkfTrustTier.HumanReviewed",
+      "filter": "FullyQualifiedName~Settings|FullyQualifiedName~TrustAudit|FullyQualifiedName~TrustPolicy"
+    },
+    {
+      "name": "audit row records stale as never included",
+      "file": "src/Premagentic.Core/Retrieval/HybridSearch.cs",
+      "old": "cmd.Parameters.AddWithValue(\"includeStale\", gate.Trust.IncludeStale);",
+      "new": "cmd.Parameters.AddWithValue(\"includeStale\", false);",
+      "filter": "FullyQualifiedName~Settings|FullyQualifiedName~TrustAudit|FullyQualifiedName~TrustPolicy"
+    },
+    {
+      "name": "audit row records the clock, not the search instant",
+      "file": "src/Premagentic.Core/Retrieval/HybridSearch.cs",
+      "old": "new Npgsql.NpgsqlParameter(\"policyAt\", NpgsqlDbType.TimestampTz) { Value = gate.Now }",
+      "new": "new Npgsql.NpgsqlParameter(\"policyAt\", NpgsqlDbType.TimestampTz) { Value = DateTimeOffset.UtcNow }",
+      "filter": "FullyQualifiedName~Settings|FullyQualifiedName~TrustAudit|FullyQualifiedName~TrustPolicy"
+    },
+    {
+      "name": "no warning for a looser value",
+      "file": "src/Premagentic.Cli/Admin/SettingsCommands.cs",
+      "old": "        if (TrustSettingsStore.IsLooser(key, current.Value, normalized))\n            Console.WriteLine($\"WARNING:",
+      "new": "        if (false)\n            Console.WriteLine($\"WARNING:",
+      "filter": "FullyQualifiedName~Settings|FullyQualifiedName~TrustAudit|FullyQualifiedName~TrustPolicy"
+    },
+    {
+      "name": "warning printed after the value is saved",
+      "file": "src/Premagentic.Cli/Admin/SettingsCommands.cs",
+      "old": "        if (TrustSettingsStore.IsLooser(key, current.Value, normalized))\n            Console.WriteLine($\"WARNING: {normalized} is looser than {current.Value}. {Consequence(key, normalized)}\");\n\n        var change = await store.SetAsync(key, normalized, AdminActor.Cli());",
+      "new": "        var change = await store.SetAsync(key, normalized, AdminActor.Cli());\n        if (TrustSettingsStore.IsLooser(key, current.Value, normalized))\n            Console.WriteLine($\"WARNING: {normalized} is looser than {current.Value}. {Consequence(key, normalized)}\");\n",
+      "filter": "FullyQualifiedName~Settings|FullyQualifiedName~TrustAudit|FullyQualifiedName~TrustPolicy"
+    },
+    {
+      "name": "hosts keep the default settings",
+      "file": "src/Premagentic.Core/Identity/CallerAccess.cs",
+      "old": "return new TrustSettingsStore(db, tenantId).ResolveAsync(kind, agentMinimumTier, ct);",
+      "new": "return Task.FromResult(TrustPolicy.Resolve(kind, agentMinimumTier, TrustSettings.Default));",
+      "filter": "FullyQualifiedName~SettingsHttp|FullyQualifiedName~TrustAudit"
+    },
+    {
+      "name": "a section fetch is not recorded",
+      "file": "src/Premagentic.Core/Retrieval/SectionFetcher.cs",
+      "old": "        await HybridSearch.WriteEventAsync(\n            db, tenantId, HybridSearch.SectionEventKind, path, heading, gate, served,\n            sw.ElapsedMilliseconds, lexicalCount: null, bestDistance: null, ct);\n",
+      "new": "",
+      "filter": "FullyQualifiedName~SettingsHttp|FullyQualifiedName~TrustAudit"
+    },
+    {
+      "name": "a section fetch is recorded as a search",
+      "file": "src/Premagentic.Core/Retrieval/SectionFetcher.cs",
+      "old": "HybridSearch.SectionEventKind, path, heading",
+      "new": "HybridSearch.SearchEventKind, path, heading",
+      "filter": "FullyQualifiedName~SettingsHttp|FullyQualifiedName~TrustAudit"
+    },
+    {
+      "name": "a section fetch records no passages",
+      "file": "src/Premagentic.Core/Retrieval/SectionFetcher.cs",
+      "old": "                served.Add(new HybridSearch.AuditedPassage(path, reader.GetString(1), reader.GetString(3)));\n",
+      "new": "",
+      "filter": "FullyQualifiedName~SettingsHttp|FullyQualifiedName~TrustAudit"
+    },
+    {
+      "name": "the requested heading is not recorded",
+      "file": "src/Premagentic.Core/Retrieval/HybridSearch.cs",
+      "old": "(object?)requestedHeading ?? DBNull.Value",
+      "new": "DBNull.Value",
+      "filter": "FullyQualifiedName~SettingsHttp|FullyQualifiedName~TrustAudit"
+    }
+  ]
+}

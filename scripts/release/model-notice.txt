@@ -1,0 +1,16 @@
+The embedding model in this folder
+
+model.onnx and vocab.txt are the ONNX export and the vocabulary of
+sentence-transformers/all-MiniLM-L6-v2, taken unchanged from
+https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
+at revision @REVISION@.
+
+The model is licensed under the Apache License, Version 2.0, as its model
+card states. The full text of that license is LICENSE-Apache-2.0.txt, beside
+this file. The model's repository publishes no NOTICE file.
+
+prem-model.json is written by PremAgentic's release build. It names the
+model, its pooling and its dimensions, and records the revision above.
+
+Both files were checked against the SHA-256 values that
+scripts/download-model.sh pins, before this archive was made.

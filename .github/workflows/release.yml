@@ -1,0 +1,219 @@
+name: Release
+
+# Builds the release archives with scripts/release/build.sh, proves the Linux
+# archive it built (the prove job, below), and on a version tag makes a DRAFT
+# release from them. Nothing is published until a person publishes the draft,
+# and scripts/release/README.md says what must be proven first.
+#
+#   a tag v1.2.3 (or v1.2.3-rc.1)  build, prove, then a draft release with the archives
+#   Run workflow (dispatch)        build and prove, with the version given
+#   a pull request that changes    build and prove, as 0.0.0-pr.<number>, so the
+#   the release or clean-install   workflow can be tried before it is on the
+#   scripts, the pins or this file default branch
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to stamp, X.Y.Z'
+        required: true
+        default: '0.0.0-dispatch'
+  pull_request:
+    paths:
+      - 'scripts/release/**'
+      - 'scripts/clean-install/**'
+      - 'scripts/download-model.sh'
+      - 'scripts/download-vc-runtime.sh'
+      - '.github/workflows/release.yml'
+
+permissions:
+  contents: read
+
+# Every run step is bash with -e and -o pipefail, so a proof piped into tee
+# fails its step when the proof fails, not only when tee does.
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    steps:
+      # Pinned to a full commit so the action cannot change under us; the tag is a comment.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Exactly the SDK global.json pins: it decides the .NET runtime the archives
+      # carry, and build.sh refuses any other.
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      # The version comes from the tag, the dispatch input or the pull request,
+      # never from Directory.Build.props. Every value reaches the shell through
+      # the environment, not through the workflow text.
+      - name: Version
+        id: version
+        env:
+          EVENT: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_VERSION: ${{ inputs.version }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          case "$EVENT" in
+            push) version=${REF_NAME#v} ;;
+            workflow_dispatch) version=$INPUT_VERSION ;;
+            pull_request) version=0.0.0-pr.$PR_NUMBER ;;
+          esac
+          if ! [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
+            echo "'$version' is not X.Y.Z or X.Y.Z-suffix" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      # Fetches the pinned embedding model and the pinned Visual C++
+      # Redistributable into vc-runtime/ (each script refuses a file that does
+      # not match its SHA-256), publishes both platforms and checks each archive.
+      - name: Build the archives
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: bash scripts/release/build.sh --version "$VERSION" --out "$RUNNER_TEMP/release"
+
+      # The refusals the build depends on, each shown to fire on this runner.
+      - name: Test the build's checks
+        run: bash scripts/release/test.sh --model-dir models/minilm --archives "$RUNNER_TEMP/release" --vc-runtime vc-runtime/VC_redist.x64.exe
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-archives
+          path: |
+            ${{ runner.temp }}/release/*.tar.gz
+            ${{ runner.temp }}/release/*.zip
+            ${{ runner.temp }}/release/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 14
+
+  # The proof runs on the bytes the build job uploaded, the Linux archive a draft
+  # release would carry, so the proven bytes are the released bytes: the clean
+  # install offline, the install with the upgrade from an older release and its
+  # rollback, and the offline proof's control, each on this runner's Docker. The
+  # Windows archive cannot be proven here (a hosted runner has no Windows
+  # Sandbox); scripts/release/README.md says how the draft's own is proven.
+  prove:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+
+    steps:
+      # The whole history: the upgrade builds the older release from its commit.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-archives
+          path: dist
+
+      - name: Check the checksums
+        working-directory: dist
+        run: sha256sum --check --strict SHA256SUMS
+
+      # run.sh needs the pinned model even when it is handed an archive, and the
+      # older release's build takes it from there.
+      - name: Fetch the pinned embedding model
+        run: sh scripts/download-model.sh
+
+      - name: The clean install with no network, on the draft's Linux archive
+        run: |
+          PREM_ARCHIVE=$(ls dist/premagentic-*-linux-x64.tar.gz) \
+            bash scripts/clean-install/run.sh --offline 2>&1 | tee "$RUNNER_TEMP/prove-offline.log"
+
+      # The upgrade is from the previous release, the nearest earlier v tag; with
+      # none, run.sh says in one line that the upgrade did not run.
+      - name: The install, the upgrade from the previous release and the rollback, on the draft's Linux archive
+        run: |
+          PREM_ARCHIVE=$(ls dist/premagentic-*-linux-x64.tar.gz) \
+            bash scripts/clean-install/run.sh 2>&1 | tee "$RUNNER_TEMP/prove-online.log"
+
+      - name: The offline proof's control, on the draft's Linux archive
+        run: |
+          PREM_ARCHIVE=$(ls dist/premagentic-*-linux-x64.tar.gz) \
+            bash scripts/clean-install/control.sh --log "$RUNNER_TEMP/prove-control-run.log" 2>&1 | tee "$RUNNER_TEMP/prove-control.log"
+
+      # Which bytes were proven, and what each leg said, on the run's page.
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo '### The draft'"'"'s archives (SHA256SUMS)'
+            echo '```'
+            cat dist/SHA256SUMS
+            echo '```'
+            echo '### What the proof said'
+            echo '```'
+            for leg in offline online control; do
+              grep -hE '^(OFFLINE PROOF PASSED|CLEAN INSTALL PASSED|UPGRADE NOT RUN: |CONTROL PASSED|the control proved nothing|SHA256SUMS: |FAIL )' \
+                "$RUNNER_TEMP/prove-$leg.log" 2>/dev/null || echo "$leg: no result line (the leg did not run or did not finish)"
+            done
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: prove-logs
+          path: ${{ runner.temp }}/prove-*.log
+          if-no-files-found: warn
+          retention-days: 14
+
+  publish:
+    needs: [build, prove]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write      # the draft release
+      id-token: write      # the attestation's signing certificate
+      attestations: write  # the attestation itself
+
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-archives
+          path: dist
+
+      - name: Check the checksums
+        working-directory: dist
+        run: sha256sum --check --strict SHA256SUMS
+
+      # Artifact attestations are not available on a private repository under
+      # the free plan, so this step runs only once the repository is public.
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        if: github.event.repository.private == false
+        with:
+          subject-checksums: dist/SHA256SUMS
+
+      - name: Draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --draft --verify-tag \
+            --title "PremAgentic ${TAG#v}" \
+            --notes "Self-contained archives for Linux x64 and Windows x64, and SHA256SUMS. INSTALL.txt in each archive says how to install it." \
+            dist/*.tar.gz dist/*.zip dist/SHA256SUMS

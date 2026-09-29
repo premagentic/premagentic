@@ -1,0 +1,27 @@
+{
+  "name": "The portal's origin check on a form with a null origin, and an unreadable stale date",
+  "commit": "hand run, 2026-09-24",
+  "mutants": [
+    {
+      "name": "origin: a null origin is read as a foreign origin again (every browser form refused)",
+      "file": "src/Premagentic.Portal/PortalEndpoints.cs",
+      "old": "if (request.Headers.Origin.ToString() is { Length: > 0 } origin && origin != \"null\")",
+      "new": "if (request.Headers.Origin.ToString() is { Length: > 0 } origin)",
+      "filter": "FullyQualifiedName~PortalAccessTests|FullyQualifiedName~PortalRemindersTests"
+    },
+    {
+      "name": "origin: a null origin is let through without asking Sec-Fetch-Site",
+      "file": "src/Premagentic.Portal/PortalEndpoints.cs",
+      "old": "        return string.Equals(request.Headers[\"Sec-Fetch-Site\"].ToString(), \"same-origin\", StringComparison.Ordinal);",
+      "new": "        return request.Headers.Origin.ToString() == \"null\" || string.Equals(request.Headers[\"Sec-Fetch-Site\"].ToString(), \"same-origin\", StringComparison.Ordinal);",
+      "filter": "FullyQualifiedName~PortalAccessTests|FullyQualifiedName~PortalRemindersTests"
+    },
+    {
+      "name": "reminders: an unreadable stale date is shown as the year one",
+      "file": "src/Premagentic.Portal/Pages/ReviewPages.cs",
+      "old": "item.Since == DateTimeOffset.MinValue ? M.H($\"unreadable date: always stale\")",
+      "new": "false ? M.H($\"unreadable date: always stale\")",
+      "filter": "FullyQualifiedName~PortalAccessTests|FullyQualifiedName~PortalRemindersTests"
+    }
+  ]
+}

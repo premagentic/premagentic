@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The benchmark: a console program, never a test project. `dotnet test`
+       runs only test projects, so the suite never runs it and CI never does;
+       it is in the solution so that it keeps building. It measures on
+       synthetic data only, in a throwaway database, and every number it
+       prints depends on the machine it ran on. See README.md. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>false</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Premagentic.Core\Premagentic.Core.csproj" />
+  </ItemGroup>
+
+</Project>

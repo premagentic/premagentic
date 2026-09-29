@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- ASP.NET Core from the shared framework the host already runs on; no package. -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Premagentic.Core\Premagentic.Core.csproj" />
+  </ItemGroup>
+
+  <!-- The stylesheet and the script ship inside the assembly and are served by
+       the portal itself, so the pages need nothing from any other origin. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\*" LogicalName="Premagentic.Portal.Assets.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <!-- The connect page's templates: read by the page, never served as a file. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Connect\snippets.json" LogicalName="Premagentic.Portal.Connect.snippets.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Premagentic.Tests" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,90 @@
+PremAgentic @VERSION@ for Windows x64
+
+This archive runs as it is. It needs no .NET install, no build and no
+network connection: the programs, their runtime and the embedding model are
+all in it.
+
+What it does not include: a database. PremAgentic stores everything in a
+PostgreSQL 14 or later that you already run (it is tested on 17), and needs
+no extension in it. The PostgreSQL that PremAgentic can bundle on Windows is
+not in this archive.
+
+What is in this folder
+
+  bin\prem.exe                   the command line: setup, ingest, search, users, ...
+  bin\Premagentic.Api.exe        the server: people over HTTPS, agents over MCP
+  bin\Premagentic.McpServer.exe  a bridge for an assistant that only starts a local program
+                                 (the three programs share the one .NET runtime in bin\)
+  models\minilm\                 the embedding model, found by the programs on their own
+@EXTENSIONS@
+  extensions\                    the PDF, Word and Excel readers; none loads until allowed (step 6)
+@END-EXTENSIONS@
+  samples\profiles\starter\      a sample configuration; sample-docs\ is its documents
+  licenses\                      the license text of everything this archive redistributes
+  LICENSE, NOTICE, THIRD-PARTY-NOTICES.md
+
+1. Unzip it where it will live, for example C:\Program Files\PremAgentic.
+   Keep the folders together: the programs find the model from where they
+   are.
+
+2. Give setup a way into PostgreSQL. Write a file, readable by you only,
+   whose one line names a role that can create roles and databases:
+
+     connection=Host=localhost;Username=postgres;Password=...;Database=postgres
+
+   Setup uses it once and stores it nowhere.
+
+3. Run setup. It creates the database and three roles with generated
+   passwords, the first administrator (whose password it asks for), and a
+   self-signed HTTPS certificate for the name clients will use:
+
+     bin\prem.exe setup --admin-connection-file <that file> --admin-user <your sign-in name> --host-name <this computer's name>
+
+   It writes its files to the Premagentic folder in your local application
+   data unless you give --credentials-dir. It ends by searching, to prove
+   the install works, and says what it did. Run it again at any time; a
+   finished install is left as it is. prem setup --plan shows every step
+   and changes nothing.
+
+4. Start the server. To try it, point it at the application's credentials
+   file that setup wrote, then run it:
+
+     $env:PREM_CREDENTIALS_FILE = "<credentials folder>\app.credentials"
+     .\bin\Premagentic.Api.exe
+
+   It listens on https://<host name>:8443. Give clients https.crt, from
+   the same folder, to trust. Sign in to /portal/ as the first
+   administrator. To run it as a Windows service instead, run setup from an
+   elevated prompt with --windows-service; the service runs
+   bin\Premagentic.Api.exe, beside prem.exe, and the manual's Running it
+   page says more. The service has been run on a clean Windows 11 in
+   Windows Sandbox, installed by these steps; the manual's Known state page
+   says what has been proven.
+
+5. Put documents in. With PREM_CREDENTIALS_FILE set as above:
+
+     .\bin\prem.exe profile apply samples\profiles\starter
+     .\bin\prem.exe ingest --source open
+     .\bin\prem.exe ingest --source hr
+
+   The first registers the sample configuration: two sources over
+   sample-docs\, two groups, and the rule for who may read each. The other
+   two index them. For your own documents, point prem ingest or
+   prem sources add at a folder. prem --help lists every command.
+@EXTENSIONS@
+
+6. Read PDF, Word and Excel files. The archive ships three readers in
+   extensions\. Nothing loads until it is allowed: point PremAgentic at
+   that folder and allow each reader by its hash, once, with
+   PREM_CREDENTIALS_FILE set:
+
+     .\bin\prem.exe settings set extensions.folder "<this folder>\extensions"
+     .\bin\prem.exe extensions allow "<this folder>\extensions\pdf-reader"
+     .\bin\prem.exe extensions allow "<this folder>\extensions\docx-reader"
+     .\bin\prem.exe extensions allow "<this folder>\extensions\xlsx-reader"
+
+   prem extensions list says what is loaded. A running API uses them after
+   it is restarted.
+@END-EXTENSIONS@
+
+The manual: https://premagentic.com/docs/

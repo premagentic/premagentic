@@ -1,0 +1,6 @@
+{
+  "name": "starter",
+  "version": "1",
+  "description": "The sample corpus as two sources with different audiences, the trust defaults written down, and the sample golden set. What the README quick start does by hand, as a profile.",
+  "seams": { "reader": 1, "chunker": 1, "source": 1 }
+}

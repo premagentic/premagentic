@@ -1,0 +1,344 @@
+{
+  "name": "the database's second line (policies, caller sessions, the bound read, the search role check), the generated text match and the advisory locks",
+  "commit": "hand run, 2026-09-22",
+  "mutants": [
+    {
+      "name": "DECISIVE gate removed, gate tests (expected to fail)",
+      "file": "src/Premagentic.Core/Retrieval/Gates/AccessGate.cs",
+      "old": "\"(@unrestricted OR d.acl_set_id = ANY(@permitted))\"",
+      "new": "\"(@unrestricted OR TRUE OR d.acl_set_id = ANY(@permitted))\"",
+      "filter": "FullyQualifiedName~Premagentic.Tests.IdentityGate"
+    },
+    {
+      "name": "DECISIVE gate removed and document policy loosened, second-line tests",
+      "edits": [
+        {
+          "file": "src/Premagentic.Core/Retrieval/Gates/AccessGate.cs",
+          "old": "\"(@unrestricted OR d.acl_set_id = ANY(@permitted))\"",
+          "new": "\"(@unrestricted OR TRUE OR d.acl_set_id = ANY(@permitted))\""
+        },
+        {
+          "file": "src/Premagentic.Core/Storage/Migrations/0007_caller_sessions_and_row_security.sql",
+          "old": "           OR acl_set_id = ANY ((SELECT prem_config.caller_acl_sets())::BIGINT[]));",
+          "new": "           OR TRUE);"
+        }
+      ],
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls"
+    },
+    {
+      "name": "document policy loosened",
+      "file": "src/Premagentic.Core/Storage/Migrations/0007_caller_sessions_and_row_security.sql",
+      "old": "           OR acl_set_id = ANY ((SELECT prem_config.caller_acl_sets())::BIGINT[]));",
+      "new": "           OR TRUE);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "chunk policy loosened",
+      "file": "src/Premagentic.Core/Storage/Migrations/0007_caller_sessions_and_row_security.sql",
+      "old": "           OR EXISTS (SELECT 1 FROM prem_index.document d WHERE d.id = document_id));",
+      "new": "           OR TRUE);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "every role reads the whole index",
+      "file": "src/Premagentic.Core/Storage/Migrations/0007_caller_sessions_and_row_security.sql",
+      "old": "    SELECT EXISTS (SELECT 1 FROM prem_config.index_writer w WHERE w.role_name = p_role)",
+      "new": "    SELECT TRUE",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "no role reads the whole index",
+      "file": "src/Premagentic.Core/Storage/Migrations/0007_caller_sessions_and_row_security.sql",
+      "old": "    SELECT EXISTS (SELECT 1 FROM prem_config.index_writer w WHERE w.role_name = p_role)",
+      "new": "    SELECT FALSE",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "an expired session still yields its lists",
+      "file": "src/Premagentic.Core/Storage/Migrations/0007_caller_sessions_and_row_security.sql",
+      "old": "    WHERE s.id_sha256 = sha256(decode(bound, 'hex')) AND s.expires_at > now();",
+      "new": "    WHERE s.id_sha256 = sha256(decode(bound, 'hex'));",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "binding an unknown session is not refused",
+      "file": "src/Premagentic.Core/Storage/Migrations/0007_caller_sessions_and_row_security.sql",
+      "old": "        RAISE EXCEPTION 'There is no open caller session with that id.';",
+      "new": "        NULL;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "anyone may open a caller session",
+      "file": "src/Premagentic.Core/Storage/Migrations/0007_caller_sessions_and_row_security.sql",
+      "old": "REVOKE ALL ON FUNCTION prem_config.open_caller_session(TEXT, UUID, UUID, UUID, BIGINT[], INTERVAL) FROM PUBLIC;",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "anyone may close a caller session",
+      "file": "src/Premagentic.Core/Storage/Migrations/0007_caller_sessions_and_row_security.sql",
+      "old": "REVOKE ALL ON FUNCTION prem_config.close_caller_session(TEXT) FROM PUBLIC;",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "index_writer left open to its grantees",
+      "file": "src/Premagentic.Core/Storage/Migrations/0007_caller_sessions_and_row_security.sql",
+      "old": "ALTER TABLE prem_config.index_writer ENABLE ROW LEVEL SECURITY;",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "anyone may call the text match",
+      "file": "src/Premagentic.Core/Storage/Migrations/0007_caller_sessions_and_row_security.sql",
+      "old": "REVOKE ALL ON FUNCTION prem_index.text_matches FROM PUBLIC;",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "text match ignores the caller's lists",
+      "file": "src/Premagentic.Core/Retrieval/TextMatchFunction.cs",
+      "old": "            \"          AND ($3 OR d.acl_set_id = ANY ($4))\",",
+      "new": "            \"          AND TRUE\",",
+      "filter": "(FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.TextMatchFunction)&FullyQualifiedName!~The_generated_body_is_the_checked_in_text"
+    },
+    {
+      "name": "text match treats every caller as reading the whole index",
+      "file": "src/Premagentic.Core/Retrieval/TextMatchFunction.cs",
+      "old": "            \"    whole BOOLEAN := prem_config.reads_whole_index(session_user)\",",
+      "new": "            \"    whole BOOLEAN := TRUE OR prem_config.reads_whole_index(session_user)\",",
+      "filter": "(FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.TextMatchFunction)&FullyQualifiedName!~The_generated_body_is_the_checked_in_text"
+    },
+    {
+      "name": "text match leaves the gates out",
+      "file": "src/Premagentic.Core/Retrieval/TextMatchFunction.cs",
+      "old": "            .. gateLines.Select((l, i) => i == 0 ? \"          AND \" + l : \"          \" + l),\n",
+      "new": "",
+      "filter": "(FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.TextMatchFunction)&FullyQualifiedName!~The_generated_body_is_the_checked_in_text"
+    },
+    {
+      "name": "text match ignores the exclusions",
+      "file": "src/Premagentic.Core/Retrieval/TextMatchFunction.cs",
+      "old": "            $\"          AND NOT (c.id = ANY (${exclude}))\",",
+      "new": "            \"          AND TRUE\",",
+      "filter": "(FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.TextMatchFunction)&FullyQualifiedName!~The_generated_body_is_the_checked_in_text"
+    },
+    {
+      "name": "text match ignores the limit",
+      "file": "src/Premagentic.Core/Retrieval/TextMatchFunction.cs",
+      "old": "            $\"        LIMIT ${exclude + 1}\",",
+      "new": "            \"        LIMIT ALL\",",
+      "filter": "(FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.TextMatchFunction)&FullyQualifiedName!~The_generated_body_is_the_checked_in_text"
+    },
+    {
+      "name": "text match binds the gates one place off",
+      "file": "src/Premagentic.Core/Retrieval/TextMatchFunction.cs",
+      "old": "            .Select((p, i) => (Name: p, Position: FirstGatePosition + i))",
+      "new": "            .Select((p, i) => (Name: p, Position: FirstGatePosition + 1 + i))",
+      "filter": "(FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.TextMatchFunction)&FullyQualifiedName!~The_generated_body_is_the_checked_in_text"
+    },
+    {
+      "name": "migrate installs over arguments that do not fit",
+      "file": "src/Premagentic.Core/Retrieval/TextMatchFunction.cs",
+      "old": "        if (!Fits(function))",
+      "new": "        if (false && !Fits(function))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "a stale body counts as current",
+      "file": "src/Premagentic.Core/Retrieval/TextMatchFunction.cs",
+      "old": "        return installed.Count == 0 || (installed.Count == 1 && Fits(installed[0]) && installed[0].Source == Body);",
+      "new": "        return installed.Count == 0 || (installed.Count == 1 && Fits(installed[0]));",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "migrate never installs the body",
+      "file": "src/Premagentic.Core/Storage/MigrationRunner.cs",
+      "old": "            await Retrieval.TextMatchFunction.InstallAsync(conn, ct);\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "the application role starts over a stale body",
+      "file": "src/Premagentic.Core/Storage/MigrationRunner.cs",
+      "old": "            if (Pending(recorded).Count == 0 && await TextMatchCurrentAsync(ct)) return [];",
+      "new": "            if (Pending(recorded).Count == 0) return [];",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "a bound read never binds",
+      "file": "src/Premagentic.Core/Retrieval/BoundRead.cs",
+      "old": "                await bind.ExecuteNonQueryAsync(ct);",
+      "new": "                _ = bind;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "a bound read ignores the search role",
+      "file": "src/Premagentic.Core/Retrieval/BoundRead.cs",
+      "old": "        if (searchRole is null)",
+      "new": "        if (true)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "a session holds every list",
+      "file": "src/Premagentic.Core/Security/CallerSessions.cs",
+      "old": "        var ids = scope.Unrestricted",
+      "new": "        var ids = true",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "section fetch reads unbound",
+      "file": "src/Premagentic.Core/Retrieval/SectionFetcher.cs",
+      "old": "await using (var read = await BoundRead.OpenAsync(db, searchRole, tenantId, options.Scope, ct))",
+      "new": "await using (var read = await BoundRead.OpenAsync(db, null, tenantId, options.Scope, ct))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "the check misses index_writer",
+      "file": "src/Premagentic.Core/Security/SearchRole.cs",
+      "old": "        if (reader.GetBoolean(3)) return",
+      "new": "        if (false && reader.GetBoolean(3)) return",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "the check misses BYPASSRLS",
+      "file": "src/Premagentic.Core/Security/SearchRole.cs",
+      "old": "        if (reader.GetBoolean(2)) return",
+      "new": "        if (false && reader.GetBoolean(2)) return",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "a rule change takes no lock",
+      "file": "src/Premagentic.Core/Security/AclStore.cs",
+      "old": "        await IndexLocks.LockRulesAsync(conn, tx, tenantId, RuleChangeWait, ct);\n        var setId",
+      "new": "        var setId",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "a rule removal takes no lock",
+      "file": "src/Premagentic.Core/Security/AclStore.cs",
+      "old": "        await IndexLocks.LockRulesAsync(conn, tx, tenantId, RuleChangeWait, ct);\n        if (!await RetireAsync",
+      "new": "        if (!await RetireAsync",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "a second run of a source is not refused",
+      "file": "src/Premagentic.Core/Security/IndexLocks.cs",
+      "old": "            if (!await ScalarAsync<bool>(connection, \"SELECT pg_try_advisory_lock(@key)\", sourceKey, ct))",
+      "new": "            if (false && !await ScalarAsync<bool>(connection, \"SELECT pg_try_advisory_lock(@key)\", sourceKey, ct))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "an ingest does not hold the rules lock",
+      "file": "src/Premagentic.Core/Security/IndexLocks.cs",
+      "old": "            await ScalarAsync<object>(connection, \"SELECT pg_advisory_lock_shared(@key)\", rulesKey, ct);",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "a recorded run takes no locks",
+      "file": "src/Premagentic.Core/Sources/Registry/IngestRuns.cs",
+      "old": "        await using var locks = await Security.IndexLocks.ForIngestAsync(db, tenantId, source.Name, source.PathPrefix, ct);\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "the general store changes a trust setting",
+      "file": "src/Premagentic.Core/Identity/SettingsStore.cs",
+      "old": "        if (key.StartsWith(\"trust.\", StringComparison.Ordinal))",
+      "new": "        if (key.Length < 0)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "the last administrator can step down",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "                       OR EXISTS (SELECT 1 FROM admins a WHERE a.id <> @id))",
+      "new": "                       OR TRUE)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "a disabled administrator counts",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "role = 'administrator' AND NOT disabled AND deleted_at IS NULL",
+      "new": "role = 'administrator' AND deleted_at IS NULL",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "an agent's tier is stored as typed",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "            tier = Okf.TrustPolicy.TierKey(parsed);",
+      "new": "            tier = minimumTrustTier;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "a viewed-as scope drops its lists",
+      "file": "src/Premagentic.Core/Security/Access.cs",
+      "old": "            PermittedSetIds = PermittedSetIds,",
+      "new": "            PermittedSetIds = null,",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "the identity store ignores the caller's transaction",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "        var cmd = transaction is null",
+      "new": "        var cmd = true",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "the rule store ignores the caller's transaction",
+      "file": "src/Premagentic.Core/Security/AclStore.cs",
+      "old": "        if (transaction is not null) return await work(transaction.Connection!, transaction);",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "a page for people lets an agent in",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "            if (requirement.RefusesAgents)",
+      "new": "            if (false && requirement.RefusesAgents)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "a signed-out browser is not sent to sign in",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "        if (requirement?.SignInRedirect is { } signIn && (",
+      "new": "        if (false && requirement?.SignInRedirect is { } signIn && (",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "the form field is never read",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "        if (header.Length > 0 || !http.Request.HasFormContentType) return header;",
+      "new": "        return header;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "the hasher hashes where text is not normalized",
+      "file": "src/Premagentic.Core/Identity/PasswordHasher.cs",
+      "old": "        ArgumentNullException.ThrowIfNull(password);\n        if (_textProblem is not null)",
+      "new": "        ArgumentNullException.ThrowIfNull(password);\n        if (false && _textProblem is not null)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "the hasher verifies where text is not normalized",
+      "file": "src/Premagentic.Core/Identity/PasswordHasher.cs",
+      "old": "    {\n        if (_textProblem is not null)\n            throw new InvalidOperationException(_textProblem);\n        if (password is null",
+      "new": "    {\n        if (password is null",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "the API's refusal is not a startup refusal",
+      "file": "src/Premagentic.Api/Program.cs",
+      "old": "        throw new StartupRefusedException(unbound + \" Fix the role before starting Premagentic.\");",
+      "new": "        throw new InvalidOperationException(unbound + \" Fix the role before starting Premagentic.\");",
+      "filter": "FullyQualifiedName~Premagentic.Tests.Rls|FullyQualifiedName~Premagentic.Tests.AclIndexLock|FullyQualifiedName~Premagentic.Tests.IdentityPortal|FullyQualifiedName~Premagentic.Tests.ApiSecondLine|FullyQualifiedName~Premagentic.Tests.IdentityStoreTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    },
+    {
+      "name": "migrate lets a second function by the name through",
+      "file": "src/Premagentic.Core/Retrieval/TextMatchFunction.cs",
+      "old": "        if (installed.Count > 1)",
+      "new": "        if (installed.Count > 99)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SetupSearchRoleTests|FullyQualifiedName~Premagentic.Tests.TextMatchFunction"
+    }
+  ]
+}

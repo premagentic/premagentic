@@ -1,0 +1,27 @@
+{
+  "name": "view as is an administrator's",
+  "commit": "hand run, 2026-09-29",
+  "mutants": [
+    {
+      "name": "view as: an auditor may open it",
+      "file": "src/Premagentic.Portal/PortalEndpoints.cs",
+      "old": "people.MapGet(\"/permissions/view-as\", (Delegate)PermissionPages.ViewAs).Needs(PortalNeed.Administrator);",
+      "new": "people.MapGet(\"/permissions/view-as\", (Delegate)PermissionPages.ViewAs).Needs(PortalNeed.Reader);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalAccessTests."
+    },
+    {
+      "name": "view as: the permissions page offers it to an auditor",
+      "file": "src/Premagentic.Portal/Pages/PermissionPages.cs",
+      "old": "{(r.IsAdministrator ? M.H($\"{Layout.Link(\"/portal/permissions/view-as\"",
+      "new": "{(true ? M.H($\"{Layout.Link(\"/portal/permissions/view-as\"",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalAccessTests."
+    },
+    {
+      "name": "view as: an auditor refused it is told it can change nothing",
+      "file": "src/Premagentic.Portal/PortalEndpoints.cs",
+      "old": ": \"This page is for administrators.\");",
+      "new": ": \"Only an administrator can change this.\");",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalAccessTests."
+    }
+  ]
+}

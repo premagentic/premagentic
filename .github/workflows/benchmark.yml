@@ -1,0 +1,127 @@
+name: Benchmark
+
+# The benchmark (tests/Premagentic.Benchmark) on the hosted Linux runner, run by
+# hand only: it is timed work, so it never runs on a push, a pull request or a
+# schedule. Its numbers describe the hosted runner, a shared virtual machine whose
+# processor, memory and neighbors GitHub chooses, and nothing else: not any other
+# machine, and not a deployment's speed on its own hardware. The benchmark ends
+# every table with the machine line it prints (read from /proc/cpuinfo), and the
+# runner's own description heads each job's summary.
+#
+# It follows docs/benchmark.md as a deployment reads, one job per size: a
+# throwaway PostgreSQL on loopback, the roles and row policies made by prem setup
+# from a Release build of the command line, synth, then the ingest path, the
+# search as the search role, and ONNX Runtime's spin-waiting off and on. Each size
+# is a job of its own, with its own runner and database, since synth loads only an
+# empty index. The tables go into the job's summary, and the whole log is kept as
+# an artifact for a week. About 2 GB of disk and 1 GB of memory, and 10 to 20
+# minutes, at 500,000 chunks.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        chunks: [25000, 100000, 500000]
+    defaults:
+      run:
+        shell: bash
+    env:
+      DOTNET_NOLOGO: 'true'
+      # The PostgreSQL the product's tests run against, pinned by digest.
+      POSTGRES_IMAGE: postgres:17.11@sha256:d74eeac9a635390a49bc21bd49fccd973de707e2a53a76ac49b552b8712ec46f
+
+    steps:
+      # Pinned to a full commit so the action cannot change under us; the tag is a comment.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      # The script checks both files against their pinned SHA-256 whether they come
+      # from this cache or from the download.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: models/minilm
+          key: minilm-${{ hashFiles('scripts/download-model.sh') }}
+
+      - name: The embedding model
+        run: bash scripts/download-model.sh
+
+      - name: Build
+        run: |
+          dotnet build src/Premagentic.Cli/Premagentic.Cli.csproj -c Release -p:RestoreLockedMode=true -warnaserror:NU1901,NU1902,NU1903,NU1904
+          dotnet build tests/Premagentic.Benchmark/Premagentic.Benchmark.csproj -c Release -p:RestoreLockedMode=true -warnaserror:NU1901,NU1902,NU1903,NU1904
+
+      - name: The runner
+        env:
+          CHUNKS: ${{ matrix.chunks }}
+        run: |
+          {
+            printf '## %s chunks\n\n' "$CHUNKS"
+            printf 'runner: %s processors, %s, %s GB memory, %s, .NET SDK %s, commit %s\n\n' "$(nproc)" \
+              "$(lscpu | sed -n 's/^Model name: *//p')" "$(free -g | awk '/^Mem:/ { print $2 }')" \
+              "$(. /etc/os-release && echo "$PRETTY_NAME")" "$(dotnet --version)" "${GITHUB_SHA::10}"
+          } | tee bench.log >> "$GITHUB_STEP_SUMMARY"
+
+      # A PostgreSQL on loopback, on a network of its own, with a password made
+      # here, masked, and never on a command line; setup; synth as the
+      # administrator; then each measurement as the search role, its table into
+      # the summary.
+      - name: Measure
+        env:
+          CHUNKS: ${{ matrix.chunks }}
+        run: |
+          n=$CHUNKS
+          [[ $n =~ ^[1-9][0-9]*$ ]] || { echo "'$n' is not a chunk count" >&2; exit 1; }
+          work=$RUNNER_TEMP/bench
+          mkdir -p "$work"
+          pw=$(openssl rand -hex 16)
+          echo "::add-mask::$pw"
+          ( umask 077
+            printf 'POSTGRES_USER=prem\nPOSTGRES_PASSWORD=%s\nPOSTGRES_DB=bench\n' "$pw" > "$work/postgres.env"
+            printf 'connection=Host=127.0.0.1;Port=5442;Database=bench;Username=prem;Password=%s;Command Timeout=0\n' "$pw" \
+              > "$work/admin.credentials" )
+          docker network create prem-bench > /dev/null
+          docker run -d --name prem-bench --network prem-bench -p 127.0.0.1:5442:5432 --env-file "$work/postgres.env" "$POSTGRES_IMAGE" > /dev/null
+          for _ in $(seq 1 60); do docker exec prem-bench pg_isready -U prem -d bench > /dev/null 2>&1 && break; sleep 1; done
+          docker exec prem-bench pg_isready -U prem -d bench
+          # setup writes a kestrel.json naming this host, which nothing here reads.
+          dotnet src/Premagentic.Cli/bin/Release/net10.0/prem.dll setup --admin-connection-file "$work/admin.credentials" \
+            --credentials-dir "$work/credentials" 2>&1 | tee -a bench.log
+          export PREM_EMBEDDING_PROVIDER=local PREM_ONNX_MODEL_DIR="$PWD/models/minilm"
+          bench=tests/Premagentic.Benchmark/bin/Release/net10.0/Premagentic.Benchmark.dll
+          # setup made its own database, premagentic, owned by its owner role; synth writes there.
+          PREM_CONNECTION_STRING="Host=127.0.0.1;Port=5442;Database=premagentic;Username=prem;Password=$pw;Command Timeout=0" \
+            dotnet "$bench" synth --chunks "$n" 2>&1 | tee -a bench.log
+          unset pw
+          export PREM_CREDENTIALS_FILE=$work/credentials/app.credentials
+          # A blank line after each, so the machine line ending one table and the
+          # next table's title stay apart in the summary.
+          table() { { dotnet "$bench" "$@" && echo; } 2>&1 | tee -a bench.log | tee -a "$GITHUB_STEP_SUMMARY"; }
+          table ingest --documents 200 --rounds 5 --spin both
+          table measure --search-role
+          table spin --off --search-role
+          table spin --on --search-role
+          docker rm -f -v prem-bench > /dev/null
+          docker network rm prem-bench > /dev/null
+          rm -rf "$work"
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: benchmark-log-${{ matrix.chunks }}
+          path: bench.log
+          if-no-files-found: warn
+          retention-days: 7

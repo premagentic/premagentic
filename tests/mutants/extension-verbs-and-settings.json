@@ -1,0 +1,274 @@
+{
+  "name": "commands and settings from extensions, and what names the add-on",
+  "commit": "hand run, 2026-09-28",
+  "mutants": [
+    {
+      "name": "dispatch: a command an extension added never runs",
+      "file": "src/Premagentic.Core/Extensions/ExtensionCommands.cs",
+      "old": "        if (added.Length == 0) return null;",
+      "new": "        if (added.Length >= 0) return null;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "dispatch: a flag the usage does not name reaches the verb",
+      "file": "src/Premagentic.Core/Extensions/ExtensionCommands.cs",
+      "old": "        if (args.Skip(2).FirstOrDefault(a => a.StartsWith(\"--\", StringComparison.Ordinal) && !accepted.Contains(a)) is { } unknown)",
+      "new": "        if (args.Skip(2).FirstOrDefault(a => a.StartsWith(\"--\", StringComparison.Ordinal) && !accepted.Contains(a)) is { } unknown && unknown.Length < 0)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "dispatch: a verb's refusal of its arguments escapes as an exception",
+      "file": "src/Premagentic.Core/Extensions/ExtensionCommands.cs",
+      "old": "        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)\n        {\n            error.WriteLine(ex.Message);",
+      "new": "        catch (Exception ex) when (ex is InvalidOperationException)\n        {\n            error.WriteLine(ex.Message);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "dispatch: the write verbs are the ones that change nothing",
+      "file": "src/Premagentic.Core/Extensions/ExtensionCommands.cs",
+      "old": "c.Command.Verbs.Where(v => v.Writes)",
+      "new": "c.Command.Verbs.Where(v => !v.Writes)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AdminVerbRecordTests.|FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "help: a word an open command lacks is refused before the extensions load",
+      "file": "src/Premagentic.Cli/Help.cs",
+      "old": "        if (BuiltInCommands.Open.ContainsKey(verb) && args.Length > 1 && CommandLine.IsWord(args[1])",
+      "new": "        if (false && BuiltInCommands.Open.ContainsKey(verb) && args.Length > 1 && CommandLine.IsWord(args[1])",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "help: a word no command has is refused before the extensions load",
+      "file": "src/Premagentic.Cli/Help.cs",
+      "old": "            if (CommandLine.IsWord(verb))\n            {\n                notBuiltIn = notACommand;",
+      "new": "            if (false && CommandLine.IsWord(verb))\n            {\n                notBuiltIn = notACommand;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests.|FullyQualifiedName~Premagentic.Tests.BusinessAddOnTests."
+    },
+    {
+      "name": "program: a call no built-in takes is never offered to the extensions",
+      "file": "src/Premagentic.Cli/Program.cs",
+      "old": "    if (await ExtensionCommands.RunAsync(extensions, args, db, tenantId, Console.Out, Console.Error) is { } ran) return ran;\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "program: with no database the add-on is not named",
+      "file": "src/Premagentic.Cli/Program.cs",
+      "old": "        Console.Error.WriteLine(BusinessAddOn.Refusal(args, host: null) ?? notBuiltIn);",
+      "new": "        Console.Error.WriteLine(notBuiltIn);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.CliHelpTests."
+    },
+    {
+      "name": "program: with a database the add-on is not named",
+      "file": "src/Premagentic.Cli/Program.cs",
+      "old": "    Console.Error.WriteLine(BusinessAddOn.Refusal(args, extensions)\n",
+      "new": "    Console.Error.WriteLine(((string?)null)\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.BusinessAddOnTests."
+    },
+    {
+      "name": "store: an extension's key is refused while it is loaded",
+      "file": "src/Premagentic.Core/Identity/SettingsStore.cs",
+      "old": "        if (!(settings ?? DeploymentSettings.BuiltIn).Contains(key))",
+      "new": "        if (!DeploymentSettings.BuiltIn.Contains(key))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "store: a key no loaded extension defines is taken",
+      "file": "src/Premagentic.Core/Identity/SettingsStore.cs",
+      "old": "        if (!(settings ?? DeploymentSettings.BuiltIn).Contains(key))",
+      "new": "        if (false && !(settings ?? DeploymentSettings.BuiltIn).Contains(key))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "tuning store: an extension's key cannot be set",
+      "file": "src/Premagentic.Core/Evaluation/TuningSettingsStore.cs",
+      "old": "        var defined = settings ?? DeploymentSettings.BuiltIn;",
+      "new": "        var defined = DeploymentSettings.BuiltIn;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "settings: an extension's value is stored without its check",
+      "edits": [
+        {
+          "file": "src/Premagentic.Cli/Admin/SettingsCommands.cs",
+          "old": "        if (d.Problem(value) is { } problem) return Fail(problem);",
+          "new": ""
+        },
+        {
+          "file": "src/Premagentic.Core/Evaluation/TuningSettingsStore.cs",
+          "old": "        if (definition.Problem(value) is { } problem) throw new ArgumentException(problem);",
+          "new": ""
+        }
+      ],
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "settings: the add-on is not named for its setting",
+      "file": "src/Premagentic.Cli/Admin/SettingsCommands.cs",
+      "old": "        new(BusinessAddOn.SettingRefusal(key, host)\n",
+      "new": "        new(((string?)null)\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.BusinessAddOnTests."
+    },
+    {
+      "name": "host: commands load without the command seam declared",
+      "file": "src/Premagentic.Core/Extensions/ExtensionHost.cs",
+      "old": "            if (registrations.Commands.Count > 0 && !manifest.Seams.ContainsKey(SeamVersions.CommandName))",
+      "new": "            if (false && registrations.Commands.Count > 0 && !manifest.Seams.ContainsKey(SeamVersions.CommandName))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "host: settings load without the setting seam declared",
+      "file": "src/Premagentic.Core/Extensions/ExtensionHost.cs",
+      "old": "            if (registrations.Settings.Count > 0 && !manifest.Seams.ContainsKey(SeamVersions.SettingName))",
+      "new": "            if (false && registrations.Settings.Count > 0 && !manifest.Seams.ContainsKey(SeamVersions.SettingName))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "host: a second extension takes a command another brought",
+      "file": "src/Premagentic.Core/Extensions/ExtensionHost.cs",
+      "old": "                    if (own)\n",
+      "new": "                    if (false)\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "registration: a built-in command takes an extension's subcommands",
+      "file": "src/Premagentic.Core/Extensions/ExtensionRegistrations.cs",
+      "old": "        if (BuiltInCommands.Names.Contains(noun) && !BuiltInCommands.Open.ContainsKey(noun))",
+      "new": "        if (false && BuiltInCommands.Names.Contains(noun) && !BuiltInCommands.Open.ContainsKey(noun))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "registration: an extension replaces a built-in subcommand",
+      "file": "src/Premagentic.Core/Extensions/ExtensionRegistrations.cs",
+      "old": "            if (BuiltInCommands.Open.TryGetValue(noun, out var builtIn) && builtIn.Contains(verb.Name))",
+      "new": "            if (BuiltInCommands.Open.TryGetValue(noun, out var builtIn) && builtIn.Contains(verb.Name) && false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "registration: a usage that names other subcommands is taken",
+      "file": "src/Premagentic.Core/Extensions/ExtensionRegistrations.cs",
+      "old": "        if (!named.SetEquals(names))",
+      "new": "        if (false && !named.SetEquals(names))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "registration: an extension defines a trust or extensions key",
+      "file": "src/Premagentic.Core/Extensions/ExtensionRegistrations.cs",
+      "old": "        if (key.StartsWith(\"trust.\", StringComparison.Ordinal) || key.StartsWith(\"extensions.\", StringComparison.Ordinal) || setting.IsTrust)",
+      "new": "        if (setting.IsTrust)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "registration: an extension defines a built-in key",
+      "file": "src/Premagentic.Core/Extensions/ExtensionRegistrations.cs",
+      "old": "        if (SettingsCatalog.Contains(key))\n",
+      "new": "        if (false && SettingsCatalog.Contains(key))\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "profile: an extension's setting is called no setting at all",
+      "file": "src/Premagentic.Core/Profiles/ProfilePlan.cs",
+      "old": "            if (defined.ExtensionOf(key) is { } extension)\n",
+      "new": "            if (defined.ExtensionOf(key) is { } extension && false)\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "profile: the add-on's setting is called no setting at all",
+      "file": "src/Premagentic.Core/Profiles/ProfilePlan.cs",
+      "old": "            if (BusinessAddOn.Settings.Contains(key))\n",
+      "new": "            if (false)\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.BusinessAddOnTests."
+    },
+    {
+      "name": "extensions list: what an extension adds is not said",
+      "file": "src/Premagentic.Cli/Admin/ExtensionsCommands.cs",
+      "old": "                if (verbs.Length > 0) Console.WriteLine(",
+      "new": "                if (verbs.Length < 0) Console.WriteLine(",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "add-on: a refused add-on reads as not installed",
+      "file": "src/Premagentic.Core/Extensions/BusinessAddOn.cs",
+      "old": "        if (host.Refused.FirstOrDefault(r => r.Name.Equals(ExtensionName, StringComparison.OrdinalIgnoreCase)) is { } refused)",
+      "new": "        if (host.Refused.FirstOrDefault(r => r.Name.Equals(ExtensionName, StringComparison.OrdinalIgnoreCase)) is { } refused && false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.BusinessAddOnTests."
+    },
+    {
+      "name": "add-on: its commands are not named",
+      "file": "src/Premagentic.Core/Extensions/BusinessAddOn.cs",
+      "old": "        if (verb is not null && Verbs.Contains((noun, verb))) return Sentence($\"'prem {noun} {verb}'\", host);\n        return Nouns.Contains(noun) ? Sentence($\"'prem {noun}'\", host) : null;",
+      "new": "        return null;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.BusinessAddOnTests.|FullyQualifiedName~Premagentic.Tests.CliHelpTests."
+    },
+    {
+      "name": "portal: the audit trail's export address is not named",
+      "file": "src/Premagentic.Portal/PortalEndpoints.cs",
+      "old": "        people.MapGet(\"/export/audit.jsonl\", (Delegate)AddOnPage).Needs(PortalNeed.Reader);\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PortalPagesTests."
+    },
+    {
+      "name": "program: a configuration that is set and cannot be used gets the add-on sentence",
+      "file": "src/Premagentic.Cli/Program.cs",
+      "old": "    if (notBuiltIn is not null && NothingConfigured())",
+      "new": "    if (notBuiltIn is not null)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.CliHelpTests."
+    },
+    {
+      "name": "program: a call that waits for the extensions on a database it cannot use ends in a stack trace",
+      "file": "src/Premagentic.Cli/Program.cs",
+      "old": "catch (Exception ex) when (notBuiltIn is not null && ex is Npgsql.NpgsqlException or InvalidOperationException)",
+      "new": "catch (Exception ex) when (notBuiltIn is null && ex is Npgsql.NpgsqlException or InvalidOperationException)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "help: an unknown word under groups with --help waits for the extensions",
+      "file": "src/Premagentic.Cli/Help.cs",
+      "old": "&& !SubcommandsIn(verb, usage).Contains(args[1]) && !args.Contains(\"--help\") && !args.Contains(\"-h\"))",
+      "new": "&& !SubcommandsIn(verb, usage).Contains(args[1]))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.CliHelpTests."
+    },
+    {
+      "name": "command store: an extensions key is written",
+      "file": "src/Premagentic.Core/Identity/SettingsStore.cs",
+      "old": "            RefuseExtensionsKey(key);\n            if ((settings ?? DeploymentSettings.BuiltIn).Find(key)?.Problem(value) is { } problem)",
+      "new": "            if ((settings ?? DeploymentSettings.BuiltIn).Find(key)?.Problem(value) is { } problem)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "command store: an extensions key is removed",
+      "file": "src/Premagentic.Core/Identity/SettingsStore.cs",
+      "old": "        if (ForExtensionCommand) RefuseExtensionsKey(key);\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "command store: a value its definition refuses is written",
+      "file": "src/Premagentic.Core/Identity/SettingsStore.cs",
+      "old": "            if ((settings ?? DeploymentSettings.BuiltIn).Find(key)?.Problem(value) is { } problem)\n                throw new ArgumentException(problem, nameof(value));\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    },
+    {
+      "name": "add-on page: with the add-on loaded the address says the add-on lacks it",
+      "file": "src/Premagentic.Core/Extensions/BusinessAddOn.cs",
+      "old": "        if (host is not null && host.Loaded.Any(l => l.Name.Equals(ExtensionName, StringComparison.OrdinalIgnoreCase)))",
+      "new": "        if (false && host is not null && host.Loaded.Any(l => l.Name.Equals(ExtensionName, StringComparison.OrdinalIgnoreCase)))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.BusinessAddOnTests.|FullyQualifiedName~Premagentic.Tests.PortalPagesTests."
+    },
+    {
+      "name": "add-on page: an address typed in another case is not named",
+      "file": "src/Premagentic.Core/Extensions/BusinessAddOn.cs",
+      "old": "string.Equals(path, p, StringComparison.OrdinalIgnoreCase)",
+      "new": "string.Equals(path, p, StringComparison.Ordinal)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.BusinessAddOnTests.|FullyQualifiedName~Premagentic.Tests.PortalPagesTests."
+    },
+    {
+      "name": "registration: the verbs are kept as the extension's own list",
+      "file": "src/Premagentic.Core/Extensions/ExtensionRegistrations.cs",
+      "old": "        _commands.Add(command with { Usage = usage, Verbs = [.. verbs] });",
+      "new": "        _commands.Add(command with { Usage = usage });",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ExtensionCommandTests."
+    }
+  ]
+}

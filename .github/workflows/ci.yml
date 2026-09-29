@@ -1,0 +1,156 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      # Pinned to a full commit so the action cannot change under us; the tag is a comment.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The manual's links and its index, before anything is built.
+      - name: Check docs
+        run: bash scripts/check-docs.sh
+
+      # Every mutant list still anchors on this tree: each mutant's text occurs
+      # exactly once in its file, so a list that no longer fits the code fails
+      # here, not on the day someone runs it. Read-only; it builds nothing.
+      - name: Check the mutant lists
+        run: python3 tests/mutants/run.py --check tests/mutants/*.json
+
+      # The runner's own rules (a failed build is no verdict, a sidecar stops a
+      # run, a list in another runner's format is refused, ...), each shown to
+      # hold and to fail on canned output and a scratch folder. It builds nothing.
+      - name: Check the mutant runner
+        run: python3 tests/mutants/run.py --self-test
+
+      # The SDK global.json pins. Its rollForward is patch, for which this action
+      # installs exactly that version (latestPatch would make it install the newest
+      # in the feature band), and the SDK then uses it.
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      # Every lock file, the plain ones and the per-runtime ones a release
+      # publishes against, restored in locked mode: a package id or version that
+      # moved without its lock file fails here.
+      - name: Check the lock files
+        run: bash scripts/release/lock-files.sh --check
+
+      - name: Restore
+        run: dotnet restore Premagentic.slnx --locked-mode
+
+      # Warnings as errors for the NuGet audit only: a dependency that picks up
+      # a known advisory fails the build instead of scrolling past.
+      - name: Build
+        run: dotnet build Premagentic.slnx --no-restore --configuration Release -warnaserror:NU1901,NU1902,NU1903,NU1904
+
+      # The datastore and authorization gate tests run against a real, stock
+      # PostgreSQL via Testcontainers, so they need the Docker daemon the hosted
+      # runner provides.
+      - name: Test
+        run: dotnet test Premagentic.slnx --no-build --configuration Release --logger "console;verbosity=normal"
+
+  # The tests that return at once on Linux: the PostgreSQL bundled on Windows,
+  # the Windows access rules on the credentials files, and setup's Windows
+  # service step. They run here with the bundle laid out and
+  # PREM_TEST_POSTGRES_BUNDLE set, and SetupInstallTests, which would start a
+  # Linux container this runner cannot run, installs into the image's own
+  # PostgreSQL 17 through PREM_TEST_ADMIN_CONNECTION instead.
+  windows-setup:
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      # EDB's archive is about 380 MB. The script checks it against its pinned
+      # SHA-256 whether it comes from this cache or from the download.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}\premagentic-cache
+          key: edb-postgresql-${{ hashFiles('installer/windows/fetch-postgresql.ps1') }}
+
+      - name: Lay out the bundled PostgreSQL
+        shell: pwsh
+        run: ./installer/windows/fetch-postgresql.ps1 -Destination "$env:RUNNER_TEMP\postgresql" -Cache "$env:RUNNER_TEMP\premagentic-cache"
+
+      - name: Restore
+        run: dotnet restore Premagentic.slnx --locked-mode
+
+      - name: Build
+        run: dotnet build Premagentic.slnx --no-restore --configuration Release -warnaserror:NU1901,NU1902,NU1903,NU1904
+
+      # The image carries PostgreSQL 17 as a service, stopped and disabled, whose
+      # superuser is postgres with the image's documented password, root. It is
+      # a throwaway server on a throwaway machine: SetupInstallTests leaves its
+      # databases and roles on it.
+      - name: Start the image's PostgreSQL
+        shell: pwsh
+        run: |
+          Set-Service -Name postgresql-x64-17 -StartupType Manual
+          Start-Service -Name postgresql-x64-17
+          foreach ($i in 1..30) { & "$env:PGBIN\pg_isready.exe" -h localhost -p 5432 | Out-Null; if ($LASTEXITCODE -eq 0) { break }; Start-Sleep -Seconds 1 }
+          & "$env:PGBIN\pg_isready.exe" -h localhost -p 5432
+          if ($LASTEXITCODE -ne 0) { throw "The image's PostgreSQL did not become ready." }
+
+      - name: Test the Windows setup paths
+        shell: pwsh
+        run: |
+          $env:PREM_TEST_POSTGRES_BUNDLE = "$env:RUNNER_TEMP\postgresql\pgsql"
+          if (-not (Test-Path "$env:PREM_TEST_POSTGRES_BUNDLE\bin\initdb.exe")) { throw "No bundle at $env:PREM_TEST_POSTGRES_BUNDLE" }
+          $env:PREM_TEST_ADMIN_CONNECTION = "Host=localhost;Port=5432;Username=postgres;Password=root;Database=postgres"
+          dotnet test tests/Premagentic.Tests/Premagentic.Tests.csproj --no-build --configuration Release `
+            --filter "FullyQualifiedName~Premagentic.Tests.SetupBundledPostgresTests|FullyQualifiedName~Premagentic.Tests.RemovalBundledPostgresTests|FullyQualifiedName~Premagentic.Tests.SetupCredentialsTests|FullyQualifiedName~Premagentic.Tests.SetupInstallTests" `
+            --logger "console;verbosity=normal" --logger "trx;LogFileName=windows.trx" --results-directory "$env:RUNNER_TEMP\results"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      # A test that returns at once also counts as passed, so a green run alone
+      # cannot tell. The bundle test makes, starts and stops a whole cluster, and
+      # the service access test runs setup twice against the image's PostgreSQL;
+      # returning early takes milliseconds. The service registration test must not
+      # run on an elevated runner, so it is skipped, and its reason must say so.
+      - name: The Windows tests ran rather than returned
+        shell: pwsh
+        run: |
+          [xml] $trx = Get-Content "$env:RUNNER_TEMP\results\windows.trx"
+          $results = $trx.TestRun.Results.UnitTestResult
+          function Find([string] $name) {
+            $found = $results | Where-Object { $_.testName -like "*.$name" }
+            if (-not $found) { throw "$name is not in the results." }
+            $found
+          }
+          $bundle = Find 'Setup_makes_starts_and_uses_the_bundled_server_as_this_account'
+          $took = [TimeSpan]::Parse($bundle.duration)
+          if ($took.TotalSeconds -lt 2) { throw "The bundled server test took $took; it returned instead of starting a server." }
+          "The bundled server test took $took."
+          $access = Find 'The_service_may_keep_read_access_to_the_application_file_and_never_to_the_owner_file'
+          $took = [TimeSpan]::Parse($access.duration)
+          if ($access.outcome -ne 'Passed' -or $took.TotalSeconds -lt 1) { throw "The service access test was $($access.outcome) in $took; it did not run setup against the image's PostgreSQL." }
+          "The service access test passed in $took."
+          # The two tests of handing files to administrators need the elevated runner; skipped, they would prove nothing.
+          foreach ($name in 'The_folder_and_files_a_service_reads_become_the_administrators_own', 'A_superuser_file_given_to_administrators_is_trusted_and_private_to_a_second_administrator') {
+            $handover = Find $name
+            if ($handover.outcome -ne 'Passed') { throw "$name was $($handover.outcome), not passed on the elevated runner: $($handover.OuterXml)" }
+            "$name passed on the elevated runner."
+          }
+          $registration = Find 'Registering_the_windows_service_is_planned_and_without_elevation_refused_with_what_to_do'
+          if ($registration.outcome -ne 'NotExecuted' -or $registration.OuterXml -notmatch 'This process is elevated') { throw "The service registration test was $($registration.outcome), not skipped for the elevated runner: $($registration.OuterXml)" }
+          "The service registration test was skipped: this process is elevated."

@@ -1,0 +1,62 @@
+{
+  "name": "the MCP endpoint's request size limit of the product's own",
+  "commit": "hand run, 2026-09-26",
+  "mutants": [
+    {
+      "name": "the bound is dropped",
+      "file": "src/Premagentic.Api/Program.cs",
+      "old": "app.UseMiddleware<McpRequestLimitMiddleware>();\n",
+      "new": "\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.McpRequestLimitTests.|FullyQualifiedName~Premagentic.Tests.McpErrorTests."
+    },
+    {
+      "name": "one byte over the bound is taken",
+      "file": "src/Premagentic.Api/Callers/McpRequestLimit.cs",
+      "old": "public static bool Over(long bytes, int bound) => bytes > bound;",
+      "new": "public static bool Over(long bytes, int bound) => bytes > bound + 1;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.McpRequestLimitTests."
+    },
+    {
+      "name": "a declared length over the bound is taken",
+      "file": "src/Premagentic.Api/Callers/McpRequestLimit.cs",
+      "old": "if (McpRequestSizeLimit.Over(declared, limit.Bytes))",
+      "new": "if (false && McpRequestSizeLimit.Over(declared, limit.Bytes))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.McpRequestLimitTests."
+    },
+    {
+      "name": "a body of unknown length over the bound is taken",
+      "file": "src/Premagentic.Api/Callers/McpRequestLimit.cs",
+      "old": "if (McpRequestSizeLimit.Over(received.Length, limit.Bytes))",
+      "new": "if (false && McpRequestSizeLimit.Over(received.Length, limit.Bytes))",
+      "filter": "FullyQualifiedName~Premagentic.Tests.McpRequestLimitTests."
+    },
+    {
+      "name": "the stored setting is not read",
+      "file": "src/Premagentic.Api/Callers/McpRequestLimit.cs",
+      "old": "                bytes = stored.GetInt32();",
+      "new": "                _ = stored.GetInt32();",
+      "filter": "FullyQualifiedName~Premagentic.Tests.McpRequestLimitTests."
+    },
+    {
+      "name": "a stored bound outside the range is used",
+      "file": "src/Premagentic.Core/Identity/DeploymentInstructions.cs",
+      "old": "value.TryGetInt32(out var bytes) && bytes is >= MaxRequestBytesMin and <= MaxRequestBytesMax",
+      "new": "value.TryGetInt32(out var bytes) && bytes >= 0",
+      "filter": "FullyQualifiedName~Premagentic.Tests.McpRequestLimitTests."
+    },
+    {
+      "name": "the refusal answers 400 instead of 413",
+      "file": "src/Premagentic.Api/Callers/McpRequestLimit.cs",
+      "old": "http.Response.StatusCode = StatusCodes.Status413PayloadTooLarge;",
+      "new": "http.Response.StatusCode = StatusCodes.Status400BadRequest;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.McpRequestLimitTests."
+    },
+    {
+      "name": "the refusal carries another JSON-RPC code",
+      "file": "src/Premagentic.Api/Callers/McpRequestLimit.cs",
+      "old": "error = new { code = -32600, message",
+      "new": "error = new { code = -32603, message",
+      "filter": "FullyQualifiedName~Premagentic.Tests.McpRequestLimitTests."
+    }
+  ]
+}

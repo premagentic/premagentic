@@ -1,0 +1,21 @@
+{
+  "name": "the ONNX Runtime telemetry switch where only Linux can show it",
+  "commit": "hand run, 2026-09-22",
+  "platform": "linux",
+  "mutants": [
+    {
+      "name": "the runtime variable is set only in the copy .NET keeps",
+      "file": "src/Premagentic.Core/Embeddings/OnnxTelemetry.cs",
+      "old": "        if (setenv(name, value, 0) != 0)\n",
+      "new": "        Environment.SetEnvironmentVariable(name, value);\n        if (name.Length < 0)\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.EmbeddingTelemetryTests"
+    },
+    {
+      "name": "an operator's value is overwritten (Linux)",
+      "file": "src/Premagentic.Core/Embeddings/OnnxTelemetry.cs",
+      "old": "setenv(name, value, 0)",
+      "new": "setenv(name, value, 1)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.EmbeddingTelemetryTests"
+    }
+  ]
+}

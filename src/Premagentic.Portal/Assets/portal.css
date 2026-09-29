@@ -1,0 +1,535 @@
+/* The portal's only stylesheet. Everything it needs ships beside it under
+   /portal/assets: the three faces, the marks, the favicon. Nothing is loaded
+   from anywhere else, so the portal works on a network with no route out, and
+   the content security policy can forbid outside origins outright.
+
+   The character is the website's: a white panel framed by a one pixel black
+   rule on a gray page, black structure and soft gray rows, mono for labels and
+   identifiers, the pixel face for display lines, one accent, square corners
+   everywhere. The token values are copied from the site's stylesheet, named by
+   role, so a dark theme is one block of redefinitions later. Light only. */
+
+@font-face {
+  font-family: "Geist";
+  src: url("/portal/assets/Geist-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/portal/assets/GeistMono-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pixelify Sans";
+  src: url("/portal/assets/PixelifySans-Variable.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --bg: #ffffff;
+  --page: #efefef;
+  --panel: #f2f2f2;
+  --fg: #000000;
+  --muted: #5c5c5c;
+  --rule: #000000;
+  --rule-soft: #c9c9c9;
+  --shadow: #939393;
+  --accent: #0062db;
+  --accent-ink: #ffffff;
+  --accent-soft: #e8f0fd;
+  --good: #1f6b3a;
+  --good-soft: #e6f2ea;
+  --warn: #8a5a00;
+  --warn-soft: #fbf1de;
+  --bad: #a3261f;
+  --bad-soft: #fbeae9;
+
+  --sans: "Geist", "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono: "Geist Mono", Consolas, "Courier New", monospace;
+  --pixel: "Pixelify Sans", "Geist", sans-serif;
+
+  --frame: 1rem;
+  --side: 15rem;
+  --measure: 72rem;
+  --row: 2.4rem;
+  --control: 2.2rem;
+  --hard-shadow: 6px 6px 0 0 var(--shadow);
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  padding: var(--frame);
+  background: var(--page);
+  color: var(--fg);
+  font: 400 15px/1.5 var(--sans);
+}
+
+/* The frame: the whole app in one white panel, ruled in black, on the page. */
+.frame {
+  display: flex;
+  align-items: stretch;
+  min-height: calc(100vh - 2 * var(--frame));
+  background: var(--bg);
+  border: 1px solid var(--rule);
+}
+
+a { color: var(--accent); text-decoration: none; transition: color 120ms ease; }
+a:hover, a:focus-visible { text-decoration: underline; text-underline-offset: 0.15em; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* An identifier that happens to be a link is still an identifier. */
+td a, .hit .citation a, dl.facts dd a { color: var(--fg); }
+td a:hover, td a:focus-visible, dl.facts dd a:hover { color: var(--accent); }
+
+code, pre, kbd { font-family: var(--mono); font-size: 0.93em; }
+
+/* Display lines in the pixel face, as on the website, and nowhere else. */
+h1 {
+  margin: 0 0 1rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--rule);
+  font: 700 clamp(1.75rem, 3vw, 2.5rem)/0.95 var(--pixel);
+  letter-spacing: 0;
+  text-transform: uppercase;
+  overflow-wrap: normal;
+}
+
+h2 { font: 500 16px/1.2 var(--sans); letter-spacing: -0.01em; margin: 2rem 0 0.6rem; }
+h3 { font: 500 14px/1.2 var(--sans); letter-spacing: -0.01em; margin: 1.4rem 0 0.5rem; }
+
+p { margin: 0 0 0.9rem; }
+
+/* The website's small mono labels, with its gray number box. */
+th,
+label,
+.label,
+dl.facts dt,
+.side .group > .label {
+  font: 500 0.75rem/1rem var(--mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.num {
+  display: inline-block;
+  min-width: 1.6rem;
+  padding: 0.15rem 0.35rem;
+  margin-right: 0.5rem;
+  background: var(--panel);
+  color: var(--fg);
+  text-align: center;
+}
+
+.group-label { margin: 0 0 0.75rem; }
+
+/* The sidebar, inside the frame, ruled off from the main area in black. */
+.side {
+  flex: 0 0 var(--side);
+  width: var(--side);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-bottom: 1rem;
+  border-right: 1px solid var(--rule);
+}
+
+/* The black corner square with the inverted mark, flush with the frame. */
+.side .brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--rule);
+  color: var(--fg);
+  font: 600 0.95rem/1 var(--sans);
+  letter-spacing: -0.01em;
+}
+
+.side .brand:hover, .side .brand:focus-visible { color: var(--accent); text-decoration: none; }
+
+.markbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 3rem;
+  width: 3rem;
+  height: 3rem;
+  background: var(--fg);
+  border-right: 1px solid var(--rule);
+}
+
+.markbox .mark { width: 1.75rem; height: auto; filter: invert(1); display: block; }
+
+.side nav { display: flex; flex-direction: column; gap: 1.25rem; }
+.side .group { display: flex; flex-direction: column; }
+.side .group > .label { padding: 0 1rem 0.4rem; }
+
+.side .group a {
+  padding: 0.3rem 1rem;
+  border-left: 2px solid transparent;
+  color: var(--fg);
+  font: 500 0.8125rem/1.6 var(--mono);
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.side .group a:hover { color: var(--accent); text-decoration: none; }
+.side .group a.current { color: var(--accent); border-left-color: var(--accent); }
+
+/* The website's legal row, at the foot of the sidebar. */
+.side .who {
+  margin-top: auto;
+  padding: 0.8rem 1rem 0;
+  border-top: 1px solid var(--rule-soft);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+}
+
+.side .who .name { color: var(--fg); font-size: 14px; font-weight: 500; }
+.side .who .role { font: 500 0.6875rem/1.4 var(--mono); letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.side .who button.link { margin-top: 0.4rem; font: 500 0.75rem/1 var(--mono); color: var(--muted); }
+.side .who button.link:hover { color: var(--accent); }
+
+main {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: var(--measure);
+  min-width: 0;
+  padding: 2rem;
+}
+
+main > p.note:first-of-type { max-width: 70ch; }
+
+/* The link to this program's source, at the foot of every page. */
+footer.source { margin-top: 2.5rem; font: 500 0.75rem/1 var(--mono); }
+footer.source a { color: var(--muted); }
+footer.source a:hover, footer.source a:focus-visible { color: var(--accent); }
+
+/* Tables: black under the headings, soft rules between rows. */
+table { border-collapse: collapse; width: 100%; margin: 0.25rem 0 1.5rem; }
+
+th, td {
+  text-align: left;
+  padding: 0.45rem 0.75rem 0.45rem 0;
+  border-bottom: 1px solid var(--rule-soft);
+  vertical-align: top;
+}
+
+th { padding-bottom: 0.4rem; border-bottom: 1px solid var(--rule); }
+tbody tr { height: var(--row); }
+tbody tr:hover { background: var(--panel); }
+tbody tr:last-child td { border-bottom: none; }
+
+/* Identifiers and moments read as themselves wherever they appear. */
+td code, dl.facts dd code, .hit .path, .token { font-family: var(--mono); }
+.when { font-family: var(--mono); font-size: 0.93em; white-space: nowrap; }
+
+table.paths td:first-child, table.paths td:last-child { font-family: var(--mono); font-size: 13px; overflow-wrap: anywhere; }
+table.paths td:first-child { min-width: 17rem; }
+table.paths td:last-child { color: var(--muted); }
+table.numbers th:nth-child(n+3), table.numbers td:nth-child(n+3) { text-align: right; padding-right: 1.25rem; }
+table.wraps td:nth-child(2) { font-family: var(--mono); font-size: 13px; overflow-wrap: normal; }
+table.wraps td:nth-child(3), table.wraps td:nth-child(4) { font-family: var(--mono); font-size: 13px; max-width: 22rem; overflow-wrap: anywhere; }
+/* The authorization flow's lists: a made-up id, an address or a client's own
+   name can be long with nowhere to break, so it breaks anywhere, and a moment
+   may wrap at its spaces, rather than push the table past the page. */
+table.flow td code, table.flow td a, table.flow td bdi { overflow-wrap: anywhere; }
+table.flow td .when { white-space: normal; }
+
+dl.facts { display: grid; grid-template-columns: max-content 1fr; gap: 0.4rem 1.25rem; margin: 0 0 1.5rem; }
+dl.facts dt { padding-top: 0.15rem; }
+dl.facts dd { margin: 0; }
+
+/* Forms: the label above its control, square corners, one height. */
+form.inline { display: inline-flex; flex-wrap: wrap; align-items: flex-end; gap: 0.5rem 0.6rem; margin: 0 0.5rem 0.5rem 0; }
+form.block { display: block; }
+
+label { display: inline-flex; flex-direction: column; gap: 0.3rem; }
+
+label.check {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--fg);
+  font: 400 14px/1.5 var(--sans);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+input[type="text"], input[type="password"], input[type="number"], select, textarea {
+  font: 400 14px/1.4 var(--sans);
+  height: var(--control);
+  padding: 0 0.55rem;
+  border: 1px solid var(--rule-soft);
+  background: var(--bg);
+  color: var(--fg);
+  min-width: 11rem;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible {
+  outline: none;
+  border-color: var(--rule);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+textarea { min-width: 28rem; min-height: 6rem; height: auto; padding: 0.4rem 0.55rem; font-family: var(--mono); }
+input[type="checkbox"] { accent-color: var(--accent); width: 1rem; height: 1rem; }
+
+/* The website's buttons: black, mono, square, accent when pointed at. */
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--control);
+  padding: 0 1rem;
+  border: 1px solid var(--rule);
+  background: var(--fg);
+  color: var(--bg);
+  font: 500 0.8125rem/1rem var(--mono);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+button:hover, button:focus-visible { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+button.secondary { background: var(--bg); color: var(--fg); }
+button.secondary:hover, button.secondary:focus-visible { background: var(--bg); color: var(--accent); border-color: var(--accent); }
+button.danger { background: var(--bg); color: var(--bad); border-color: var(--bad); }
+button.danger:hover, button.danger:focus-visible { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+
+button.link {
+  height: auto;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+button.link:hover { background: none; color: var(--accent); }
+
+.actions { display: flex; flex-wrap: nowrap; align-items: center; gap: 0.4rem; }
+.actions form.inline { margin: 0; flex-wrap: nowrap; align-items: center; }
+.actions input[type="text"] { width: 9rem; min-width: 0; }
+
+/* Notices: a slim bar with a rule in the semantic color, square. */
+.done, .error, .warning {
+  padding: 0.5rem 0.75rem;
+  margin: 0 0 1rem;
+  border-left: 3px solid var(--rule-soft);
+  background: var(--panel);
+  color: var(--fg);
+}
+
+.done { border-left-color: var(--good); background: var(--good-soft); }
+.error { border-left-color: var(--bad); background: var(--bad-soft); }
+.warning { border-left-color: var(--warn); background: var(--warn-soft); }
+
+.empty { color: var(--muted); padding: 0.75rem 0 1rem; }
+.note { color: var(--muted); }
+
+/* The consent page: where the answer goes, set large, since it is what a
+   person has to recognize; the client's own name in its isolated span; the two
+   forms, Approve and Deny, side by side. */
+.consent .lead { font-size: 1.1rem; }
+bdi.client { font-weight: 600; }
+.consent .origin { font: 500 1.5rem/1.3 var(--mono); overflow-wrap: anywhere; margin: 0 0 1rem; }
+.consent-actions { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1rem; }
+.continue a { font-size: 1.1rem; }
+
+/* Badges take the website's strip items: square, soft rule, mono. */
+.tag {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  margin: 0 0.25rem 0.25rem 0;
+  border: 1px solid var(--rule-soft);
+  background: var(--bg);
+  color: var(--fg);
+  font: 400 0.75rem/1.5 var(--mono);
+  white-space: nowrap;
+}
+
+.tag.good, .tag.trust-human-reviewed { background: var(--good-soft); border-color: #b9d6c4; color: var(--good); }
+.tag.trust-machine-confirmed { background: var(--accent-soft); border-color: #bcd4f5; color: var(--accent); }
+.tag.bad, .tag.stale-yes { background: var(--bad-soft); border-color: #e7b9b6; color: var(--bad); }
+.tag.authorship-machine { background: var(--warn-soft); border-color: #e3cb9c; color: var(--warn); }
+.tag.lifecycle-superseded, .tag.lifecycle-archived { color: var(--muted); text-decoration: line-through; }
+.tag.quiet { border-color: transparent; background: none; color: var(--muted); padding-left: 0.1rem; padding-right: 0.1rem; }
+.tag.quiet.lifecycle-superseded, .tag.quiet.lifecycle-archived { text-decoration: line-through; }
+
+/* The search form as the website's terminal window. */
+.window {
+  border: 1px solid var(--rule);
+  background: var(--bg);
+  box-shadow: var(--hard-shadow);
+  margin: 0 0 2rem;
+  max-width: 52rem;
+}
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 1.5rem;
+  padding: 0 0.5rem;
+  border-bottom: 1px solid var(--rule);
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 3px, var(--rule) 3px 4px, transparent 4px 7px) center / 100% 11px no-repeat;
+}
+
+.titlebar span {
+  background: var(--bg);
+  padding: 0 0.4rem;
+  font: 500 0.6875rem/1rem var(--mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+.window form.inline { display: flex; flex-wrap: nowrap; align-items: center; gap: 0.75rem; margin: 0; padding: 1rem 1.1rem; }
+
+/* The question carries the website's accent prompt; its label still names the
+   field for anyone not looking at it. */
+.window form.inline label:not(.check) { flex: 1 1 auto; flex-direction: row; align-items: center; gap: 0.5rem; font-size: 0; }
+.window form.inline label:not(.check)::before {
+  content: "$";
+  font: 500 0.8125rem/1 var(--mono);
+  color: var(--accent);
+}
+
+.window input[name="q"] {
+  width: 100%;
+  min-width: 0;
+  border: none;
+  height: 1.6rem;
+  padding: 0;
+  font: 400 0.8125rem/1.6 var(--mono);
+}
+
+.window input[name="q"]:focus-visible { box-shadow: none; outline: 2px solid var(--accent-soft); outline-offset: 2px; }
+.window label.check { flex: 0 0 auto; }
+
+.token {
+  display: block;
+  padding: 0.75rem;
+  background: var(--panel);
+  border: 1px solid var(--rule-soft);
+  word-break: break-all;
+  font-size: 14px;
+}
+
+/* A configuration to copy keeps its lines; a long one scrolls in its box. */
+/* Lines wrap on the screen only; the copy button copies the text as written. */
+pre.snippet { margin: 0 0 0.5rem; white-space: pre-wrap; overflow-wrap: anywhere; word-break: normal; font-size: 13px; line-height: 1.5; }
+
+/* The usage figures: a row of numbers, each with its label above it. */
+dl.figures { display: flex; flex-wrap: wrap; gap: 0; margin: 0 0 1rem; border: 1px solid var(--rule); background: var(--bg); }
+dl.figures .figure { flex: 1 1 10rem; padding: 0.75rem 1rem; border-right: 1px solid var(--rule-soft); }
+dl.figures .figure:last-child { border-right: none; }
+dl.figures dt { font: 400 0.75rem/1.4 var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+dl.figures dd { margin: 0.25rem 0 0; font: 600 1.75rem/1.1 var(--mono); }
+
+/* Search results: the citation is the headline, the passage a quiet block. */
+.hit { padding: 1rem 0; border-bottom: 1px solid var(--rule-soft); }
+.hit:last-of-type { border-bottom: none; }
+.hit .citation { display: block; margin-bottom: 0.4rem; font-weight: 600; }
+.hit .citation .path { color: var(--muted); font-weight: 400; font-family: var(--mono); font-size: 0.875rem; }
+.hit .passage { margin: 0 0 0.5rem; padding-left: 0.75rem; border-left: 2px solid var(--rule-soft); }
+.hit .fields { display: flex; flex-wrap: wrap; align-items: center; gap: 0 0.25rem; margin: 0; }
+
+/* Sign-in: the website's note card on the gray page. */
+body.sign-in { padding: 0; background: var(--page); min-height: 100vh; }
+body.sign-in .frame { border: none; background: none; display: block; min-height: 100vh; }
+body.sign-in main { max-width: none; width: 100%; padding: 0; }
+body.sign-in footer.source { margin: 0; padding-bottom: 2rem; text-align: center; }
+
+.sign-in-card {
+  width: 24rem;
+  max-width: calc(100% - 2rem);
+  margin: 6rem auto;
+  padding: 1.5rem;
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  box-shadow: var(--hard-shadow);
+}
+
+.sign-in-card .logo { width: 6rem; height: auto; margin: 0 auto 1rem; display: block; }
+/* The mark loops; the still stands in when the visitor asks for less motion */
+.sign-in-card .still { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .sign-in-card .motion { display: none; }
+  .sign-in-card .still { display: block; }
+}
+.sign-in-card h1 { border: none; padding: 0; margin: 0 0 1.5rem; font: 700 1.75rem/0.95 var(--pixel); text-transform: uppercase; text-align: center; }
+.sign-in-card form { display: flex; flex-direction: column; gap: 1rem; }
+.sign-in-card label { width: 100%; }
+.sign-in-card input { width: 100%; }
+.sign-in-card button { width: 100%; }
+.sign-in-card .error-text { color: var(--bad); font: 400 0.8125rem/1.5 var(--mono); margin: 0; }
+
+/* Narrow: the frame keeps its rule, the sidebar becomes a top strip with the
+   same links wrapped, so nothing is hidden and nothing needs a script. */
+@media (max-width: 900px) {
+  body { padding: 6px; }
+  .frame { display: block; min-height: calc(100vh - 12px); }
+
+  .side {
+    width: auto;
+    flex: none;
+    gap: 0.75rem;
+    padding: 0 0 0.75rem;
+    border-right: none;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .side nav { flex-direction: row; flex-wrap: wrap; gap: 0.5rem 1.25rem; padding: 0 0.75rem; }
+  .side .group { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.6rem; }
+  .side .group > .label { padding: 0; }
+  .side .group a { padding: 0.15rem 0; border-left: none; }
+  .side .group a.current { border-left: none; text-decoration: underline; text-underline-offset: 0.2em; }
+  .side .who { margin-top: 0; padding: 0.6rem 0.75rem 0; flex-direction: row; align-items: center; gap: 0.75rem; }
+  .side .who button.link { margin-top: 0; }
+
+  main { max-width: none; padding: 1.25rem 0.75rem; }
+  h1 { font-size: clamp(1.5rem, 8vw, 2rem); overflow-wrap: anywhere; }
+
+  dl.facts dd, .hit .citation, .token, code { overflow-wrap: anywhere; }
+  /* A hash or a long value in a facts list wraps rather than widening the page. */
+  dl.facts dd, dl.facts dd code { word-break: break-all; }
+  /* A badge holding a long concept id wraps instead of widening the page. */
+  .tag { white-space: normal; overflow-wrap: anywhere; }
+  /* A table keeps every word whole: a column is at least as wide as its
+     longest word, and a table that is then wider than the screen scrolls in
+     its own box rather than breaking words at any letter. */
+  table { display: block; overflow-x: auto; white-space: nowrap; }
+  td, th,
+  table.paths td:first-child, table.paths td:last-child,
+  table.wraps td:nth-child(3), table.wraps td:nth-child(4) { white-space: normal; overflow-wrap: break-word; word-break: normal; }
+  td code { overflow-wrap: break-word; }
+  dl.facts { grid-template-columns: 1fr; gap: 0.1rem 0; }
+  dl.figures .figure { flex-basis: 50%; border-right: none; border-bottom: 1px solid var(--rule-soft); }
+  /* A long button label wraps rather than widening the page. */
+  button { white-space: normal; max-width: 100%; text-align: left; }
+  dl.facts dd { margin-bottom: 0.6rem; }
+  textarea { min-width: 100%; }
+  input[type="text"], input[type="password"], input[type="number"], select { min-width: 0; width: 100%; }
+  form.inline { display: flex; width: 100%; flex-wrap: wrap; }
+  label { width: 100%; }
+  .window { box-shadow: 3px 3px 0 0 var(--shadow); max-width: none; }
+  .window form.inline { flex-wrap: wrap; padding: 0.75rem; }
+  .window form.inline label:not(.check) { width: auto; }
+  .sign-in-card { margin: 2rem auto; box-shadow: 3px 3px 0 0 var(--shadow); }
+}

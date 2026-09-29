@@ -1,0 +1,75 @@
+# The Premagentic API as a systemd service. A template: copy it to
+# /etc/systemd/system/premagentic-api.service and change the paths if yours differ.
+#
+# It expects:
+#   - the release archive unpacked into /opt/premagentic: the API in
+#     /opt/premagentic/bin beside the command line and the runtime they share,
+#     and the embedding model in /opt/premagentic/models/minilm;
+#   - a system account for the service, which owns nothing and cannot log in:
+#       useradd --system --no-create-home --shell /usr/sbin/nologin premagentic
+#   - prem setup run as root with --credentials-dir /etc/premagentic, which leaves
+#     app.credentials, search.credentials, kestrel.json and https.pfx there,
+#     readable by root only.
+#
+# systemd hands those four files to the service with LoadCredential: the service
+# account reads its own copy for as long as it runs, the originals stay root's,
+# and owner.credentials is never given to the service at all.
+# PREM_CREDENTIALS_FILE points at the copy, and the API finds kestrel.json and
+# the certificate beside it. No password appears in this file or the environment.
+#
+#   systemctl daemon-reload
+#   systemctl enable --now premagentic-api
+#   systemctl status premagentic-api
+
+[Unit]
+Description=Premagentic search API
+Wants=network-online.target
+After=network-online.target postgresql.service
+
+[Service]
+# The API tells systemd when it is ready: after every stored vector is loaded
+# and the HTTPS endpoint is listening.
+Type=notify
+User=premagentic
+Group=premagentic
+WorkingDirectory=/opt/premagentic
+ExecStart=/opt/premagentic/bin/Premagentic.Api
+LoadCredential=app.credentials:/etc/premagentic/app.credentials
+LoadCredential=search.credentials:/etc/premagentic/search.credentials
+LoadCredential=kestrel.json:/etc/premagentic/kestrel.json
+LoadCredential=https.pfx:/etc/premagentic/https.pfx
+Environment=PREM_CREDENTIALS_FILE=%d/app.credentials
+Environment=PREM_ONNX_MODEL_DIR=/opt/premagentic/models/minilm
+# Loading the vectors of a large index takes seconds to minutes.
+TimeoutStartSec=300
+Restart=on-failure
+RestartSec=10
+# Exit code 2 is a configuration the API cannot start with, such as a missing
+# credentials file. It says which in the journal; restarting would not help.
+RestartPreventExitStatus=2
+
+# The service reads its files and answers requests. It writes nothing on disk,
+# so the whole file system is read-only to it.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=
+SystemCallArchitectures=native
+UMask=0077
+# Not MemoryDenyWriteExecute: the .NET runtime compiles code as it runs.
+
+[Install]
+WantedBy=multi-user.target

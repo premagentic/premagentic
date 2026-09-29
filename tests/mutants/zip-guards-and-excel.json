@@ -1,0 +1,254 @@
+{
+  "name": "the shared zip guards and the Excel reader",
+  "commit": "hand run, 2026-09-25",
+  "project": "tests/Premagentic.Readers.Tests/Premagentic.Readers.Tests.csproj",
+  "mutants": [
+    {
+      "name": "1a the entry count a zip states is not read before it is opened",
+      "file": "extensions/shared/ZipParts.cs",
+      "old": "if (StatedEntryCount(bytes) is { } stated && stated > limits.MaxEntries)",
+      "new": "if (StatedEntryCount(bytes) is { } stated && stated < 0)",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.ZipPartsTests|FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests|FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "1b the entry count is not checked once the zip is open",
+      "file": "extensions/shared/ZipParts.cs",
+      "old": "            if (entries.Count > limits.MaxEntries)\n",
+      "new": "            if (entries.Count < 0)\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.ZipPartsTests|FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests|FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "1c the size a zip says it expands to is not checked",
+      "file": "extensions/shared/ZipParts.cs",
+      "old": "if (entry.Length < 0 || entry.Length > limits.MaxUncompressedBytes - statedBytes)",
+      "new": "if (entry.Length < 0)",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.ZipPartsTests|FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests|FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "1d the bytes read are not held to the read limit",
+      "file": "extensions/shared/ZipParts.cs",
+      "old": "            if (_read > _limits.MaxReadBytes)\n",
+      "new": "            if (_read < 0)\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.ZipPartsTests|FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests|FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "1e the read limit counts each part alone, not every part read together",
+      "file": "extensions/shared/ZipParts.cs",
+      "old": "            _read += got;\n",
+      "new": "            _read = copy.Length;\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.ZipPartsTests|FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests|FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "1f no part is held to the compression ratio",
+      "file": "extensions/shared/ZipParts.cs",
+      "old": "if (copy.Length > _limits.RatioFloorBytes && copy.Length > Math.Max(1, entry.CompressedLength) * _limits.MaxCompressionRatio)",
+      "new": "if (copy.Length < 0)",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.ZipPartsTests|FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests|FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "1g the ratio is held from the first byte, with no floor",
+      "file": "extensions/shared/ZipParts.cs",
+      "old": "if (copy.Length > _limits.RatioFloorBytes && copy.Length > Math.Max(1, entry.CompressedLength) * _limits.MaxCompressionRatio)",
+      "new": "if (copy.Length > Math.Max(1, entry.CompressedLength) * _limits.MaxCompressionRatio)",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.ZipPartsTests|FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests|FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "1h a part is never measured for depth",
+      "file": "extensions/shared/ZipParts.cs",
+      "old": "                if (scan.Depth > _limits.MaxDepth)\n",
+      "new": "                if (scan.Depth < 0)\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.ZipPartsTests|FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "1i a name held by two parts is read as the first",
+      "file": "extensions/shared/ZipParts.cs",
+      "old": "        if (found.Count > 1) throw new UnreadableDocumentException($\"holds two parts named {name}\");\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.ZipPartsTests|FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests|FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "1j a part that is itself an archive is read as XML",
+      "file": "extensions/shared/ZipParts.cs",
+      "old": "        if (data.AsSpan().StartsWith(ZipLocalHeader))\n",
+      "new": "        if (data.Length < 0)\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.ZipPartsTests|FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests|FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "1k a part may carry a document type definition",
+      "file": "extensions/shared/ZipParts.cs",
+      "old": "        DtdProcessing = DtdProcessing.Prohibit,\n",
+      "new": "        DtdProcessing = DtdProcessing.Parse,\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.ZipPartsTests|FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests|FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "1l reading a part never checks the clock",
+      "edits": [
+        {
+          "file": "extensions/shared/ZipParts.cs",
+          "old": "        _clock.Check();\n        var found = Entries",
+          "new": "        var found = Entries"
+        },
+        {
+          "file": "extensions/shared/ZipParts.cs",
+          "old": "            _clock.Check();\n            copy.Write(chunk, 0, got);",
+          "new": "            copy.Write(chunk, 0, got);"
+        }
+      ],
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.ZipPartsTests|FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests|FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "1m a relationship target may climb out of the file",
+      "file": "extensions/shared/ZipParts.cs",
+      "old": "if (name.Length == 0 || name.EndsWith('/') || name.Contains(\"..\", StringComparison.Ordinal) || name.Contains(':')",
+      "new": "if (name.Length == 0 || name.EndsWith('/') || name.Contains(':')",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.ZipPartsTests|FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests|FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "1n the main part may be named outside the file",
+      "file": "extensions/shared/ZipParts.cs",
+      "old": "        if (name.Contains(\"..\", StringComparison.Ordinal) || name.Contains(':') || name.Contains('\\\\'))\n            throw new UnreadableDocumentException(_damaged);\n        return name;\n    }\n\n    /// <summary>Whether the content types",
+      "new": "        return name;\n    }\n\n    /// <summary>Whether the content types",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.ZipPartsTests|FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests|FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "1o a macro project is not looked for",
+      "file": "extensions/shared/ZipParts.cs",
+      "old": "e.FullName.EndsWith(\"vbaProject.bin\", StringComparison.OrdinalIgnoreCase)",
+      "new": "e.FullName.EndsWith(\"vbaProject.none\", StringComparison.OrdinalIgnoreCase)",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.ZipPartsTests|FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests|FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "1p a main part declared macro-enabled is not noticed",
+      "file": "extensions/shared/ZipParts.cs",
+      "old": "Contains(\"macroEnabled\", StringComparison.OrdinalIgnoreCase)",
+      "new": "Contains(\"macroDisabled\", StringComparison.OrdinalIgnoreCase)",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.ZipPartsTests|FullyQualifiedName~Premagentic.Readers.Tests.DocxReaderTests|FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "2a a .xls is opened",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.cs",
+      "old": "        if (extension == \".xls\") return ReadDocument.Skipped(\"legacy .xls\");\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "2b a .xlsm is opened",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.cs",
+      "old": "        if (extension == \".xlsm\") return ReadDocument.Skipped(\"macro-enabled\");\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "2c no file is too large",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.cs",
+      "old": "        if (bytes.Length > limits.MaxFileBytes)\n",
+      "new": "        if (bytes.Length < 0)\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "2d a password-protected workbook is called a legacy .xls",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.cs",
+      "old": "                ? throw new UnreadableDocumentException(\"password protected\")\n",
+      "new": "                ? ReadDocument.Skipped(\"legacy .xls\")\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "2e a workbook carrying a macro project is read",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.cs",
+      "old": "        if (parts.HoldsMacroProject) return ReadDocument.Skipped(\"macro-enabled\");\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "2f a workbook declared macro-enabled is read",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.cs",
+      "old": "        if (parts.DeclaresMacroEnabled(main)) return ReadDocument.Skipped(\"macro-enabled\");\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "2g an Excel 4 macro sheet is not looked for",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.cs",
+      "old": "        relationships.Any(r => r.Type.EndsWith(\"/xlMacrosheet\", StringComparison.Ordinal)",
+      "new": "        relationships.Any(r => false) && relationships.Any(r => r.Type.EndsWith(\"/xlMacrosheet\", StringComparison.Ordinal)",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "2h no workbook has too many sheets",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.cs",
+      "old": "        if (sheets.Count > limits.MaxSheets)\n",
+      "new": "        if (sheets.Count < 0)\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "2i no workbook has too many cells",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.cs",
+      "old": "            if (++_count > max) throw",
+      "new": "            if (++_count < 0) throw",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "2j only cells with text are counted",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.cs",
+      "old": "                cells.Count();\n                var text = Cell(reader, values);\n                if (text.Length > 0) texts.Add(text);\n",
+      "new": "                var text = Cell(reader, values);\n                if (text.Length > 0)\n                {\n                    cells.Count();\n                    texts.Add(text);\n                }\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "2k the shared string table is not held to the cell limit",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.cs",
+      "old": "                if (strings.Count >= cells.Max)\n",
+      "new": "                if (strings.Count < 0)\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "2l the text is not held to the text limit",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.cs",
+      "old": "            if (_text.Length + block.Length + 2 > maxChars)\n",
+      "new": "            if (_text.Length < 0)\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "2m a formula is read as the text",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.cs",
+      "old": "            if (reader.NodeType == XmlNodeType.Element && Is(reader, \"v\")) value = reader.ReadElementContentAsString();\n",
+      "new": "            if (reader.NodeType == XmlNodeType.Element && (Is(reader, \"v\") || Is(reader, \"f\"))) value = reader.ReadElementContentAsString();\n",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "2n the phonetic guide is read",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.cs",
+      "old": "            if (reader.NodeType == XmlNodeType.Element && Is(reader, \"rPh\")) reader.Skip();\n            else if",
+      "new": "            if (false) reader.Skip();\n            else if",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "2o a tab inside a cell is kept, so a tab no longer means the next cell",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.cs",
+      "old": "            return text.Replace('\\t', ' ').Replace('\\r', ' ')",
+      "new": "            return text.Replace('\\r', ' ')",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "2p half a surrogate pair from an escape is kept, and no encoding can write it",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.cs",
+      "old": "            clean.Append(char.IsSurrogate(c) ? '\\uFFFD' : c < ' ' ? ' ' : c);",
+      "new": "            clean.Append(c < ' ' ? ' ' : c);",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "2q the 1904 system is bounded as the 1900 system is",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.cs",
+      "old": "        var lastDay = date1904 ? 2957003 : 2958465;",
+      "new": "        var lastDay = 2958465;",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    },
+    {
+      "name": "2r a serial that rounds past the last day is not checked again",
+      "file": "extensions/xlsx-reader/XlsxDocumentReader.cs",
+      "old": "        if (days > lastDay) return null;\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Premagentic.Readers.Tests.XlsxReaderTests"
+    }
+  ]
+}

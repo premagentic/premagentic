@@ -1,0 +1,586 @@
+{
+  "name": "the MCP authorization flow: its settings, stores, endpoints, off-proof and credential generations",
+  "commit": "hand run, 2026-09-25",
+  "mutants": [
+    {
+      "name": "a user's disable does not move the credential generation",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "                SET disabled = @value,\n                    credential_generation = credential_generation + CASE WHEN @value THEN 1 ELSE 0 END\n",
+      "new": "                SET disabled = @value,\n                    credential_generation = credential_generation\n",
+      "filter": "FullyQualifiedName~CredentialGeneration"
+    },
+    {
+      "name": "an agent's disable does not move the credential generation",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "            SET disabled = @value,\n                credential_generation = credential_generation + CASE WHEN @value THEN 1 ELSE 0 END\n",
+      "new": "            SET disabled = @value,\n                credential_generation = credential_generation\n",
+      "filter": "FullyQualifiedName~CredentialGeneration"
+    },
+    {
+      "name": "a new password does not move the credential generation",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "SET password_hash = @value, credential_generation = credential_generation + 1",
+      "new": "SET password_hash = @value",
+      "filter": "FullyQualifiedName~CredentialGeneration"
+    },
+    {
+      "name": "the sign-in rehash moves the credential generation",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "UPDATE prem_config.app_user SET password_hash = @new",
+      "new": "UPDATE prem_config.app_user SET password_hash = @new, credential_generation = credential_generation + 1",
+      "filter": "FullyQualifiedName~CredentialGeneration"
+    },
+    {
+      "name": "the token read never finds a token superseded",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "               NOT {CredentialSql.TokenCurrent(\"t\", \"a\", \"u\")}",
+      "new": "               false",
+      "filter": "FullyQualifiedName~CredentialGeneration"
+    },
+    {
+      "name": "every agent's token is stamped, not only a self: agent's",
+      "edits": [
+        {
+          "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+          "old": "CASE WHEN a.created_by LIKE 'self:%' THEN u.credential_generation END,",
+          "new": "u.credential_generation,"
+        },
+        {
+          "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+          "old": "CASE WHEN a.created_by LIKE 'self:%' THEN a.credential_generation END",
+          "new": "a.credential_generation"
+        }
+      ],
+      "filter": "FullyQualifiedName~CredentialGeneration"
+    },
+    {
+      "name": "the token's stamps are judged before its agent and owner",
+      "file": "src/Premagentic.Core/Identity/CallerResolver.cs",
+      "old": "        var resolved = await ResolveAgentAsync(agentId, tokenId, ct);\n",
+      "new": "        if (record.Superseded) return ResolvedCaller.Refused(CallerStatus.TokenSuperseded, agentId: agentId, tokenId: tokenId);\n        var resolved = await ResolveAgentAsync(agentId, tokenId, ct);\n",
+      "filter": "FullyQualifiedName~CredentialGeneration"
+    },
+    {
+      "name": "an oauth: agent is issued a token",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "        if (agent.Origin?.Kind == AgentOrigin.OAuthKind)",
+      "new": "        if (false)",
+      "filter": "FullyQualifiedName~CredentialGeneration"
+    },
+    {
+      "name": "0080 leaves a user disabled at the upgrade at generation 0",
+      "file": "src/Premagentic.Core/Storage/Migrations/0080_mcp_authorization.sql",
+      "old": "UPDATE prem_config.app_user SET credential_generation = 1 WHERE disabled;",
+      "new": "SELECT 1;",
+      "filter": "FullyQualifiedName~MigrationBackfillTests"
+    },
+    {
+      "name": "0080 leaves an agent disabled at the upgrade at generation 0",
+      "file": "src/Premagentic.Core/Storage/Migrations/0080_mcp_authorization.sql",
+      "old": "UPDATE prem_config.agent SET credential_generation = 1 WHERE disabled;",
+      "new": "SELECT 1;",
+      "filter": "FullyQualifiedName~MigrationBackfillTests"
+    },
+    {
+      "name": "the connect page's list leaves every agent Live",
+      "file": "src/Premagentic.Core/Identity/SelfServeAgents.cs",
+      "old": "                (OwnAgentState)reader.GetInt32(9)));",
+      "new": "                OwnAgentState.Live));",
+      "filter": "FullyQualifiedName~CredentialGeneration"
+    },
+    {
+      "name": "the bound counts a self: agent whose tokens have ended",
+      "file": "src/Premagentic.Core/Identity/ConnectedAssistants.cs",
+      "old": "                      AND {CredentialSql.SelfAgentHoldsSlot(\"a\")})",
+      "new": "                      )",
+      "filter": "FullyQualifiedName~CredentialGeneration"
+    },
+    {
+      "name": "a superseded token reads as usable",
+      "file": "src/Premagentic.Core/Identity/IdentityModel.cs",
+      "old": "RevokedAt is null && !Superseded && now < ExpiresAt",
+      "new": "RevokedAt is null && now < ExpiresAt",
+      "filter": "FullyQualifiedName~CredentialGeneration"
+    },
+    {
+      "name": "a public address in another spelling is stored as given",
+      "file": "src/Premagentic.Core/Identity/OAuthConfiguration.cs",
+      "old": "        return canonical == text\n",
+      "new": "        return true\n",
+      "filter": "FullyQualifiedName~OAuthConfigurationTests"
+    },
+    {
+      "name": "no loopback exception: a loopback redirect matches only exactly",
+      "file": "src/Premagentic.Core/Identity/OAuthConfiguration.cs",
+      "old": "        return WithoutLoopbackPort(registered) is { } r && WithoutLoopbackPort(requested) is { } q",
+      "new": "        return false && WithoutLoopbackPort(registered) is { } r && WithoutLoopbackPort(requested) is { } q",
+      "filter": "FullyQualifiedName~OAuthConfigurationTests"
+    },
+    {
+      "name": "the loopback exception ignores the path and the host",
+      "file": "src/Premagentic.Core/Identity/OAuthConfiguration.cs",
+      "old": "        return \"http://\" + host + uri[(\"http://\".Length + authority.Length)..];",
+      "new": "        return \"http://\";",
+      "filter": "FullyQualifiedName~OAuthConfigurationTests"
+    },
+    {
+      "name": "the loopback exception applies to any host",
+      "file": "src/Premagentic.Core/Identity/OAuthConfiguration.cs",
+      "old": "    private static string? LoopbackAuthority(string authority)\n    {\n",
+      "new": "    private static string? LoopbackAuthority(string authority)\n    {\n        return authority.Split(':')[0];\n",
+      "filter": "FullyQualifiedName~OAuthConfigurationTests"
+    },
+    {
+      "name": "a private-use scheme is taken for a malformed address",
+      "file": "src/Premagentic.Core/Identity/OAuthConfiguration.cs",
+      "old": "            return RedirectUriKind.PrivateUse;",
+      "new": "            return RedirectUriKind.Malformed;",
+      "filter": "FullyQualifiedName~OAuthConfigurationTests"
+    },
+    {
+      "name": "the redirect list takes a loopback address too",
+      "file": "src/Premagentic.Core/Identity/OAuthConfiguration.cs",
+      "old": "            if (kind != RedirectUriKind.Https)",
+      "new": "            if (kind == RedirectUriKind.Malformed)",
+      "filter": "FullyQualifiedName~OAuthConfigurationTests"
+    },
+    {
+      "name": "start takes an unusable public address",
+      "file": "src/Premagentic.Core/Identity/OAuthConfiguration.cs",
+      "old": "        else if (OAuthSettingRules.PublicUrlProblem(url) is { } urlProblem)",
+      "new": "        else if (false && OAuthSettingRules.PublicUrlProblem(url) is { } urlProblem)",
+      "filter": "FullyQualifiedName~OAuthStartAndSettingsTests"
+    },
+    {
+      "name": "start takes a bad redirect list",
+      "file": "src/Premagentic.Core/Identity/OAuthConfiguration.cs",
+      "old": "            if (OAuthSettingRules.DynamicRedirectUrisProblem(list) is { } listProblem)",
+      "new": "            if (false && OAuthSettingRules.DynamicRedirectUrisProblem(list) is { } listProblem)",
+      "filter": "FullyQualifiedName~OAuthStartAndSettingsTests"
+    },
+    {
+      "name": "the flag is turned on with no public address",
+      "file": "src/Premagentic.Cli/Admin/SettingsCommands.cs",
+      "old": "        if (key == OAuthSettings.Enabled && value.ValueKind == JsonValueKind.True",
+      "new": "        if (false && key == OAuthSettings.Enabled && value.ValueKind == JsonValueKind.True",
+      "filter": "FullyQualifiedName~OAuthStartAndSettingsTests"
+    },
+    {
+      "name": "the public address is unset while the flag is on",
+      "file": "src/Premagentic.Cli/Admin/SettingsCommands.cs",
+      "old": "        if (key == OAuthSettings.PublicUrl\n",
+      "new": "        if (false && key == OAuthSettings.PublicUrl\n",
+      "filter": "FullyQualifiedName~OAuthStartAndSettingsTests"
+    },
+    {
+      "name": "a grant stands whatever its agent's generation",
+      "file": "src/Premagentic.Core/Identity/ConnectedAssistants.cs",
+      "old": "                       AND ga.credential_generation = {g}.agent_generation\n",
+      "new": "\n",
+      "filter": "FullyQualifiedName~OAuthLifecycleTests"
+    },
+    {
+      "name": "a grant stands whatever its owner's generation",
+      "file": "src/Premagentic.Core/Identity/ConnectedAssistants.cs",
+      "old": "                       AND gu.credential_generation = {g}.user_generation))",
+      "new": "                       ))",
+      "filter": "FullyQualifiedName~OAuthLifecycleTests"
+    },
+    {
+      "name": "a grant stands whatever its client's state",
+      "file": "src/Premagentic.Core/Identity/ConnectedAssistants.cs",
+      "old": "                       AND NOT gc.disabled AND gc.deleted_at IS NULL)",
+      "new": "                       )",
+      "filter": "FullyQualifiedName~OAuthLifecycleTests"
+    },
+    {
+      "name": "a pending grant holds no slot while its code lives",
+      "file": "src/Premagentic.Core/Identity/ConnectedAssistants.cs",
+      "old": "              OR EXISTS (SELECT 1 FROM prem_config.oauth_code gk",
+      "new": "              OR false AND EXISTS (SELECT 1 FROM prem_config.oauth_code gk",
+      "filter": "FullyQualifiedName~OAuthConsentTests"
+    },
+    {
+      "name": "a removed client's request is shown as valid",
+      "file": "src/Premagentic.Core/Identity/OAuthConsent.cs",
+      "old": "        if (row.Removed) return Show(\"invalid_request\", RegistrationEnded);",
+      "new": "",
+      "filter": "FullyQualifiedName~OAuthConsentTests"
+    },
+    {
+      "name": "disabling a client ends none of its grants",
+      "file": "src/Premagentic.Core/Identity/OAuthClients.cs",
+      "old": "                await OAuthStore.RevokeAsync(change, tenantId, grant, reason, disableAgent: true, now, ct);",
+      "new": "                await Task.CompletedTask;",
+      "filter": "FullyQualifiedName~OAuthLifecycleTests"
+    },
+    {
+      "name": "a self-registration keeps any https redirect",
+      "file": "src/Premagentic.Core/Identity/OAuthClients.cs",
+      "old": "                case RedirectUriKind.Https when oauth.DynamicRedirectUris.Contains(uri, StringComparer.Ordinal):",
+      "new": "                case RedirectUriKind.Https:",
+      "filter": "FullyQualifiedName~OAuthRegistrationTests"
+    },
+    {
+      "name": "a private-use redirect refuses the whole registration",
+      "file": "src/Premagentic.Core/Identity/OAuthClients.cs",
+      "old": "                case RedirectUriKind.Https or RedirectUriKind.PrivateUse:",
+      "new": "                case RedirectUriKind.Https:",
+      "filter": "FullyQualifiedName~OAuthRegistrationTests"
+    },
+    {
+      "name": "a malformed redirect is left out instead of refusing the body",
+      "file": "src/Premagentic.Core/Identity/OAuthClients.cs",
+      "old": "                default:\n                    return Refuse(\"invalid_redirect_uri\", $\"A redirect address is refused: {problem}.\", \"register_redirect_malformed\");",
+      "new": "                default:\n                    break;",
+      "filter": "FullyQualifiedName~OAuthRegistrationTests"
+    },
+    {
+      "name": "client text is not checked rune by rune",
+      "file": "src/Premagentic.Core/Identity/OAuthSecrets.cs",
+      "old": "            if (Rune.GetUnicodeCategory(rune) is UnicodeCategory.Control or UnicodeCategory.Format",
+      "new": "            if (false && Rune.GetUnicodeCategory(rune) is UnicodeCategory.Control or UnicodeCategory.Format",
+      "filter": "FullyQualifiedName~OAuthRegistrationTests"
+    },
+    {
+      "name": "the redirect list is not applied again at authorize",
+      "file": "src/Premagentic.Core/Identity/OAuthConsent.cs",
+      "old": "            && !oauth.DynamicRedirectUris.Contains(redirect, StringComparer.Ordinal))",
+      "new": "            && false)",
+      "filter": "FullyQualifiedName~OAuthConsentTests"
+    },
+    {
+      "name": "re-approval keeps a disabled agent",
+      "file": "src/Premagentic.Core/Identity/OAuthConsent.cs",
+      "old": "                var keep = old is { Disabled: false } && old.ModelLocation == location && old.ModelVendor == vendor;",
+      "new": "                var keep = old is not null && old.ModelLocation == location && old.ModelVendor == vendor;",
+      "filter": "FullyQualifiedName~OAuthConsentTests"
+    },
+    {
+      "name": "local is allowed whatever the redirect",
+      "file": "src/Premagentic.Core/Identity/OAuthConsent.cs",
+      "old": "                if (location == ModelLocation.Local && !(loopback || client.StatedModelLocation == ModelLocation.Local))",
+      "new": "                if (false)",
+      "filter": "FullyQualifiedName~OAuthConsentTests"
+    },
+    {
+      "name": "a second answer to the same request is a database error",
+      "edits": [
+        {
+          "file": "src/Premagentic.Core/Identity/OAuthConsent.cs",
+          "old": "                if (await ChallengeUsedAsync(tx, client.Id, request.CodeChallenge, ct)) throw new InvalidOperationException(AlreadyAnswered);",
+          "new": ""
+        },
+        {
+          "file": "src/Premagentic.Core/Identity/OAuthConsent.cs",
+          "old": "        catch (PostgresException ex) when (ex.SqlState == \"23505\" && ex.ConstraintName == \"oauth_code_challenge_once\")",
+          "new": "        catch (PostgresException ex) when (false)"
+        }
+      ],
+      "filter": "FullyQualifiedName~OAuthConsentTests"
+    },
+    {
+      "name": "the token step ignores redirect_uri",
+      "file": "src/Premagentic.Core/Identity/OAuthTokenService.cs",
+      "old": "        if (form.TryGetValue(\"redirect_uri\", out var redirect) && !string.Equals(redirect, code.RedirectUri, StringComparison.Ordinal))",
+      "new": "        if (false && form.TryGetValue(\"redirect_uri\", out var redirect))",
+      "filter": "FullyQualifiedName~OAuthTokenTests"
+    },
+    {
+      "name": "the token step lets a loopback port differ",
+      "file": "src/Premagentic.Core/Identity/OAuthTokenService.cs",
+      "old": "&& !string.Equals(redirect, code.RedirectUri, StringComparison.Ordinal))",
+      "new": "&& !RedirectUris.Matches(code.RedirectUri, redirect))",
+      "filter": "FullyQualifiedName~OAuthTokenTests"
+    },
+    {
+      "name": "a used code revokes before the verifier is checked",
+      "file": "src/Premagentic.Core/Identity/OAuthTokenService.cs",
+      "old": "        if (!OAuthSecrets.VerifierMatches(verifier, code.Challenge)) return Invalid(\"code_verifier_mismatch\", counts: true, grant: code.GrantId);",
+      "new": "        if (code.UsedAt is not null) { await RevokeForAsync((await OAuthStore.FindGrantAsync(conn, null, tenantId, code.GrantId, now, ct))!, OAuthStore.CodeReplayed, ct); return Invalid(\"code_replayed\"); }\n        if (!OAuthSecrets.VerifierMatches(verifier, code.Challenge)) return Invalid(\"code_verifier_mismatch\", counts: true, grant: code.GrantId);",
+      "filter": "FullyQualifiedName~OAuthTokenTests"
+    },
+    {
+      "name": "a replayed code revokes nothing",
+      "file": "src/Premagentic.Core/Identity/OAuthTokenService.cs",
+      "old": "                    await RevokeForAsync(grant, OAuthStore.CodeReplayed, ct);",
+      "new": "",
+      "filter": "FullyQualifiedName~OAuthTokenTests"
+    },
+    {
+      "name": "the loser of a refresh race is not taken for reuse",
+      "file": "src/Premagentic.Core/Identity/OAuthTokenService.cs",
+      "old": "                if (row.UsedAt is not null || await RefreshUsedAsync(conn, presented.Id, ct))",
+      "new": "                if (row.UsedAt is not null)",
+      "filter": "FullyQualifiedName~OAuthTokenTests"
+    },
+    {
+      "name": "a refresh token is not claimed once",
+      "file": "src/Premagentic.Core/Identity/OAuthTokenService.cs",
+      "old": "            WHERE tenant_id = @tenant AND id = @id AND used_at IS NULL AND expires_at > @now\n            \"\"\", conn, tx))",
+      "new": "            WHERE tenant_id = @tenant AND id = @id AND expires_at > @now\n            \"\"\", conn, tx))",
+      "filter": "FullyQualifiedName~OAuthTokenTests"
+    },
+    {
+      "name": "an access token for another resource is not refused for its audience",
+      "file": "src/Premagentic.Core/Identity/OAuthTokenService.cs",
+      "old": "                if (!string.Equals(reader.GetString(2), oauth.Resource, StringComparison.Ordinal)) return (null, \"access_other_audience\");",
+      "new": "",
+      "filter": "FullyQualifiedName~OAuthTokenTests"
+    },
+    {
+      "name": "a token response says a scope other than read",
+      "file": "src/Premagentic.Core/Identity/OAuthTokenService.cs",
+      "old": "            [\"scope\"] = OAuthScopes.Read,\n        });",
+      "new": "            [\"scope\"] = \"read offline_access\",\n        });",
+      "filter": "FullyQualifiedName~OAuthTokenTests"
+    },
+    {
+      "name": "an OAuth call's label does not name its grant",
+      "file": "src/Premagentic.Core/Identity/CallerResolver.cs",
+      "old": "        ResolveAgentAsync(agentId, credentialId, ct);",
+      "new": "        ResolveAgentAsync(agentId, tokenId: null, ct);",
+      "filter": "FullyQualifiedName~OAuthTokenTests"
+    },
+    {
+      "name": "a grant never exchanged shows as live",
+      "file": "src/Premagentic.Core/Identity/OAuthStore.cs",
+      "old": "        if (g.ActivatedAt is null) return g.HasClaimableCode && g.ExpiresAt > now ? OAuthGrantStatus.Pending : OAuthGrantStatus.Expired;",
+      "new": "        if (g.ActivatedAt is null) return OAuthGrantStatus.Live;",
+      "filter": "FullyQualifiedName~OAuthLifecycleTests"
+    },
+    {
+      "name": "the flow's answers lose nosniff and no-store",
+      "file": "src/Premagentic.Api/Callers/OAuthEndpoints.cs",
+      "old": "        var flow = app.MapGroup(\"\").WithMetadata(CallerRequirement.Nobody).AddEndpointFilter(NotSniffedNotStored);",
+      "new": "        var flow = app.MapGroup(\"\").WithMetadata(CallerRequirement.Nobody);",
+      "filter": "FullyQualifiedName~OAuthHttpTests.Every_flow_response_is_nosniff_and_no_store"
+    },
+    {
+      "name": "authorize forwards the raw query",
+      "file": "src/Premagentic.Api/Callers/OAuthEndpoints.cs",
+      "old": "        var forward = OAuthPaths.Consent + query;",
+      "new": "        var forward = OAuthPaths.Consent + http.Request.QueryString;",
+      "filter": "FullyQualifiedName~OAuthHttpTests.Authorize_forwards_every_parameter_escaped_again_with_repeats_kept"
+    },
+    {
+      "name": "no length check on the forward",
+      "file": "src/Premagentic.Api/Callers/OAuthEndpoints.cs",
+      "old": "        if (Uri.EscapeDataString(forward).Length > ForwardLimit)",
+      "new": "        if (false)",
+      "filter": "FullyQualifiedName~OAuthHttpTests.An_authorize_request_too_long_to_survive_sign_in_is_a_plain_400"
+    },
+    {
+      "name": "the throttle is checked before the request is judged",
+      "file": "src/Premagentic.Api/Callers/OAuthEndpoints.cs",
+      "old": "        return AfterThrottle(http, log, throttles, await tokens.TokenAsync(form!, ct), form!);",
+      "new": "        if (throttles.FailuresBlocked(http.Connection.RemoteIpAddress, out var early)) return Results.StatusCode(429);\n        return AfterThrottle(http, log, throttles, await tokens.TokenAsync(form!, ct), form!);",
+      "filter": "FullyQualifiedName~OAuthHttpTests.Thirty_unmatched_failures_then_a_valid_refresh_and_a_valid_exchange_both_succeed|FullyQualifiedName~OAuthHttpTests.A_held_address_that_brings_back_a_used_refresh_token_still_ends_the_grant"
+    },
+    {
+      "name": "every failure counts",
+      "file": "src/Premagentic.Api/Callers/OAuthEndpoints.cs",
+      "old": "        if (answer.CountsAsFailure) throttles.RecordFailure(address);",
+      "new": "        throttles.RecordFailure(address);",
+      "filter": "FullyQualifiedName~OAuthHttpTests.Refusals_of_values_that_matched_a_row_do_not_count"
+    },
+    {
+      "name": "a 429 is logged every time",
+      "file": "src/Premagentic.Api/Callers/OAuthEndpoints.cs",
+      "old": "            if (throttles.LogThrottleNow(address))",
+      "new": "            if (true)",
+      "filter": "FullyQualifiedName~OAuthHttpTests.Thirty_unmatched_failures_then_a_valid_refresh_and_a_valid_exchange_both_succeed"
+    },
+    {
+      "name": "the token endpoint takes any media type",
+      "file": "src/Premagentic.Api/Callers/OAuthEndpoints.cs",
+      "old": "        if (!IsMediaType(http.Request.ContentType, FormMediaType))",
+      "new": "        if (false)",
+      "filter": "FullyQualifiedName~OAuthHttpTests.The_token_endpoint_takes_a_small_form_only_and_counts_none_of_its_refusals_of_shape"
+    },
+    {
+      "name": "the token endpoint reads a large body",
+      "file": "src/Premagentic.Api/Callers/OAuthEndpoints.cs",
+      "old": "    public const int FormBodyLimit = 8 * 1024;",
+      "new": "    public const int FormBodyLimit = 8 * 1024 * 1024;",
+      "filter": "FullyQualifiedName~OAuthHttpTests.The_token_endpoint_takes_a_small_form_only_and_counts_none_of_its_refusals_of_shape"
+    },
+    {
+      "name": "a repeated parameter takes its last value",
+      "file": "src/Premagentic.Api/Callers/OAuthEndpoints.cs",
+      "old": "            if (given.Length > 1)",
+      "new": "            if (false)",
+      "filter": "FullyQualifiedName~OAuthHttpTests.The_token_endpoint_takes_a_small_form_only_and_counts_none_of_its_refusals_of_shape"
+    },
+    {
+      "name": "an Authorization header at the token endpoint is ignored",
+      "file": "src/Premagentic.Api/Callers/OAuthEndpoints.cs",
+      "old": "        if (http.Request.Headers.Authorization.Count > 0)\n        {\n            var scheme",
+      "new": "        if (false)\n        {\n            var scheme",
+      "filter": "FullyQualifiedName~OAuthHttpTests.An_authorization_header_at_the_token_endpoint_is_refused_in_its_own_scheme"
+    },
+    {
+      "name": "registration takes any media type",
+      "file": "src/Premagentic.Api/Callers/OAuthEndpoints.cs",
+      "old": "        if (!IsMediaType(http.Request.ContentType, JsonMediaType))",
+      "new": "        if (false)",
+      "filter": "FullyQualifiedName~OAuthHttpTests.A_registration_is_json_of_at_most_16_KB_and_a_refused_one_records_nothing"
+    },
+    {
+      "name": "no hourly registration limit",
+      "file": "src/Premagentic.Api/Callers/OAuthEndpoints.cs",
+      "old": "            if (made < perHour) return false;",
+      "new": "            return false;",
+      "filter": "FullyQualifiedName~OAuthHttpTests.One_address_is_held_to_its_registrations_an_hour_and_the_operator_is_warned_once_a_minute"
+    },
+    {
+      "name": "the registration endpoint is listed while self-registration is off",
+      "file": "src/Premagentic.Api/Callers/OAuthEndpoints.cs",
+      "old": "        if (oauth.DynamicRegistration) document[\"registration_endpoint\"] = oauth.PublicUrl + OAuthPaths.Register;",
+      "new": "        document[\"registration_endpoint\"] = oauth.PublicUrl + OAuthPaths.Register;",
+      "filter": "FullyQualifiedName~OAuthHttpTests.The_server_document_lists_self_registration_only_while_it_is_on"
+    },
+    {
+      "name": "the root copy of the resource document is written separately and drifts",
+      "file": "src/Premagentic.Api/Callers/OAuthEndpoints.cs",
+      "old": "        flow.MapGet(OAuthPaths.ProtectedResourceMetadataRoot, () => Results.Bytes(resourceDocument, JsonMediaType));",
+      "new": "        flow.MapGet(OAuthPaths.ProtectedResourceMetadataRoot, () => Results.Text(JsonSerializer.Serialize(ProtectedResourceMetadata(oauth), new JsonSerializerOptions { WriteIndented = true }), JsonMediaType));",
+      "filter": "FullyQualifiedName~OAuthHttpTests.The_resource_document_is_the_same_at_both_addresses_and_names_the_canonical_resource"
+    },
+    {
+      "name": "a flow service resolves while the flow is off",
+      "file": "src/Premagentic.Api/Callers/OAuthEndpoints.cs",
+      "old": "            sp.GetService<OAuthDeployment>() is null ? null! : new OAuthThrottles(sp.GetRequiredService<TimeProvider>()));",
+      "new": "            new OAuthThrottles(sp.GetRequiredService<TimeProvider>()));",
+      "filter": "FullyQualifiedName~OAuthHttpOffTests.While_off_no_service_of_the_flow_resolves"
+    },
+    {
+      "name": "the certificate warning never speaks",
+      "file": "src/Premagentic.Api/Callers/OAuthEndpoints.cs",
+      "old": "            if (certificate.MatchesHostname(host)) return null;",
+      "new": "            return null;",
+      "filter": "FullyQualifiedName~OAuthHttpTests.The_certificate_warning_speaks_only_when_the_certificate_does_not_name_the_host"
+    },
+    {
+      "name": "the access token is taken anywhere",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "        oauth is not null && requirement.AgentsOnly && http.Request.Path.StartsWithSegments(CallerServices.McpPath);",
+      "new": "        oauth is not null;",
+      "filter": "FullyQualifiedName~OAuthHttpTests.Each_kind_of_token_works_only_where_it_belongs"
+    },
+    {
+      "name": "the 401 at /mcp does not name the resource metadata",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "        if (!TakesOAuthAccess(http, requirement)) return \"Bearer\";",
+      "new": "        return \"Bearer\";",
+      "filter": "FullyQualifiedName~OAuthHttpTests.While_on_a_401_from_mcp_names_the_resource_metadata_and_the_scope"
+    },
+    {
+      "name": "the 401 at /mcp never says invalid_token",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "        var error = tokenPresented ? \"error=\\\"invalid_token\\\", \" : \"\";",
+      "new": "        var error = \"\";",
+      "filter": "FullyQualifiedName~OAuthHttpTests.While_on_a_401_from_mcp_names_the_resource_metadata_and_the_scope"
+    },
+    {
+      "name": "the count reads the grants while the flow is off",
+      "edits": [
+        {
+          "file": "src/Premagentic.Core/Identity/ConnectedAssistants.cs",
+          "old": "        if (oauth is not null)\n            sql += $\"\"\"",
+          "new": "        if (true)\n            sql += $\"\"\""
+        },
+        {
+          "file": "src/Premagentic.Core/Identity/ConnectedAssistants.cs",
+          "old": "        if (oauth is not null) cmd.Parameters.AddWithValue(\"oauth_resource\", oauth.Resource);",
+          "new": "        cmd.Parameters.AddWithValue(\"oauth_resource\", oauth?.Resource ?? \"\");"
+        }
+      ],
+      "filter": "FullyQualifiedName~OAuthHttpOffTests.While_off_no_request_reads_or_writes_a_table_of_the_flow"
+    },
+    {
+      "name": "the grant list leaves out the refresh count",
+      "file": "src/Premagentic.Cli/Admin/OAuthCommands.cs",
+      "old": "                $\"refreshed {g.RefreshCount} time(s), last ",
+      "new": "                $\"refreshed 0 time(s), last ",
+      "filter": "FullyQualifiedName~OAuthCliTests.The_grant_list_says_how_often_each_grant_was_refreshed_and_when_last"
+    },
+    {
+      "name": "the grant list never says when it was last refreshed",
+      "file": "src/Premagentic.Cli/Admin/OAuthCommands.cs",
+      "old": "(g.LastRefreshedAt is { } last ? Time(last) : \"never\")",
+      "new": "(\"never\")",
+      "filter": "FullyQualifiedName~OAuthCliTests.The_grant_list_says_how_often_each_grant_was_refreshed_and_when_last"
+    },
+    {
+      "name": "an administrator's hosted client needs no vendor",
+      "file": "src/Premagentic.Core/Identity/OAuthClients.cs",
+      "old": "        if (modelLocation == ModelLocation.Hosted && vendor is null)\n            throw new ArgumentException(\"Name who runs the hosted model, so the record can say where passages went.\");\n",
+      "new": "",
+      "filter": "FullyQualifiedName~OAuthCliTests.A_hosted_client_with_no_vendor_is_refused_and_nothing_is_written"
+    },
+    {
+      "name": "revoke --user revokes everyone's grants",
+      "file": "src/Premagentic.Cli/Admin/OAuthCommands.cs",
+      "old": "        var revoked = await grants.RevokeManyAsync(AdminActor.Cli(), user?.Id, default);",
+      "new": "        var revoked = await grants.RevokeManyAsync(AdminActor.Cli(), null, default);",
+      "filter": "FullyQualifiedName~OAuthCliTests.A_revoke_by_person_or_of_all_says_how_many_it_ended"
+    },
+    {
+      "name": "a revoked grant is said to be revoked again",
+      "file": "src/Premagentic.Cli/Admin/OAuthCommands.cs",
+      "old": "            if (grant.RevokedAt is not null) return Ok($\"Grant {id} was revoked already ({grant.RevokedReason}); nothing changed.\");\n",
+      "new": "",
+      "filter": "FullyQualifiedName~OAuthCliTests.A_revoke_by_person_or_of_all_says_how_many_it_ended"
+    },
+    {
+      "name": "grants revoke is not marked as a verb that writes",
+      "file": "src/Premagentic.Cli/Admin/OAuthCommands.cs",
+      "old": "        [(\"clients\", \"add\"), (\"clients\", \"replace\"), (\"clients\", \"disable\"), (\"clients\", \"enable\"), (\"clients\", \"remove\"), (\"grants\", \"revoke\")];",
+      "new": "        [(\"clients\", \"add\"), (\"clients\", \"replace\"), (\"clients\", \"disable\"), (\"clients\", \"enable\"), (\"clients\", \"remove\")];",
+      "filter": "FullyQualifiedName~AdminVerbRecordTests"
+    },
+    {
+      "name": "the flow's summary is read while its flag is off",
+      "file": "src/Premagentic.Core/Identity/OAuthConfiguration.cs",
+      "old": "        if (!stored.TryGetValue(OAuthSettings.Enabled, out var enabled) || enabled.ValueKind != JsonValueKind.True) return null;\n        var url = stored.TryGetValue",
+      "new": "        var url = stored.TryGetValue",
+      "filter": "FullyQualifiedName~OAuthHttpOffTests.While_off_no_request_reads_or_writes_a_table_of_the_flow"
+    },
+    {
+      "name": "the configuration export takes a table of the flow",
+      "file": "src/Premagentic.Core/Admin/ConfigExport.cs",
+      "old": "        (\"source\", []),\n    ];",
+      "new": "        (\"source\", []),\n        (\"oauth_client\", []),\n    ];",
+      "filter": "FullyQualifiedName~OAuthLifecycleTests.The_configuration_export_leaves_the_flows_tables_out_even_with_secrets"
+    },
+    {
+      "name": "the health interface resolves while the flow is off",
+      "file": "src/Premagentic.Api/Callers/OAuthEndpoints.cs",
+      "old": "        services.AddSingleton<IOAuthHealth>(sp => sp.GetService<OAuthThrottles>()!);",
+      "new": "        services.AddSingleton<IOAuthHealth>(sp => new OAuthThrottles(TimeProvider.System));",
+      "filter": "FullyQualifiedName~OAuthHttpOffTests.While_off_no_service_of_the_flow_resolves"
+    },
+    {
+      "name": "the bundle's pending count takes approved clients",
+      "file": "src/Premagentic.Core/Identity/OAuthConfiguration.cs",
+      "old": "                   count(*) FILTER (WHERE deleted_at IS NULL AND registered_by = 'dynamic' AND first_approved_at IS NULL",
+      "new": "                   count(*) FILTER (WHERE deleted_at IS NULL AND registered_by = 'dynamic'",
+      "filter": "FullyQualifiedName~OAuthHttpTests.The_support_bundle_carries_the_flow_while_its_flag_is_on"
+    },
+    {
+      "name": "a grant whose owner's generation moved still holds a slot",
+      "file": "src/Premagentic.Core/Identity/ConnectedAssistants.cs",
+      "old": "                       AND gu.credential_generation = {g}.user_generation))",
+      "new": "                       ))",
+      "filter": "FullyQualifiedName~OAuthConsentTests.A_person_at_the_bound_reconnects_after_a_re_enable"
+    },
+    {
+      "name": "the token endpoint takes a disabled or removed client",
+      "file": "src/Premagentic.Core/Identity/OAuthTokenService.cs",
+      "old": "        if (client is null or { Removed: true } or { Disabled: true })\n            return OAuthEndpointAnswer.Error(400, \"invalid_client\", UnknownClient(client, clientId), \"token_unknown_client\"",
+      "new": "        if (client is null)\n            return OAuthEndpointAnswer.Error(400, \"invalid_client\", UnknownClient(client, clientId), \"token_unknown_client\"",
+      "filter": "FullyQualifiedName~OAuthLifecycleTests"
+    }
+  ]
+}

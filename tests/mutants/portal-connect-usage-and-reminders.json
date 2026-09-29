@@ -1,0 +1,132 @@
+{
+  "name": "The connect page's bound, the usage page and its export, the reminders view, groups in a profile and the golden set",
+  "commit": "hand run, 2026-09-24",
+  "mutants": [
+    {
+      "name": "connect: the snippet leaves the token out",
+      "file": "src/Premagentic.Portal/Connect/ConnectSnippets.cs",
+      "old": ".Replace(TokenField, token, StringComparison.Ordinal);",
+      "new": ".Replace(TokenField, \"\", StringComparison.Ordinal);",
+      "filter": "FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalRemindersTests|FullyQualifiedName~ProfileTests|FullyQualifiedName~AdminEvalGoldenSetTests"
+    },
+    {
+      "name": "connect: the token goes to a redirect and a later page instead of this response",
+      "file": "src/Premagentic.Portal/Pages/ConnectPages.cs",
+      "old": "        return await TokenPageAsync(r, $\"'{name}' is connected\", kind, created.Token, Markup.Empty);",
+      "new": "        return Layout.After(Path, done: $\"Connected. The token is {created.Token}\");",
+      "filter": "FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalRemindersTests|FullyQualifiedName~ProfileTests|FullyQualifiedName~AdminEvalGoldenSetTests"
+    },
+    {
+      "name": "connect: the form stays on at an allowance of zero",
+      "file": "src/Premagentic.Portal/Pages/ConnectPages.cs",
+      "old": "        var form = max == 0",
+      "new": "        var form = max < 0",
+      "filter": "FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalRemindersTests|FullyQualifiedName~ProfileTests|FullyQualifiedName~AdminEvalGoldenSetTests"
+    },
+    {
+      "name": "connect: a post at an allowance of zero is not refused by the page",
+      "file": "src/Premagentic.Portal/Pages/ConnectPages.cs",
+      "old": "        if (await SelfServiceMaxAsync(r) == 0)",
+      "new": "        if (await SelfServiceMaxAsync(r) < 0)",
+      "filter": "FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalRemindersTests|FullyQualifiedName~ProfileTests|FullyQualifiedName~AdminEvalGoldenSetTests"
+    },
+    {
+      "name": "connect: the setting's template does not replace the shipped one",
+      "file": "src/Premagentic.Portal/Connect/ConnectSnippets.cs",
+      "old": "        foreach (var (kind, template) in overrides) merged[kind] = template;",
+      "new": "        foreach (var (kind, template) in overrides) _ = template;",
+      "filter": "FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalRemindersTests|FullyQualifiedName~ProfileTests|FullyQualifiedName~AdminEvalGoldenSetTests"
+    },
+    {
+      "name": "connect: a template that does not say where the token goes is accepted",
+      "file": "src/Premagentic.Portal/Connect/ConnectSnippets.cs",
+      "old": "            else if (!text.Contains(TokenField, StringComparison.Ordinal))",
+      "new": "            else if (text.Length < 0)",
+      "filter": "FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalRemindersTests|FullyQualifiedName~ProfileTests|FullyQualifiedName~AdminEvalGoldenSetTests"
+    },
+    {
+      "name": "connect: the usable half of a bad override is used",
+      "file": "src/Premagentic.Portal/Connect/ConnectSnippets.cs",
+      "old": "            return false;\n        }\n\n        return true;\n    }",
+      "new": "            continue;\n        }\n\n        return true;\n    }",
+      "filter": "FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalRemindersTests|FullyQualifiedName~ProfileTests|FullyQualifiedName~AdminEvalGoldenSetTests"
+    },
+    {
+      "name": "usage: opening the page records that it was opened",
+      "file": "src/Premagentic.Portal/Pages/UsagePages.cs",
+      "old": "        var usage = new UsageQueries(r.Db, r.Tenant);",
+      "new": "        await r.Changes().RunAsync(r.Actor, change => { change.Record(\"usage.view\", \"usage\", null, new { opened = true }); return Task.FromResult(true); }, r.Aborted);\n        var usage = new UsageQueries(r.Db, r.Tenant);",
+      "filter": "FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalRemindersTests|FullyQualifiedName~ProfileTests|FullyQualifiedName~AdminEvalGoldenSetTests"
+    },
+    {
+      "name": "usage: the hosted-only filter is ignored",
+      "file": "src/Premagentic.Portal/Pages/UsagePages.cs",
+      "old": "        var hostedOnly = r.Query(\"hosted\") == \"yes\";",
+      "new": "        var hostedOnly = false;",
+      "filter": "FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalRemindersTests|FullyQualifiedName~ProfileTests|FullyQualifiedName~AdminEvalGoldenSetTests"
+    },
+    {
+      "name": "connect: the form reads its own bound instead of the store's rule",
+      "file": "src/Premagentic.Portal/Pages/ConnectPages.cs",
+      "old": "        AgentSettings.SelfServiceMaxAsync(new SettingsStore(r.Db, r.Tenant), r.Aborted);",
+      "new": "        Task.FromResult(AgentSettings.SelfServiceDefault);",
+      "filter": "FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalRemindersTests|FullyQualifiedName~ProfileTests|FullyQualifiedName~AdminEvalGoldenSetTests"
+    },
+    {
+      "name": "reminders: the unowned list is shown to every reader",
+      "file": "src/Premagentic.Portal/Pages/ReviewPages.cs",
+      "old": "            if (r.IsAdministrator)\n                rows.AddRange(summary.Unowned",
+      "new": "            if (true)\n                rows.AddRange(summary.Unowned",
+      "filter": "FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalRemindersTests|FullyQualifiedName~ProfileTests|FullyQualifiedName~AdminEvalGoldenSetTests"
+    },
+    {
+      "name": "groups: applied after the rules that name them",
+      "file": "src/Premagentic.Core/Profiles/ProfileApply.cs",
+      "old": "        .. changes.OfType<GroupChange>(),\n        .. changes.OfType<SourceChange>(),\n        .. changes.OfType<SourceOwnerChange>(),\n        .. changes.OfType<RuleChange>(),",
+      "new": "        .. changes.OfType<SourceChange>(),\n        .. changes.OfType<SourceOwnerChange>(),\n        .. changes.OfType<RuleChange>(),\n        .. changes.OfType<GroupChange>(),",
+      "filter": "FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalRemindersTests|FullyQualifiedName~ProfileTests|FullyQualifiedName~AdminEvalGoldenSetTests"
+    },
+    {
+      "name": "groups: a rule keeps the placeholder instead of the group's real id",
+      "file": "src/Premagentic.Core/Profiles/ProfileApply.cs",
+      "old": "            ids[CallerResolver.IdText(placeholder)] = CallerResolver.IdText(group.Id);",
+      "new": "            ids[CallerResolver.IdText(placeholder)] = CallerResolver.IdText(placeholder);",
+      "filter": "FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalRemindersTests|FullyQualifiedName~ProfileTests|FullyQualifiedName~AdminEvalGoldenSetTests"
+    },
+    {
+      "name": "groups: a group that exists is planned again (second apply not idempotent)",
+      "file": "src/Premagentic.Core/Profiles/ProfilePlan.cs",
+      "old": "            if (await identity.FindGroupByNameAsync(name, ct) is not null) continue;",
+      "new": "            _ = await identity.FindGroupByNameAsync(name, ct);",
+      "filter": "FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalRemindersTests|FullyQualifiedName~ProfileTests|FullyQualifiedName~AdminEvalGoldenSetTests"
+    },
+    {
+      "name": "groups: a name listed twice is accepted",
+      "file": "src/Premagentic.Core/Profiles/ProfilePlan.cs",
+      "old": "            if (!seen.Add(name))",
+      "new": "            if (!seen.Add(name) && false)",
+      "filter": "FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalRemindersTests|FullyQualifiedName~ProfileTests|FullyQualifiedName~AdminEvalGoldenSetTests"
+    },
+    {
+      "name": "golden set: a copy in force is copied again (second apply not idempotent)",
+      "file": "src/Premagentic.Core/Profiles/ProfilePlan.cs",
+      "old": "            && SameBytes(profile.GoldenSetFile, target))",
+      "new": "            && false)",
+      "filter": "FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalRemindersTests|FullyQualifiedName~ProfileTests|FullyQualifiedName~AdminEvalGoldenSetTests"
+    },
+    {
+      "name": "golden set: a run writes a report beside the golden set",
+      "file": "src/Premagentic.Core/Evaluation/GoldenSetRun.cs",
+      "old": "                summary = await new EvalRunner(search, tenantId, names).EvaluateAsync(cases, timeout.Token);",
+      "new": "                summary = await new EvalRunner(search, tenantId, names).EvaluateAsync(cases, timeout.Token);\n                File.WriteAllText(Path.Combine(Path.GetDirectoryName(path)!, \"report-mutant.md\"), \"x\");",
+      "filter": "FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalRemindersTests|FullyQualifiedName~ProfileTests|FullyQualifiedName~AdminEvalGoldenSetTests"
+    },
+    {
+      "name": "apply: an apply that changed nothing does not say so",
+      "file": "src/Premagentic.Cli/Admin/ProfileCommands.cs",
+      "old": "            return Ok(report.Applied.Count == 0",
+      "new": "            return Ok(report.Applied.Count < 0",
+      "filter": "FullyQualifiedName~PortalConnectUsageTests|FullyQualifiedName~PortalRemindersTests|FullyQualifiedName~ProfileTests|FullyQualifiedName~AdminEvalGoldenSetTests"
+    }
+  ]
+}

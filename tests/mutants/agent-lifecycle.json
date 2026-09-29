@@ -1,0 +1,183 @@
+{
+  "name": "reissue an assistant's key and remove an assistant",
+  "commit": "hand run, 2026-09-27",
+  "mutants": [
+    {
+      "name": "a reissue takes a grant-made assistant's token",
+      "file": "src/Premagentic.Core/Admin/AgentLifecycle.cs",
+      "old": "if (agent.Origin?.Kind == AgentOrigin.OAuthKind)",
+      "new": "if (false && agent.Origin?.Kind == AgentOrigin.OAuthKind)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AgentLifecycleTests.|FullyQualifiedName~Premagentic.Tests.AgentLifecycleApiTests."
+    },
+    {
+      "name": "a reissue takes a disabled agent's token",
+      "file": "src/Premagentic.Core/Admin/AgentLifecycle.cs",
+      "old": "if (agent.Disabled)",
+      "new": "if (false && agent.Disabled)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AgentLifecycleTests.|FullyQualifiedName~Premagentic.Tests.AgentLifecycleApiTests."
+    },
+    {
+      "name": "a reissue takes a token of a disabled person's agent",
+      "file": "src/Premagentic.Core/Admin/AgentLifecycle.cs",
+      "old": "if (!standing.OwnerLive)",
+      "new": "if (false && !standing.OwnerLive)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AgentLifecycleTests.|FullyQualifiedName~Premagentic.Tests.AgentLifecycleApiTests."
+    },
+    {
+      "name": "a reissue takes a revoked token (the check and the revoke's row check both dropped)",
+      "edits": [
+        {
+          "file": "src/Premagentic.Core/Admin/AgentLifecycle.cs",
+          "old": "if (token.RevokedAt is not null)",
+          "new": "if (false && token.RevokedAt is not null)"
+        },
+        {
+          "file": "src/Premagentic.Core/Admin/AgentLifecycle.cs",
+          "old": "if (!await store.RevokeTokenAsync(tokenId, ct))",
+          "new": "if (!await store.RevokeTokenAsync(tokenId, ct) && false)"
+        }
+      ],
+      "filter": "FullyQualifiedName~Premagentic.Tests.AgentLifecycleTests.|FullyQualifiedName~Premagentic.Tests.AgentLifecycleApiTests."
+    },
+    {
+      "name": "a reissue keeps its new token when the old one was not revoked",
+      "file": "src/Premagentic.Core/Admin/AgentLifecycle.cs",
+      "old": "if (!await store.RevokeTokenAsync(tokenId, ct))",
+      "new": "if (!await store.RevokeTokenAsync(tokenId, ct) && false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AgentLifecycleTests.A_reissue_that_cannot_revoke_the_old_token_writes_nothing"
+    },
+    {
+      "name": "a reissue takes an expired token",
+      "file": "src/Premagentic.Core/Admin/AgentLifecycle.cs",
+      "old": "if (store.Time.GetUtcNow() >= token.ExpiresAt)",
+      "new": "if (false && store.Time.GetUtcNow() >= token.ExpiresAt)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AgentLifecycleTests.|FullyQualifiedName~Premagentic.Tests.AgentLifecycleApiTests."
+    },
+    {
+      "name": "a reissue brings a superseded token back",
+      "file": "src/Premagentic.Core/Admin/AgentLifecycle.cs",
+      "old": "if (token.Superseded)",
+      "new": "if (false && token.Superseded)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AgentLifecycleTests.|FullyQualifiedName~Premagentic.Tests.AgentLifecycleApiTests."
+    },
+    {
+      "name": "a reissue gives the default lifetime instead of the replaced token's",
+      "file": "src/Premagentic.Core/Admin/AgentLifecycle.cs",
+      "old": "lifetime ?? token.ExpiresAt - token.CreatedAt",
+      "new": "lifetime ?? TimeSpan.FromDays(90)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AgentLifecycleTests.|FullyQualifiedName~Premagentic.Tests.AgentLifecycleApiTests."
+    },
+    {
+      "name": "a reissue leaves no row",
+      "file": "src/Premagentic.Core/Admin/AgentLifecycle.cs",
+      "old": "change.Record(ReissueKind, agent.Name,",
+      "new": "_ = (ReissueKind, agent.Name,",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AgentLifecycleTests.|FullyQualifiedName~Premagentic.Tests.AgentLifecycleApiTests.|FullyQualifiedName~Premagentic.Tests.AdminVerbRecordTests."
+    },
+    {
+      "name": "a removal leaves no row",
+      "file": "src/Premagentic.Core/Admin/AgentLifecycle.cs",
+      "old": "change.Record(RemoveKind, removal.Name,",
+      "new": "_ = (RemoveKind, removal.Name,",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AgentLifecycleTests.|FullyQualifiedName~Premagentic.Tests.AgentLifecycleApiTests.|FullyQualifiedName~Premagentic.Tests.AdminVerbRecordTests."
+    },
+    {
+      "name": "a removed agent's token is judged as live",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "r.GetBoolean(18) ? null : ReadAgentAt(r, 8)",
+      "new": "ReadAgentAt(r, 8)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AgentLifecycleTests.|FullyQualifiedName~Premagentic.Tests.AgentLifecycleApiTests."
+    },
+    {
+      "name": "a removal leaves the credential generation where it was",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "SET credential_generation = credential_generation + 1, deleted_at = @now, deleted_by = @by",
+      "new": "SET deleted_at = @now, deleted_by = @by",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AgentLifecycleTests.|FullyQualifiedName~Premagentic.Tests.AgentLifecycleApiTests."
+    },
+    {
+      "name": "a removal leaves the tokens unrevoked",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "WHERE tenant_id = @tenant AND agent_id = @id AND revoked_at IS NULL",
+      "new": "WHERE tenant_id = @tenant AND agent_id = @id AND revoked_at IS NULL AND false",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AgentLifecycleTests.|FullyQualifiedName~Premagentic.Tests.AgentLifecycleApiTests."
+    },
+    {
+      "name": "a removal marks nothing removed",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "deleted_at = @now, deleted_by",
+      "new": "deleted_at = deleted_at, deleted_by",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AgentLifecycleTests.|FullyQualifiedName~Premagentic.Tests.AgentLifecycleApiTests."
+    },
+    {
+      "name": "a removal says not by whom",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "deleted_by = @by",
+      "new": "deleted_by = deleted_by",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AgentLifecycleTests.|FullyQualifiedName~Premagentic.Tests.AgentLifecycleApiTests."
+    },
+    {
+      "name": "the removed list lists the live agents",
+      "file": "src/Premagentic.Core/Identity/IdentityStore.cs",
+      "old": "WHERE a.tenant_id = @tenant AND a.deleted_at IS NOT NULL",
+      "new": "WHERE a.tenant_id = @tenant AND a.deleted_at IS NULL",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AgentLifecycleTests.|FullyQualifiedName~Premagentic.Tests.AgentLifecycleApiTests.|FullyQualifiedName~Premagentic.Tests.AgentLifecycleCliTests."
+    },
+    {
+      "name": "a person reissues somebody else's assistant",
+      "file": "src/Premagentic.Core/Identity/SelfServeAgents.cs",
+      "old": "is null)\n                throw new InvalidOperationException(NotYours);\n            var now",
+      "new": "is null && false)\n                throw new InvalidOperationException(NotYours);\n            var now",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SelfServeAgentsTests."
+    },
+    {
+      "name": "a person removes somebody else's assistant",
+      "file": "src/Premagentic.Core/Identity/SelfServeAgents.cs",
+      "old": "is null)\n                throw new InvalidOperationException(NotYours);\n            return await Admin.AgentLifecycle.RemoveAsync",
+      "new": "is null && false)\n                throw new InvalidOperationException(NotYours);\n            return await Admin.AgentLifecycle.RemoveAsync",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SelfServeAgentsTests."
+    },
+    {
+      "name": "a person's reissue goes on with no live key",
+      "file": "src/Premagentic.Core/Identity/SelfServeAgents.cs",
+      "old": "if (live.Count == 0) throw",
+      "new": "if (false && live.Count == 0) throw",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SelfServeAgentsTests."
+    },
+    {
+      "name": "a person's reissue picks one of two live keys",
+      "file": "src/Premagentic.Core/Identity/SelfServeAgents.cs",
+      "old": "if (live.Count > 1) throw",
+      "new": "if (false && live.Count > 1) throw",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SelfServeAgentsTests."
+    },
+    {
+      "name": "the audit read does not say removed",
+      "file": "src/Premagentic.Core/Admin/AuditTrail.cs",
+      "old": "e.model_location, a.name, a.deleted_at IS NOT NULL",
+      "new": "e.model_location, a.name, false",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AgentLifecycleTests."
+    },
+    {
+      "name": "the usage read does not say removed",
+      "file": "src/Premagentic.Core/Audit/UsageQueries.cs",
+      "old": "a.model_location, a.deleted_at IS NOT NULL",
+      "new": "a.model_location, false",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AgentLifecycleTests."
+    },
+    {
+      "name": "prem tokens reissue --agent picks one of two live tokens",
+      "file": "src/Premagentic.Cli/Admin/AdminCommands.cs",
+      "old": "if (live.Count != 1)",
+      "new": "if (live.Count < 1)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AgentLifecycleCliTests."
+    },
+    {
+      "name": "prem agents list --removed lists the live agents",
+      "file": "src/Premagentic.Cli/Admin/AdminCommands.cs",
+      "old": "if (args.Contains(\"--removed\"))",
+      "new": "if (false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.AgentLifecycleCliTests."
+    }
+  ]
+}

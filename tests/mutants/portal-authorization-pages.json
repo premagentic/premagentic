@@ -1,0 +1,230 @@
+{
+  "name": "The authorization flow's consent, grants and clients pages, and the connect page's grants",
+  "commit": "hand run, 2026-09-25",
+  "mutants": [
+    {
+      "name": "consent: the client's name outside its own bdi",
+      "file": "src/Premagentic.Portal/Pages/OAuthPages.cs",
+      "old": "<p class=\"lead\">An assistant asks to search as you: <bdi class=\"client\">{client.Name}</bdi></p>",
+      "new": "<p class=\"lead\">An assistant asks to search as you: {client.Name}</p>",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "consent: the loopback warning loses its shared-computer sentence",
+      "file": "src/Premagentic.Portal/Pages/OAuthPages.cs",
+      "old": "On a shared computer that can be another person's program. ",
+      "new": "",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "consent: Approve and Deny answer with a redirect",
+      "file": "src/Premagentic.Portal/Pages/OAuthPages.cs",
+      "old": "        var origin = OriginOf(target);\n",
+      "new": "        return Results.Redirect(target);\n        var origin = OriginOf(target);\n",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "consent: any address the flow answers becomes a link",
+      "file": "src/Premagentic.Portal/Pages/OAuthPages.cs",
+      "old": "(url.StartsWith(\"https://\", StringComparison.Ordinal) || url.StartsWith(\"http://\", StringComparison.Ordinal))",
+      "new": "true",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "consent: the form's own fields are handed on as parameters",
+      "file": "src/Premagentic.Portal/Pages/OAuthPages.cs",
+      "old": "form.Where(f => f.Key.StartsWith(ParameterPrefix, StringComparison.Ordinal) && f.Key.Length > ParameterPrefix.Length)",
+      "new": "form.Where(f => f.Key.Length > ParameterPrefix.Length)",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "consent: an error's link back is followed on its own",
+      "file": "src/Premagentic.Portal/Pages/OAuthPages.cs",
+      "old": "<p><a href=\"{back}\">Return to",
+      "new": "<p><a href=\"{back}\" data-continue=\"{back}\">Return to",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "consent: a stated model location is asked again",
+      "file": "src/Premagentic.Portal/Pages/OAuthPages.cs",
+      "old": "if (client.StatedModelLocation is { } stated)",
+      "new": "if (client.StatedModelLocation is { } stated && stated == (ModelLocation)0)",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "grants: an ended grant offers Revoke",
+      "file": "src/Premagentic.Portal/Pages/OAuthPages.cs",
+      "old": "status is OAuthGrantStatus.Live or OAuthGrantStatus.Pending;",
+      "new": "status is not OAuthGrantStatus.Pending;",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "navigation: the flow's links shown while it is off",
+      "file": "src/Premagentic.Portal/Html/Layout.cs",
+      "old": "!flowOn ? Navigation : Navigation.Select(",
+      "new": "Navigation.Select(",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "mapping: the flow's pages mapped while it is off",
+      "file": "src/Premagentic.Portal/PortalEndpoints.cs",
+      "old": "if (app.ServiceProvider.GetService<OAuthDeployment>() is not null)",
+      "new": "if (app.ServiceProvider is not null)",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "agents: an assistant connected through the flow is not made for themselves",
+      "file": "src/Premagentic.Portal/Pages/AgentPages.cs",
+      "old": "origin?.Kind is AgentOrigin.SelfKind or AgentOrigin.OAuthKind",
+      "new": "origin?.Kind is AgentOrigin.SelfKind",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "agents: a superseded token reads as expired",
+      "file": "src/Premagentic.Portal/Pages/AgentPages.cs",
+      "old": "        : token.Superseded ? \"ended by a disable or a password change\"\n",
+      "new": "",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "connect: the count beside the bound leaves out the grants",
+      "file": "src/Premagentic.Portal/Pages/ConnectPages.cs",
+      "old": "var connected = await own.ConnectedCountAsync(r.Person.User.Id, r.Aborted);",
+      "new": "var connected = agents.Count(a => a.State == OwnAgentState.Live);",
+      "filter": "FullyQualifiedName~PortalOAuthFlowTests|FullyQualifiedName~PortalAgentsOriginTests|FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "connect: the flow's tables are read while it is off",
+      "file": "src/Premagentic.Portal/Pages/ConnectPages.cs",
+      "old": "new(r.Db, r.Tenant, r.Http.RequestServices.GetService<OAuthDeployment>(), r.Clock);",
+      "new": "new(r.Db, r.Tenant, r.Http.RequestServices.GetService<OAuthDeployment>() ?? new OAuthDeployment(\"https://localhost\", true, []), r.Clock);",
+      "filter": "FullyQualifiedName~PortalOAuthFlowTests|FullyQualifiedName~PortalAgentsOriginTests|FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "connect: an agent ended by a disable says nothing of it",
+      "file": "src/Premagentic.Portal/Pages/ConnectPages.cs",
+      "old": "        OwnAgentState.Ended => \"ended by a disable or a password change\",\n",
+      "new": "",
+      "filter": "FullyQualifiedName~PortalOAuthFlowTests|FullyQualifiedName~PortalAgentsOriginTests|FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "connect: a person's revoke goes through the administrator's",
+      "file": "src/Premagentic.Portal/Pages/ConnectPages.cs",
+      "old": ".RevokeOwnAsync(r.Person.User.Id, id, r.Aborted);",
+      "new": ".RevokeAsync(r.Actor, id, r.Aborted);",
+      "filter": "FullyQualifiedName~PortalOAuthFlowTests|FullyQualifiedName~PortalAgentsOriginTests|FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "connect: the address given is the one the request came to",
+      "file": "src/Premagentic.Portal/Pages/ConnectPages.cs",
+      "old": "give it the address <code>{oauth.Resource}</code>",
+      "new": "give it the address <code>{Address(r.Http.Request) + \"/mcp\"}</code>",
+      "filter": "FullyQualifiedName~PortalOAuthFlowTests|FullyQualifiedName~PortalAgentsOriginTests|FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "connect: a browser at the public address is still told it differs",
+      "file": "src/Premagentic.Portal/Pages/ConnectPages.cs",
+      "old": "string.Equals(Address(r.Http.Request), oauth.PublicUrl, StringComparison.OrdinalIgnoreCase)",
+      "new": "false",
+      "filter": "FullyQualifiedName~PortalOAuthFlowTests|FullyQualifiedName~PortalAgentsOriginTests|FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "mapping: a person's grant revoke mapped while the flow is off",
+      "file": "src/Premagentic.Portal/PortalEndpoints.cs",
+      "old": "            people.MapPost(Local(ConnectPages.GrantRevokePath), (Delegate)ConnectPages.RevokeGrant).Needs(PortalNeed.Person);\n        }\n",
+      "new": "        }\n        people.MapPost(Local(ConnectPages.GrantRevokePath), (Delegate)ConnectPages.RevokeGrant).Needs(PortalNeed.Person);\n",
+      "filter": "FullyQualifiedName~PortalOAuthFlowTests|FullyQualifiedName~PortalAgentsOriginTests|FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "health: a line for the flow while the settings and the process both have it off",
+      "file": "src/Premagentic.Portal/Pages/HealthPages.cs",
+      "old": "        if (summary is null && !running) return Markup.Empty;\n",
+      "new": "",
+      "filter": "FullyQualifiedName~PortalOAuthFlowTests|FullyQualifiedName~PortalAgentsOriginTests|FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "health: the process is taken to run the flow whatever it started with",
+      "file": "src/Premagentic.Portal/Pages/HealthPages.cs",
+      "old": "var running = Layout.FlowOn(r.Http);",
+      "new": "var running = true;",
+      "filter": "FullyQualifiedName~PortalOAuthFlowTests|FullyQualifiedName~PortalAgentsOriginTests|FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "clients: a stored document's hash and date left off its row",
+      "file": "src/Premagentic.Portal/Pages/OAuthPages.cs",
+      "old": "M.H($\"<code>{c.Client.Id}</code>{StoredDocument(c.Document)}\"),",
+      "new": "M.H($\"<code>{c.Client.Id}</code>\"),",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "clients: the add from a document takes both a paste and a file",
+      "file": "src/Premagentic.Portal/Pages/OAuthPages.cs",
+      "old": "if (hasFile && hasPasted) throw new ArgumentException(\"Paste the document or choose its file, not both.\");",
+      "new": "if (false) throw new ArgumentException(\"Paste the document or choose its file, not both.\");",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "clients: an uploaded document read past the flow's bound",
+      "file": "src/Premagentic.Portal/Pages/OAuthPages.cs",
+      "old": "return OAuthClientDocument.ReadBytes(stream);",
+      "new": "using var copy = new MemoryStream(); stream.CopyTo(copy); return copy.ToArray();",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "clients: a pasted document's line breaks changed by the page",
+      "file": "src/Premagentic.Portal/Pages/OAuthPages.cs",
+      "old": "if (!hasFile) return Encoding.UTF8.GetBytes(pasted);",
+      "new": "if (!hasFile) return Encoding.UTF8.GetBytes(pasted.ReplaceLineEndings(\"\\r\\n\"));",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "clients: the add from a document drops the model statement",
+      "file": "src/Premagentic.Portal/Pages/OAuthPages.cs",
+      "old": "DocumentBytes(form), location, vendor.Length == 0 ? null : vendor, r.Aborted);",
+      "new": "DocumentBytes(form), null, null, r.Aborted);",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "clients: the add from a document rewrites the flow's refusal",
+      "file": "src/Premagentic.Portal/Pages/OAuthPages.cs",
+      "old": "The assistant is set up with this client id: {document.ClientId}\");\n        }\n        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)\n        {\n            return Layout.After(OAuthPaths.Clients, error: ex.Message);",
+      "new": "The assistant is set up with this client id: {document.ClientId}\");\n        }\n        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)\n        {\n            return Layout.After(OAuthPaths.Clients, error: \"The document was refused.\");",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "clients: the replace hands the flow no client",
+      "file": "src/Premagentic.Portal/Pages/OAuthPages.cs",
+      "old": "r.Actor, form[\"client\"].ToString(), DocumentBytes(form), r.Aborted);",
+      "new": "r.Actor, \"\", DocumentBytes(form), r.Aborted);",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "clients: a replace that changed nothing said to have replaced",
+      "file": "src/Premagentic.Portal/Pages/OAuthPages.cs",
+      "old": "done: replaced.Changed",
+      "new": "done: true",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "clients: the replace offered on every row",
+      "file": "src/Premagentic.Portal/Pages/OAuthPages.cs",
+      "old": "var replace = listing.Document is null || !r.IsAdministrator ? Markup.Empty",
+      "new": "var replace = !r.IsAdministrator ? Markup.Empty",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "clients: the document forms read to the framework's bounds",
+      "file": "src/Premagentic.Portal/PortalEndpoints.cs",
+      "old": "people.MapPost(Local(OAuthPaths.Clients) + \"/document\", (Delegate)OAuthPages.AddClientFromDocument).WithDocumentLimits();",
+      "new": "people.MapPost(Local(OAuthPaths.Clients) + \"/document\", (Delegate)OAuthPages.AddClientFromDocument);",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    },
+    {
+      "name": "clients: the upload form sent without multipart",
+      "file": "src/Premagentic.Portal/Html/Layout.cs",
+      "old": "<form method=\"post\" action=\"{action}\" enctype=\"multipart/form-data\">",
+      "new": "<form method=\"post\" action=\"{action}\">",
+      "filter": "FullyQualifiedName~PortalOAuthPagesTests"
+    }
+  ]
+}

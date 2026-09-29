@@ -1,0 +1,132 @@
+{
+  "name": "The portal's pages and forms, the form token check and two ingest fixes",
+  "commit": "hand run, 2026-09-22",
+  "mutants": [
+    {
+      "name": "role check removed: every role may change",
+      "file": "src/Premagentic.Portal/PortalRequest.cs",
+      "old": "        _ => role == Role.Administrator,",
+      "new": "        _ => true,",
+      "filter": "FullyQualifiedName~Portal|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "role check removed: a member reads every page",
+      "file": "src/Premagentic.Portal/PortalRequest.cs",
+      "old": "        PortalNeed.Reader => role is Role.Administrator or Role.Auditor,",
+      "new": "        PortalNeed.Reader => true,",
+      "filter": "FullyQualifiedName~Portal|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "anti-forgery check removed for forms",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "            && !SessionStore.AntiForgeryMatches(sessionValue, await PresentedAntiForgeryAsync(http, ct)))",
+      "new": "            && !http.Request.HasFormContentType && !SessionStore.AntiForgeryMatches(sessionValue, await PresentedAntiForgeryAsync(http, ct)))",
+      "filter": "FullyQualifiedName~Portal|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "change record skipped on the groups page",
+      "file": "src/Premagentic.Portal/Pages/GroupPages.cs",
+      "old": "            change.Record(\"group.add\", group.Name, null, new { name = group.Name });\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Portal|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "view as runs as the administrator",
+      "file": "src/Premagentic.Portal/Pages/PermissionPages.cs",
+      "old": "var scope = ViewAsScope.For(target.Scope, r.Person.User.Id);",
+      "new": "var scope = ViewAsScope.For(r.Person.Caller.Scope, r.Person.User.Id);",
+      "filter": "FullyQualifiedName~Portal|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "an endpoint that declares nothing is open to any person",
+      "file": "src/Premagentic.Portal/PortalEndpoints.cs",
+      "old": "?.Need ?? PortalNeed.Administrator;",
+      "new": "?.Need ?? PortalNeed.Person;",
+      "filter": "FullyQualifiedName~Portal|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "the same-origin check always passes",
+      "file": "src/Premagentic.Portal/PortalEndpoints.cs",
+      "old": "    internal static bool FromThisOrigin(HttpRequest request)\n    {\n",
+      "new": "    internal static bool FromThisOrigin(HttpRequest request) => true;\n\n    internal static bool FromThisOriginAsWritten(HttpRequest request)\n    {\n",
+      "filter": "FullyQualifiedName~Portal|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "no content security policy",
+      "file": "src/Premagentic.Portal/Html/Layout.cs",
+      "old": "        response.Headers.ContentSecurityPolicy = ContentSecurityPolicy;\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Portal|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "removing a named group asks nothing",
+      "file": "src/Premagentic.Portal/Pages/GroupPages.cs",
+      "old": "if (rules.Count > 0 && !confirmed)",
+      "new": "if (false)",
+      "filter": "FullyQualifiedName~Portal|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "the change record keeps the token",
+      "file": "src/Premagentic.Portal/Pages/AgentPages.cs",
+      "old": "new { token_id = token.Record.Id, expires_at = token.Record.ExpiresAt }",
+      "new": "new { token_id = token.Record.Id, expires_at = token.Record.ExpiresAt, token = token.PlainText }",
+      "filter": "FullyQualifiedName~Portal|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "a looser setting is saved without asking",
+      "file": "src/Premagentic.Portal/Pages/SettingsPages.cs",
+      "old": "if (TrustSettingsStore.IsLooser(key, current.Value, normalized) && !confirmed)",
+      "new": "if (false)",
+      "filter": "FullyQualifiedName~Portal|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "the export always carries the hashes",
+      "file": "src/Premagentic.Core/Admin/ConfigExport.cs",
+      "old": "var strip = includeSecrets || secrets.Length == 0 ?",
+      "new": "var strip = true ?",
+      "filter": "FullyQualifiedName~Portal|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "why reads the trust gate as strictly greater",
+      "file": "src/Premagentic.Core/Admin/AccessExplainer.cs",
+      "old": "return document.TrustTier >= policy.MinimumMachineTier",
+      "new": "return document.TrustTier > policy.MinimumMachineTier",
+      "filter": "FullyQualifiedName~Portal|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "why ignores historical access",
+      "file": "src/Premagentic.Core/Admin/AccessExplainer.cs",
+      "old": "        return includeHistorical\n            ? new GateOutcome(true,",
+      "new": "        return false\n            ? new GateOutcome(true,",
+      "filter": "FullyQualifiedName~Portal|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "the documents page shows the text",
+      "file": "src/Premagentic.Core/Admin/DocumentCatalog.cs",
+      "old": "SELECT d.id, d.path, d.title,",
+      "new": "SELECT d.id, d.path || (SELECT string_agg(c.content, ' ') FROM hc_index.chunk c WHERE c.document_id = d.id), d.title,",
+      "filter": "FullyQualifiedName~Portal|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "run now ignores a run in progress",
+      "file": "src/Premagentic.Portal/Pages/SourcePages.cs",
+      "old": "&& r.Clock.GetUtcNow() - running.StartedAt < DidNotFinishAfter)",
+      "new": "&& false)",
+      "filter": "FullyQualifiedName~Portal|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "a skip does not count as seen",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.cs",
+      "old": "if (scanned == 0 && skipped.Count == 0 && !allowEmptySource)",
+      "new": "if (scanned == 0 && !allowEmptySource)",
+      "filter": "FullyQualifiedName~Portal|FullyQualifiedName~SourcesTests"
+    },
+    {
+      "name": "an empty file is not counted",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.cs",
+      "old": "                skipped[IngestSummary.EmptyKey] = skipped.GetValueOrDefault(IngestSummary.EmptyKey) + 1;\n",
+      "new": "",
+      "filter": "FullyQualifiedName~Portal|FullyQualifiedName~SourcesTests"
+    }
+  ]
+}

@@ -1,0 +1,181 @@
+{
+  "name": "principal mapping as an extension point: the no-mapper default, the host's bounds on a mapper, one mapper per deployment, and what a start and a log say",
+  "commit": "hand run, 2026-09-28",
+  "mutants": [
+    {
+      "name": "with no mapper, an outside principal is read as the id of a group",
+      "file": "src/Premagentic.Core/Identity/PrincipalMapping.cs",
+      "old": "        if (mapper is null) return new MappedPrincipals(new Dictionary<string, Principal>(StringComparer.Ordinal), asked);",
+      "new": "        if (mapper is null) return new MappedPrincipals(asked.ToDictionary(p => p, p => Principal.Group(p), StringComparer.Ordinal), []);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PrincipalMappingTests.|FullyQualifiedName~Premagentic.Tests.SignInMappingTests.|FullyQualifiedName~Premagentic.Tests.ConnectorMappingTests."
+    },
+    {
+      "name": "a mapper's answer for a principal nobody asked about counts",
+      "file": "src/Premagentic.Core/Identity/PrincipalMapping.cs",
+      "old": "        var claimed = answered.Where(a => askedSet.Contains(a.Key)).ToArray();",
+      "new": "        var claimed = answered.ToArray();",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PrincipalMappingTests."
+    },
+    {
+      "name": "a mapper's answer counts whatever group it names",
+      "file": "src/Premagentic.Core/Identity/PrincipalMapping.cs",
+      "old": "            if (groups.Contains(groupId))",
+      "new": "            if (true)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PrincipalMappingTests."
+    },
+    {
+      "name": "a mapper can map into a group premagentic maintains",
+      "file": "src/Premagentic.Core/Identity/PrincipalMapping.cs",
+      "old": "            WHERE g.tenant_id = @tenant AND g.id = ANY(@ids) AND g.deleted_at IS NULL AND g.system_key IS NULL",
+      "new": "            WHERE g.tenant_id = @tenant AND g.id = ANY(@ids) AND g.deleted_at IS NULL",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PrincipalMappingTests."
+    },
+    {
+      "name": "a mapper can map into a deleted group",
+      "file": "src/Premagentic.Core/Identity/PrincipalMapping.cs",
+      "old": "            WHERE g.tenant_id = @tenant AND g.id = ANY(@ids) AND g.deleted_at IS NULL AND g.system_key IS NULL",
+      "new": "            WHERE g.tenant_id = @tenant AND g.id = ANY(@ids) AND g.system_key IS NULL",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PrincipalMappingTests."
+    },
+    {
+      "name": "a mapper can map into another tenant's group",
+      "file": "src/Premagentic.Core/Identity/PrincipalMapping.cs",
+      "old": "            WHERE g.tenant_id = @tenant AND g.id = ANY(@ids) AND g.deleted_at IS NULL AND g.system_key IS NULL",
+      "new": "            WHERE @tenant = @tenant AND g.id = ANY(@ids) AND g.deleted_at IS NULL AND g.system_key IS NULL",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PrincipalMappingTests."
+    },
+    {
+      "name": "a mapper is handed the asked array itself, and can write over it",
+      "file": "src/Premagentic.Core/Identity/PrincipalMapping.cs",
+      "old": "new PrincipalMapRequest(db, tenantId, Array.AsReadOnly(asked))",
+      "new": "new PrincipalMapRequest(db, tenantId, asked)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PrincipalMappingTests."
+    },
+    {
+      "name": "a mapper that answers null is read as mapping nothing",
+      "file": "src/Premagentic.Core/Identity/PrincipalMapping.cs",
+      "old": "            ?? throw new InvalidOperationException($\"The principal mapper '{mapper.Name}' answered nothing at all, not even an empty answer.\");",
+      "new": "            ?? new Dictionary<string, Guid>();",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PrincipalMappingTests."
+    },
+    {
+      "name": "an extension registers two principal mappers",
+      "file": "src/Premagentic.Core/Extensions/ExtensionRegistrations.cs",
+      "old": "        if (_principalMapper is not null)\n            throw new ArgumentException(",
+      "new": "        if (false)\n            throw new ArgumentException(",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PrincipalMapperSeamTests."
+    },
+    {
+      "name": "an extension that registers only a principal mapper registered nothing",
+      "file": "src/Premagentic.Core/Extensions/ExtensionRegistrations.cs",
+      "old": "        && _reminderSinks.Count == 0 && _commands.Count == 0 && _settings.Count == 0 && _principalMapper is null;",
+      "new": "        && _reminderSinks.Count == 0 && _commands.Count == 0 && _settings.Count == 0;",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PrincipalMapperSeamTests."
+    },
+    {
+      "name": "a second extension's principal mapper is not refused for it",
+      "file": "src/Premagentic.Core/Extensions/ExtensionHost.cs",
+      "old": "        if (registrations.PrincipalMapper is { } mapper && added.PrincipalMapper is { } kept)",
+      "new": "        if (registrations.PrincipalMapper is { } mapper && added.PrincipalMapper is { } kept && false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PrincipalMapperExtensionTests."
+    },
+    {
+      "name": "the host never keeps the principal mapper an extension brought",
+      "file": "src/Premagentic.Core/Extensions/ExtensionHost.cs",
+      "old": "            if (registrations.PrincipalMapper is { } brought) PrincipalMapper = (brought, manifest.Name);",
+      "new": "            if (registrations.PrincipalMapper is { } brought) { }",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PrincipalMapperExtensionTests.|FullyQualifiedName~Premagentic.Tests.ApiExtensionsTests."
+    },
+    {
+      "name": "an extension that brings a principal mapper need not declare the seam",
+      "file": "src/Premagentic.Core/Extensions/ExtensionHost.cs",
+      "old": "            if (registrations.PrincipalMapper is not null && !manifest.Seams.ContainsKey(SeamVersions.PrincipalsName))",
+      "new": "            if (false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PrincipalMapperExtensionTests."
+    },
+    {
+      "name": "the host forgets which extension brought the principal mapper",
+      "file": "src/Premagentic.Core/Extensions/ExtensionHost.cs",
+      "old": "added.PrincipalMapper?.Mapper, added.PrincipalMapper?.Extension);",
+      "new": "added.PrincipalMapper?.Mapper, null);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PrincipalMapperExtensionTests."
+    },
+    {
+      "name": "prem extensions list does not name the principal mapper",
+      "file": "src/Premagentic.Cli/Admin/ExtensionsCommands.cs",
+      "old": "                if (host.PrincipalMapper is { } mapper && host.PrincipalMapperExtension == loaded.Name)",
+      "new": "                if (host.PrincipalMapper is { } mapper && host.PrincipalMapperExtension == loaded.Name && false)",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PrincipalMapperExtensionTests."
+    },
+    {
+      "name": "the health page says no principal mapper is loaded when one is",
+      "file": "src/Premagentic.Portal/Pages/HealthPages.cs",
+      "old": "        var mapper = host.PrincipalMapper is { } m\n",
+      "new": "        var mapper = host.PrincipalMapper is { } m && false\n",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PrincipalMapperExtensionTests."
+    },
+    {
+      "name": "a start never says an extension's groups mean nothing without a mapper",
+      "file": "src/Premagentic.Core/Extensions/ExtensionHosting.cs",
+      "old": "              (principalMapper is null ? \" \" + NoMapperSentence : \"\");",
+      "new": "              \"\";",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PrincipalMapperSeamTests."
+    },
+    {
+      "name": "a start never names the principal mapper",
+      "file": "src/Premagentic.Core/Extensions/ExtensionHosting.cs",
+      "old": "        principalMapper is null\n            ? null\n            : $\"What groups and principals",
+      "new": "        true\n            ? null\n            : $\"What groups and principals",
+      "filter": "FullyQualifiedName~Premagentic.Tests.PrincipalMapperSeamTests.|FullyQualifiedName~Premagentic.Tests.ApiExtensionsTests."
+    },
+    {
+      "name": "the loaded mapper is named in a warning, which the command line prints on every call",
+      "file": "src/Premagentic.Core/Extensions/ExtensionHosting.cs",
+      "old": "        if (MapperLine(host.PrincipalMapper?.Name) is { } mapper)\n            note?.Invoke(mapper);",
+      "new": "        if (MapperLine(host.PrincipalMapper?.Name) is { } mapper)\n            warn?.Invoke(mapper);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ApiExtensionsTests."
+    },
+    {
+      "name": "the api reads through no mapper whatever the extensions brought",
+      "file": "src/Premagentic.Api/Callers/CallerServices.cs",
+      "old": "            sp.GetRequiredService<ExtensionHost>().PrincipalMapper));",
+      "new": "            null));",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ApiExtensionsTests."
+    },
+    {
+      "name": "a directory's mapped groups are dropped at the middleware",
+      "file": "src/Premagentic.Api/Callers/CallerMiddleware.cs",
+      "old": "                fromDirectory = [.. resolved.Mapped.Values];",
+      "new": "                fromDirectory = [];",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SignInMappingTests."
+    },
+    {
+      "name": "an unmapped group is logged on every request",
+      "file": "src/Premagentic.Api/Callers/UnmappedPrincipalLog.cs",
+      "old": "            if (!_said.TryAdd(principal, 0)) continue;",
+      "new": "            _said.TryAdd(principal, 0);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SignInMappingTests."
+    },
+    {
+      "name": "the unmapped line blames a mapper when none is loaded",
+      "file": "src/Premagentic.Api/Callers/UnmappedPrincipalLog.cs",
+      "old": "            if (mapperName is null)\n                log.LogInformation(",
+      "new": "            if (mapperName is not null)\n                log.LogInformation(",
+      "filter": "FullyQualifiedName~Premagentic.Tests.SignInMappingTests.|FullyQualifiedName~Premagentic.Tests.ApiExtensionsTests."
+    },
+    {
+      "name": "an ingest run reads through no mapper whatever it was given",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.cs",
+      "old": "        var access = await AclDecider.LoadAsync(db, tenantId, PrincipalMapper, ct);",
+      "new": "        var access = await AclDecider.LoadAsync(db, tenantId, null, ct);",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ConnectorMappingTests."
+    },
+    {
+      "name": "the run line never says no principal mapper is loaded",
+      "file": "src/Premagentic.Core/Ingestion/IngestPipeline.cs",
+      "old": "                    : \"(no principal mapper is loaded)\") +",
+      "new": "                    : \"\") +",
+      "filter": "FullyQualifiedName~Premagentic.Tests.ConnectorMappingTests."
+    }
+  ]
+}
