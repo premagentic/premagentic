@@ -12,6 +12,13 @@ namespace Premagentic.Tests;
 /// 28P01, as a PostgreSQL on Windows was seen to answer. Everything else is
 /// passed through. Plain connections only: <see cref="ConnectionString"/>
 /// turns TLS and GSS encryption off, so every message can be read.
+/// <para>
+/// The same server that was seen to answer that way sometimes does it itself,
+/// ending the connection before the proxy has read its error. Either way the
+/// client meets a login that ends with no error, and the proxy then ends the
+/// client's connection the same way, so what the client sees does not depend
+/// on which of the two happened, and <see cref="Dropped"/> counts both.
+/// </para>
 /// </summary>
 internal sealed class RefusalDroppingProxy : IAsyncDisposable
 {
@@ -43,7 +50,11 @@ internal sealed class RefusalDroppingProxy : IAsyncDisposable
     /// <summary><c>upstream</c>, reached through this proxy.</summary>
     public string ConnectionString { get; }
 
-    /// <summary>How many of the server's errors during authentication were never passed on.</summary>
+    /// <summary>
+    /// How many logins ended before the server authenticated them with no
+    /// error passed on to the client: the proxy dropped the server's error, or
+    /// the server ended the connection first.
+    /// </summary>
     public int Dropped => Volatile.Read(ref _dropped);
 
     private async Task AcceptAsync()
@@ -85,22 +96,31 @@ internal sealed class RefusalDroppingProxy : IAsyncDisposable
         var head = new byte[5];
         while (true)
         {
-            if (!await ReadAllAsync(server, head)) return;
-            var body = new byte[BinaryPrimitives.ReadInt32BigEndian(head.AsSpan(1)) - 4];
-            if (!await ReadAllAsync(server, body)) return;
-            if (head[0] == (byte)'R' && BinaryPrimitives.ReadInt32BigEndian(body) == 0) authenticated = true;
-            if (head[0] == (byte)'E' && !authenticated)
+            byte[] body;
+            try
             {
-                Interlocked.Increment(ref _dropped);
-                // Ended at once, the error never sent.
-                client.Client.LingerState = new LingerOption(true, 0);
-                client.Client.Close();
-                return;
+                if (!await ReadAllAsync(server, head)) break;
+                body = new byte[BinaryPrimitives.ReadInt32BigEndian(head.AsSpan(1)) - 4];
+                if (!await ReadAllAsync(server, body)) break;
             }
+            catch (IOException)
+            {
+                // The server reset the connection, which can take its error with it.
+                break;
+            }
+            if (head[0] == (byte)'R' && BinaryPrimitives.ReadInt32BigEndian(body) == 0) authenticated = true;
+            if (head[0] == (byte)'E' && !authenticated) break;
             var stream = client.GetStream();
             await stream.WriteAsync(head, _stop.Token);
             await stream.WriteAsync(body, _stop.Token);
         }
+        if (authenticated) return;
+        // A login that ended before the server authenticated it: its error, if
+        // the server sent one, is never passed on, and the client's connection
+        // is ended at once, whichever side ended first.
+        Interlocked.Increment(ref _dropped);
+        client.Client.LingerState = new LingerOption(true, 0);
+        client.Client.Close();
     }
 
     private async Task<bool> ReadAllAsync(NetworkStream stream, byte[] buffer)
