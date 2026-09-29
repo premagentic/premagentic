@@ -21,9 +21,9 @@ sentence the program printed.
 - **Security reports** go through the private channel in `SECURITY.md`,
   never through an issue or a discussion, and are always answered.
 
-Issues and pull requests are read and triaged, without a response-time
-commitment. See the Support section of the README for what this repository
-does and does not promise.
+Issues and pull requests are read and triaged by the maintainers. Support
+for a deployment comes with the PremAgentic business add-on; see the Support
+section of the README.
 
 ## Your first contribution
 
@@ -40,6 +40,9 @@ does and does not promise.
 6. **Open the pull request** against `main`. The template asks for what and
    why in a sentence, which rules the change touches, the test that fails
    without it, and the test count from your run.
+7. **Sign the contributor license agreement** when the check on your pull
+   request asks. You sign it once, and it covers every later contribution;
+   see "Licensing of contributions" below.
 
 Review looks for four things: the change does what its sentence says and
 nothing more; every rule below still holds; a named test fails without it;
