@@ -4,10 +4,10 @@ What PremAgentic does, the claim it makes about the network and how that claim i
 
 On-premises, for agents: the name says what it is. Governed knowledge
 retrieval that runs entirely inside a customer's own network. Point it at a
-folder of Markdown, text, PDF or Word files (the last two through first-party
-extensions an administrator allows), write down who may read which folders,
-and its people and agents get cited answers out of them, with those rules
-enforced before anything is retrieved.
+folder of Markdown, text, PDF, Word or Excel files (the last three through
+first-party extensions an administrator allows), write down who may read which
+folders, and its people and agents get cited answers out of them, with those
+rules enforced before anything is retrieved.
 
 ```
 the customer's folders of documents -> connector -> chunk -> embed (locally)
@@ -40,11 +40,12 @@ telemetry from a long-running process, and PremAgentic switches that off
 itself (`ORT_DISABLE_TELEMETRY=1`, unless you have set the variable) before
 the runtime loads.
 
-Setup is different, and it is stated here so the claim above is not read as more
-than it is. Installing downloads the embedding model from Hugging Face, the
-PostgreSQL container image and the .NET packages, once. A site with no internet
-access has to bring those in first. The optional `openai` embedding provider sends
-passage text to a third party and is off unless selected.
+Installing from a release archive needs no internet connection: the archive
+carries the embedding model and the .NET runtime, and setup uses a PostgreSQL
+you already run. Installing from the source downloads the embedding model from
+Hugging Face, the PostgreSQL container image and the .NET packages, once. The
+optional `openai` embedding provider sends passage text to a third party and
+is off unless selected.
 
 PremAgentic is built and maintained by Agave Information Solutions. The
 retrieval core was developed and measured on a single-user knowledge base of

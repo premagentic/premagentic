@@ -83,9 +83,9 @@ a page; the suite always ending in a verdict.
 - **An installer,** so a deployment starts from a package rather than from
   an archive and the steps in its `INSTALL.txt`. The archives do not carry
   the bundled PostgreSQL.
-- **The clean Windows machine proof:** the Windows service and the bundled
-  database service starting under their own accounts, and removal taking
-  them away, on a machine that has never seen the code.
+- **The bundled database as a Windows service:** the bundled PostgreSQL's
+  service starting under its own account, and removal taking it away, on a
+  machine that has never seen the code.
 - **A calibration command for the no-answer floor,** so a deployment can
   set, from its own golden set, the score below which search says it found
   nothing.

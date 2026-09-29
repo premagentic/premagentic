@@ -38,24 +38,23 @@ How that claim is tested, and what installing needs from the internet once, is o
 
 ## What it reads
 
-Markdown and plain text files are read by built-in readers. PDF, Word
-(`.docx`) and Excel (`.xlsx`) files are read by three first-party extensions
+Markdown and plain text files are read by built-in readers. PDF, Word (`.docx`)
+and Excel (`.xlsx` and `.xlsb`) files are read by three first-party extensions
 in this repository, [`extensions/pdf-reader`](extensions/pdf-reader/README.md),
 [`extensions/docx-reader`](extensions/docx-reader/README.md) and
 [`extensions/xlsx-reader`](extensions/xlsx-reader/README.md). They are built
-with the solution and, like any extension, load only once an administrator
-puts each one's build output in the extensions folder and allows it with
+with the solution and, like any extension, load only once an administrator puts
+each one's build output in the extensions folder and allows it with
 `prem extensions allow`. All three read text and nothing else: no link, script,
 macro or embedded file in a document is followed or run, and a file that
 crosses a limit is reported with the limit it crossed, never read in part. A
 PDF passage is cited by its page, a Word passage by the document's own
 headings, and an Excel passage by its sheet. A file a reader recognizes and
-will not index is counted with its
-reason, such as `.pdf (no text layer)`, `.doc (legacy .doc)` or
-`.docm (macro-enabled)`, and a file no reader claims is counted by its
-extension, so a folder of them does not look like an empty run. Before any
-reader sees a file, the run reads no more than 256 MB of it, and one file the
-index cannot store never stops a run.
+will not index is counted with its reason, such as `.pdf (no text layer)`,
+`.doc (legacy .doc)` or `.docm (macro-enabled)`, and a file no reader claims is
+counted by its extension, so a folder of them does not look like an empty run.
+Before any reader sees a file, the run reads no more than 256 MB of it, and one
+file the index cannot store never stops a run.
 
 `tests/Premagentic.Benchmark` times the search path on a synthetic index, and
 anyone can rerun it on a throwaway database; every table it prints names
@@ -64,15 +63,14 @@ the machine it ran on and which of its two modes it ran in
 
 ## What it does not do
 
-- It does not sign people in through a company directory yet.
 - It does not write to the source.
 - It does not generate prose.
-- It does not read Excel files, and it does not recognize text in pictures or
-  scanned pages.
+- It does not recognize text in pictures or scanned pages.
 
-The first three are explained under
+The first two are explained under
 [What it does not do](docs/what-it-is.md#what-it-does-not-do); what it reads
-is above.
+is above. Sign-in through a company directory is next in the
+[PremAgentic business add-on](#license).
 
 ## Quick start
 
@@ -175,24 +173,46 @@ The index of all of them, with what each covers, is [docs/README.md](docs/README
 
 ## Get involved
 
-To contribute see [`CONTRIBUTING.md`](CONTRIBUTING.md). Questions and ideas go to the
-repository's Discussions, a first change starts with an issue labeled good first issue, and
-what comes next is on [Roadmap](docs/roadmap.md).
+To contribute see [`CONTRIBUTING.md`](CONTRIBUTING.md); your first pull
+request asks you to sign the contributor license agreement, once. Questions
+and ideas go to the repository's Discussions, a first change starts with an
+issue labeled good first issue, and what comes next is on
+[Roadmap](docs/roadmap.md).
 
 ## Support
 
-The code is open. Installation, hardware and maintenance are commercial
-services from Agave Information Solutions.
+Support comes with the PremAgentic business add-on, from Agave Information
+Solutions, LLC: help installing and upgrading, sizing the hardware, mapping
+an organization's directory and permissions into PremAgentic, and answers
+from the maintainers. Write to premagentic@agaveis.com.
 
-Issues and pull requests are read and triaged, but this repository carries no
-support commitment for self-managed installations: no response time, and no
-help with mapping a particular organization's permissions into a connector.
-Security reports are the exception and are always answered.
+Questions go to the repository's Discussions and bugs to its issues, where
+the maintainers read and triage them. Security reports are always answered;
+see [`SECURITY.md`](SECURITY.md).
 
 ## License
 
-PremAgentic is licensed under the GNU Affero General Public License 3.0 only.
-See `LICENSE` and `NOTICE`. A commercial license is also offered: write to
-premagentic@agaveis.com. Dependency and model licenses are listed in
-`THIRD-PARTY-NOTICES.md`. To report a vulnerability see `SECURITY.md`; to
-contribute see `CONTRIBUTING.md`.
+PremAgentic is free software under the GNU Affero General Public License,
+version 3 only (`AGPL-3.0-only`). See `LICENSE` and `NOTICE`. Dependency and
+model licenses are listed in `THIRD-PARTY-NOTICES.md`.
+
+Agave Information Solutions, LLC also offers PremAgentic under a commercial
+license, for building it into a closed product, or running a changed copy for
+its users without offering them its source. Write to premagentic@agaveis.com.
+
+**The PremAgentic business add-on** is what an organization adds to run
+PremAgentic for many people. It carries directory group mapping, and audit
+retention and export. Next in it: sign-in through Microsoft, Google or another
+OIDC provider, with group sync; connectors that read a source's own
+permissions, for SharePoint, OneDrive and Windows file shares; the
+administration API; and a signed installer. Support comes with it.
+
+The add-on installs as one extension on the same extension host, allowed by
+hash like any other, and it is free for a deployment of up to 10 users.
+Customers can read the add-on's source.
+
+The PremAgentic name belongs to Agave Information Solutions, LLC and is not
+licensed with the code.
+
+To report a vulnerability see `SECURITY.md`; to contribute see
+`CONTRIBUTING.md`.

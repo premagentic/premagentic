@@ -203,20 +203,20 @@ Excel files; what they read, their limits and how to allow them are on
 [Sources, readers and chunkers](sources-readers-chunkers.md#pdf-word-and-excel-files).
 
 The conformance kit, `tests/Premagentic.Conformance`, holds xunit fixtures to
-inherit that prove a reader, a chunker, a connector, an embedding provider,
-a sign-in adapter or a reminder sink
-keeps its contract; the built-ins and the PDF and Word readers are held to
-them here. It packs as the package `Premagentic.Conformance`. Its version is
-the product version it is built with, the MSBuild property `Version` (from
-`Directory.Build.props`, or `-p:Version=<version>` given to `dotnet pack`),
-and it carries no copy of the core: the contracts come from the PremAgentic
-the extension builds against. The kit records the seam versions it proves,
-read from `SeamVersions.cs` when it is built, and each fixture has a test,
+inherit that prove a reader, a chunker, a connector, an embedding provider, a
+sign-in adapter or a reminder sink keeps its contract; the built-ins and the
+PDF, Word and Excel readers are held to them here. It packs as the package
+`Premagentic.Conformance`. Its version is the product version it is built
+with, the MSBuild property `Version` (from `Directory.Build.props`, or
+`-p:Version=<version>` given to `dotnet pack`), and it carries no copy of the
+core: the contracts come from the PremAgentic the extension builds against.
+The kit records the seam versions it proves, read from `SeamVersions.cs` when
+it is built, and each fixture has a test,
 `The_kit_proves_the_seams_this_extension_builds_against`, that fails when the
-PremAgentic the extension builds against offers another version of that
-seam, with a sentence naming the kit's version and the version to match. No
-package feed carries the kit; [Writing an extension](writing-an-extension.md)
-packs it into a local folder and restores it from there.
+PremAgentic the extension builds against offers another version of that seam,
+with a sentence naming the kit's version and the version to match. No package
+feed carries the kit; [Writing an extension](writing-an-extension.md) packs it
+into a local folder and restores it from there.
 
 The connector fixture proves on every machine that one item a connector
 cannot read does not throw and does not become a document. Left alone,
