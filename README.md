@@ -192,6 +192,7 @@ Security reports are the exception and are always answered.
 ## License
 
 PremAgentic is licensed under the GNU Affero General Public License 3.0 only.
-See `LICENSE` and `NOTICE`. A commercial license is also offered. Dependency
-and model licenses are listed in `THIRD-PARTY-NOTICES.md`. To report a
-vulnerability see `SECURITY.md`; to contribute see `CONTRIBUTING.md`.
+See `LICENSE` and `NOTICE`. A commercial license is also offered: write to
+premagentic@agaveis.com. Dependency and model licenses are listed in
+`THIRD-PARTY-NOTICES.md`. To report a vulnerability see `SECURITY.md`; to
+contribute see `CONTRIBUTING.md`.
