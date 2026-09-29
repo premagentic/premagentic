@@ -112,6 +112,34 @@ a draft is made.
 
 ## Licensing of contributions
 
-Contributions are accepted under a contributor license agreement that allows
-the project to relicense them. The agreement and how to sign it are linked
-here before outside contributions open.
+PremAgentic is licensed under the GNU Affero General Public License 3.0 only,
+and Agave Information Solutions, LLC also offers it under a commercial
+license. So that a contribution can go into both, contributions are accepted
+under a contributor license agreement:
+
+- `CLA-INDIVIDUAL.md`, for a person contributing their own work.
+- `CLA-ENTITY.md`, for a company contributing through its employees.
+
+You keep the copyright in what you contribute. The agreement gives Agave a
+license to use it, including under the commercial license, and Agave agrees
+to keep it available under the license the project uses on the day you
+contribute.
+
+The first time you open a pull request, a check asks you to sign the
+individual agreement by posting the one comment it gives you, and records
+your GitHub account and the date. You sign once; later pull requests pass the
+check on their own.
+
+If you contribute as part of your job, your employer either approves your
+signing the individual agreement or signs the entity agreement once. To sign
+for a company, write to [CONTACT ADDRESS] with the company's legal name, the
+signer's name and title, and the GitHub accounts it covers.
+
+## Work you did not write
+
+If a pull request includes code, text or images that you did not write, say
+so in its description: what it is, where it came from, who holds the
+copyright, and its license, and mark that part "Not a Contribution". Work
+under a license that can be combined with the GNU Affero General Public
+License 3.0, such as MIT, BSD or the Apache License 2.0, can be accepted, and
+is recorded in `THIRD-PARTY-NOTICES.md`.
