@@ -8,6 +8,10 @@ Windows in PowerShell; on Linux or macOS the slashes turn. How the host
 hashes, loads and refuses an extension is on the [Extensions](extensions.md)
 page. This page is the doing.
 
+An extension loads into PremAgentic itself, so it is covered by the GNU
+Affero General Public License 3.0 unless it is made under the commercial
+license; see [License](../README.md#license) in the README.
+
 An extension is a folder holding one assembly and an `extension.json` beside
 it; the assembly has a public class implementing `IExtension`, and nothing
 else marks it. The layout used here:
