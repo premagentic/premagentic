@@ -211,7 +211,7 @@ An assistant reads a tool's description to decide whether to call it, and the sh
 dotnet run --project src/Premagentic.Cli -- settings set mcp.tool_descriptions '{"search_knowledge": "Search the Northwind Cabinets employee handbook and HR policies."}'
 ```
 
-On this build the command stores the value and then prints `There is no retrieval setting 'mcp.tool_descriptions': the retrieval settings are retrieval.no_answer_distance_floor, retrieval.rrf_k, retrieval.fallback_rrf_weight, retrieval.authority_weights.` with exit code 1, and `prem settings list` does not show the key. The value is stored all the same: the API's next start logged `The MCP tool search_knowledge is described in this deployment's own words.`, and `tools/list` over HTTP returned the search tool with the description `Search the Northwind Cabinets employee handbook and HR policies.` and `readOnlyHint: true`.
+The command stores the value, and `prem settings list` shows it. The API's next start logged `The MCP tool search_knowledge is described in this deployment's own words.`, and `tools/list` over HTTP returned the search tool with the description `Search the Northwind Cabinets employee handbook and HR policies.` and `readOnlyHint: true`.
 
 ## Check it works
 
