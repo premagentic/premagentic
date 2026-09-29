@@ -132,8 +132,10 @@ check on their own.
 
 If you contribute as part of your job, your employer either approves your
 signing the individual agreement or signs the entity agreement once. To sign
-for a company, write to premagentic@agaveis.com with the company's legal name, the
-signer's name and title, and the GitHub accounts it covers.
+for a company, write to premagentic@agaveis.com with the company's legal
+name, the signer's name and title, and the GitHub accounts it covers. Once the
+agreement is signed, those accounts are added to the check, so it passes for
+them without an individual signature.
 
 ## Work you did not write
 
