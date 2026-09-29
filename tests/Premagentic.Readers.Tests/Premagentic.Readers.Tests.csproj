@@ -13,7 +13,7 @@
        hands it to the extension host, so the tests that load a reader from its
        folder, by hash, live in Premagentic.Tests, which references none. -->
   <ItemGroup>
-    <PackageReference Include="coverlet.collector" Version="10.0.1" />
+    <PackageReference Include="coverlet.collector" Version="10.1.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
