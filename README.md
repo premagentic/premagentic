@@ -208,10 +208,8 @@ permissions, for SharePoint, OneDrive and Windows file shares; the
 administration API; and a signed installer. Support comes with it.
 
 The add-on installs as one extension on the same extension host, allowed by
-hash like any other, and it is free for a deployment of up to 10 users. Its
-license is a signed file checked on the machine: there is no license server,
-and the check calls out to nothing. Customers can read the add-on's source to
-see how it reads permissions.
+hash like any other, and it is free for a deployment of up to 10 users.
+Customers can read the add-on's source to see how it reads permissions.
 
 The PremAgentic name belongs to Agave Information Solutions, LLC and is not
 licensed with the code.
