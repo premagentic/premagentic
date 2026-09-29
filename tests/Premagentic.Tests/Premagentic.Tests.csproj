@@ -11,7 +11,7 @@
     <PackageReference Include="coverlet.collector" Version="10.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
-    <PackageReference Include="Testcontainers.PostgreSql" Version="4.13.0" />
+    <PackageReference Include="Testcontainers.PostgreSql" Version="4.15.0" />
     <!-- Testcontainers 4.13.0 pulls SSH.NET 2025.1.0, which carries two high
          severity advisories (GHSA-mggc-4xg6-vcxf, GHSA-q939-rpr3-3284), both
          patched in 2026.0.0. The direct reference lifts the transitive
