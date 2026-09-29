@@ -1,0 +1,53 @@
+name: Contributor agreement
+
+# Asks the author of each pull request to sign the contributor license
+# agreement once (CONTRIBUTING.md, "Licensing of contributions") and records
+# the signature on the cla-signatures branch.
+#
+# pull_request_target is needed so the check can comment on and set a status
+# for pull requests from forks. It runs with this repository's token, so this
+# workflow never checks out or runs anything from the pull request: it reads
+# comments and writes signatures, nothing else.
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_target:
+    types: [opened, closed, synchronize]
+
+permissions: {}
+
+jobs:
+  cla:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+      contents: write
+      pull-requests: write
+      statuses: write
+    if: >-
+      github.event_name == 'pull_request_target' ||
+      (github.event.issue.pull_request &&
+       (github.event.comment.body == 'recheck' ||
+        github.event.comment.body == 'I have read the CLA Document and I hereby sign the CLA'))
+    steps:
+      - uses: contributor-assistant/github-action@ca4a40a7d1004f18d9960b404b97e5f30a505a08 # v2.6.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          path-to-document: https://github.com/premagentic/premagentic/blob/main/CLA-INDIVIDUAL.md
+          path-to-signatures: signatures/cla.json
+          branch: cla-signatures
+          allowlist: dependabot[bot],github-actions[bot]
+          custom-notsigned-prcomment: >-
+            Thank you for your pull request. Before it can be merged, please
+            read the [individual contributor license agreement](https://github.com/premagentic/premagentic/blob/main/CLA-INDIVIDUAL.md)
+            and sign it by posting the comment below. You sign once; later
+            pull requests pass this check on their own. If you contribute for
+            a company, see CONTRIBUTING.md, "Licensing of contributions".
+          custom-allsigned-prcomment: >-
+            Everyone on this pull request has signed the contributor license
+            agreement.
+          signed-commit-message: "cla: $contributorName signed in #$pullRequestNo"
+          create-file-commit-message: "cla: the file that records signatures"

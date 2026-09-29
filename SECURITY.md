@@ -8,8 +8,9 @@ one is always answered.
 ## Reporting
 
 Use GitHub's private vulnerability reporting: the **Report a vulnerability**
-button under this repository's **Security** tab. Please do not open a public
-issue for a suspected vulnerability.
+button under this repository's **Security** tab. If you cannot use it, write
+to premagentic@agaveis.com. Please do not open a public issue for a suspected
+vulnerability.
 
 ## What counts
 
