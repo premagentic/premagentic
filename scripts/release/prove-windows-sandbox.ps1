@@ -322,9 +322,17 @@ Stop-Process -Id $api.Id -Force
 $api.WaitForExit(15000) | Out-Null
 # A service is started with the machine's environment, not this script's.
 Assert-PathHoldsNoRuntime "the machine, which the service is started with" ([Environment]::GetEnvironmentVariable("PATH", "Machine"))
-& .\bin\prem.exe setup --admin-connection-file $adminFile --admin-user first-admin --admin-password-file $adminPasswordFile --host-name $hostName --windows-service `
-    --credentials-dir C:\ProgramData\Premagentic
-if ($LASTEXITCODE -ne 0) { Fail "prem setup --windows-service failed" $LASTEXITCODE }
+# Its output goes to its own files and to the transcript, as the prompt setup's does,
+# so a refusal says why in the results.
+$serviceOut = Join-Path $results "setup-service-$stamp.out"
+$serviceErr = Join-Path $results "setup-service-$stamp.err"
+$serviceSetup = Start-Process -FilePath (Join-Path $script:root "bin\prem.exe") -NoNewWindow -PassThru `
+    -ArgumentList "setup", "--admin-connection-file", $adminFile, "--admin-user", "first-admin", "--admin-password-file", $adminPasswordFile, "--host-name", $hostName, "--windows-service", "--credentials-dir", "C:\ProgramData\Premagentic" `
+    -RedirectStandardOutput $serviceOut -RedirectStandardError $serviceErr
+$null = $serviceSetup.Handle
+$serviceSetup.WaitForExit()
+@(Get-Content $serviceOut, $serviceErr) | Write-Host
+if ($serviceSetup.ExitCode -ne 0) { Fail "prem setup --windows-service failed; its output is in setup-service-$stamp.out and .err" $serviceSetup.ExitCode }
 & sc.exe qc PremAgentic | Write-Host
 & sc.exe start PremAgentic | Write-Host
 $ok = $false
