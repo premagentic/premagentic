@@ -51,8 +51,8 @@ know reaches nothing.
 
 **Groups from your own directory.** If people sign in through a directory,
 what its groups mean here is decided by a principal mapper, which an
-extension brings (see [Extensions](extensions.md)); the business add-on
-brings one, directory group mapping. A group the mapper does
+extension brings (see [Extensions](extensions.md));
+PremAgentic for Teams brings one, directory group mapping. A group the mapper does
 not map means nothing and is ignored, and with no mapper every group means
 nothing, so nobody gets access you did not write down; the start says when
 no mapper is loaded, and the log names each ignored group once. The same

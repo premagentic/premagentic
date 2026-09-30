@@ -49,15 +49,15 @@ public sealed class CliHelpTests
             { ["groups", "tally", "--help"], 0, "prem groups add <name>" },
             { ["help", "frobnicate"], 1, "prem help takes --markdown or one command, and 'frobnicate' is neither." },
             { ["--frobnicate"], 1, "Unknown command '--frobnicate'. prem --help lists every command." },
-            // A command the business add-on brings is named, whatever the call.
-            { ["audit"], 1, "'prem audit' comes with the PremAgentic business add-on, and no extension loads until a database is configured." },
-            { ["audit", "--help"], 1, "'prem audit' comes with the PremAgentic business add-on, and no extension loads until a database is configured." },
-            { ["audit", "prune", "--plan"], 1, "'prem audit prune' comes with the PremAgentic business add-on, and no extension loads until a database is configured." },
-            { ["help", "audit"], 1, "'prem audit' comes with the PremAgentic business add-on, and no extension loads until a database is configured." },
+            // A command PremAgentic for Teams brings is named, whatever the call.
+            { ["audit"], 1, "'prem audit' comes with PremAgentic for Teams, and no extension loads until a database is configured." },
+            { ["audit", "--help"], 1, "'prem audit' comes with PremAgentic for Teams, and no extension loads until a database is configured." },
+            { ["audit", "prune", "--plan"], 1, "'prem audit prune' comes with PremAgentic for Teams, and no extension loads until a database is configured." },
+            { ["help", "audit"], 1, "'prem audit' comes with PremAgentic for Teams, and no extension loads until a database is configured." },
             // So is directory group mapping, which the add-on brings under the built-in groups.
-            { ["groups", "map", "S-1-5-21-7", "Staff"], 1, "'prem groups map' comes with the PremAgentic business add-on, and no extension loads until a database is configured." },
-            { ["groups", "unmap", "S-1-5-21-7"], 1, "'prem groups unmap' comes with the PremAgentic business add-on, and no extension loads until a database is configured." },
-            { ["groups", "mappings"], 1, "'prem groups mappings' comes with the PremAgentic business add-on, and no extension loads until a database is configured." },
+            { ["groups", "map", "S-1-5-21-7", "Staff"], 1, "'prem groups map' comes with PremAgentic for Teams, and no extension loads until a database is configured." },
+            { ["groups", "unmap", "S-1-5-21-7"], 1, "'prem groups unmap' comes with PremAgentic for Teams, and no extension loads until a database is configured." },
+            { ["groups", "mappings"], 1, "'prem groups mappings' comes with PremAgentic for Teams, and no extension loads until a database is configured." },
         };
         foreach (var verb in new[] { "users", "groups", "agents", "tokens", "oauth", "rules", "settings", "sources", "extensions", "profile", "reminders" })
         {
@@ -223,7 +223,7 @@ public sealed class CliHelpTests
 
         Assert.True(code == 2, $"exit {code}{Environment.NewLine}{output}{errors}");
         Assert.StartsWith(refusal, errors.ReplaceLineEndings("\n").Split('\n')[0]);
-        Assert.DoesNotContain("comes with the PremAgentic business add-on", errors);
+        Assert.DoesNotContain("comes with PremAgentic for Teams", errors);
     }
 
     private static async Task<(int Code, string Output, string Errors)> RunAsync(

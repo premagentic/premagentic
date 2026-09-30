@@ -216,7 +216,7 @@ public sealed class PortalConnectUsageTests(DatastoreTestDatabase server) : ICla
         Assert.Contains(ApiWorld.Handbook, page);
         // A question nothing answered, as a link that asks it again as the reader.
         Assert.Contains("href=\"/portal/search?q=submarine%20maintenance%20schedule\"", page);
-        // The audit trail's export is the business add-on's, so the page links none.
+        // The audit trail's export comes with PremAgentic for Teams, so the page links none.
         Assert.DoesNotContain("/portal/export/audit.jsonl", page);
 
         // A hosted-model assistant alice connects, and one question from it.

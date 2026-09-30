@@ -1,7 +1,7 @@
 namespace Premagentic.Core.Extensions;
 
 /// <summary>
-/// What the business add-on brings, by name only, so a deployment without it
+/// What PremAgentic for Teams brings, by name only, so a deployment without it
 /// answers a person who asks for one of its commands, settings or pages with
 /// one sentence naming the add-on instead of a bare "unknown". Nothing here
 /// runs any of it: the add-on is an extension like any other, allowed by hash
@@ -13,7 +13,7 @@ public static class BusinessAddOn
     public const string ExtensionName = "premagentic-business";
 
     /// <summary>The add-on as a sentence names it.</summary>
-    public const string DisplayName = "the PremAgentic business add-on";
+    public const string DisplayName = "PremAgentic for Teams";
 
     /// <summary>The commands of its own the add-on brings.</summary>
     public static IReadOnlyList<string> Nouns { get; } = ["audit"];

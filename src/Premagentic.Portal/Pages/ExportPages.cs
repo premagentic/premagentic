@@ -9,7 +9,7 @@ namespace Premagentic.Portal.Pages;
 /// Backup: the configuration as plain JSON and the change record as JSON
 /// lines. Password and token hashes are left out; an administrator can ask for
 /// them with a form, and that request goes to the change record. The audit
-/// trail's export is the business add-on's.
+/// trail's export comes with PremAgentic for Teams.
 /// </summary>
 internal static class ExportPages
 {

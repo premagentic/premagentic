@@ -271,7 +271,7 @@ public sealed class PortalPagesTests(DatastoreTestDatabase server) : IClassFixtu
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
             var said = await response.Content.ReadAsStringAsync();
             Assert.Contains("/portal/export/audit.jsonl", said);
-            Assert.Contains(" comes with the PremAgentic business add-on, which is not installed here.", said);
+            Assert.Contains(" comes with PremAgentic for Teams, which is not installed here.", said);
         }
 
         // The export page is the core's backup, and no page links the audit trail's export.

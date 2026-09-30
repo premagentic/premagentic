@@ -123,7 +123,7 @@ public static class PortalEndpoints
         people.MapGet("/export/config.json", (Delegate)ExportPages.Config).Needs(PortalNeed.Reader);
         people.MapPost("/export/config.json", (Delegate)ExportPages.Config);
         people.MapGet("/export/changes.jsonl", (Delegate)ExportPages.ChangeRecord).Needs(PortalNeed.Reader);
-        // The audit trail's export is the business add-on's. Its address, with
+        // The audit trail's export comes with PremAgentic for Teams. Its address, with
         // a window or without, answers with the one sentence that names it.
         people.MapGet("/export/audit.jsonl", (Delegate)AddOnPage).Needs(PortalNeed.Reader);
 
@@ -170,7 +170,7 @@ public static class PortalEndpoints
         public long? MaxRequestBodySize => 5 * OAuthClientDocument.MaxBytes;
     }
 
-    /// <summary>A page the business add-on brings, answered with the sentence that names the add-on.</summary>
+    /// <summary>A page PremAgentic for Teams brings, answered with the sentence that names the add-on.</summary>
     private static IResult AddOnPage(HttpContext http)
     {
         var r = PortalRequest.Of(http);
