@@ -58,7 +58,9 @@ A purge drops the database as its owner, drops the three roles over setup's
 administrator connection (`--admin-connection-file` or
 `PREM_SETUP_ADMIN_CONNECTION`; a bundled server uses its own superuser),
 deletes a bundled server's data folder, and deletes the credentials files
-last. Every document, user, setting and the audit trail goes, and it cannot
+last. A profile's golden set copies, in
+`C:\ProgramData\Premagentic-golden-sets` by default, are left where they are.
+Every document, user, setting and the audit trail goes, and it cannot
 be undone. Anything that would stop the purge is found before anything is
 changed. A purge that stops part way can be run again.
 

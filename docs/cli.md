@@ -461,7 +461,8 @@ prem profile show [<folder>] [--golden-set-dir dir]
   is applied, and how this deployment differs from a profile.
 
   --golden-set-dir dir   where a profile's golden set is copied; the server has to be able to read
-                         it (default: Premagentic\golden-sets in the shared application data)
+                         it (default: Premagentic-golden-sets in the shared application data,
+                         C:\ProgramData on Windows, beside setup's credentials folder, never in it)
 ```
 
 ## prem reminders

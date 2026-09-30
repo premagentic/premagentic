@@ -111,9 +111,7 @@ internal static class SetupCommand
 
         var windowsService = args.Contains("--windows-service");
         var passwordFile = Value(args, "--admin-password-file");
-        var premFolder = Path.Combine(Environment.GetFolderPath(windowsService
-            ? Environment.SpecialFolder.CommonApplicationData
-            : Environment.SpecialFolder.LocalApplicationData), "Premagentic");
+        var premFolder = InstallFolders.Credentials(windowsService);
         var defaults = new SetupOptions("", "", providers => EmbeddingProviderFactory.FromEnvironment(providers), null);
         var options = new SetupOptions(
             AdminConnectionString: adminConnection ?? "",

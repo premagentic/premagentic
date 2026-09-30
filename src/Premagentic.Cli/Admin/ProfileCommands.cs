@@ -30,7 +30,8 @@ internal static class ProfileCommands
           is applied, and how this deployment differs from a profile.
 
           --golden-set-dir dir   where a profile's golden set is copied; the server has to be able to read
-                                 it (default: Premagentic\golden-sets in the shared application data)
+                                 it (default: Premagentic-golden-sets in the shared application data,
+                                 C:\ProgramData on Windows, beside setup's credentials folder, never in it)
         """;
 
     /// <param name="chunkers">
@@ -139,16 +140,15 @@ internal static class ProfileCommands
     }
 
     /// <summary>
-    /// Where a profile's golden set is copied to. The default is the shared
-    /// application data folder, because the file is read by the account the
-    /// SERVER runs as, which is usually not the account applying the profile.
-    /// A per-account folder would apply cleanly and then fail to be read.
+    /// Where a profile's golden set is copied to. The default is a folder in
+    /// the shared application data, because the file is read by the account
+    /// the SERVER runs as, which is usually not the account applying the
+    /// profile; a per-account folder would apply cleanly and then fail to be
+    /// read. It is beside setup's credentials folder, never in it
+    /// (<see cref="InstallFolders.GoldenSets"/>).
     /// </summary>
     private static string GoldenSetFolder(string[] args) =>
-        CliArgs.Value(args, "--golden-set-dir")
-        ?? Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-            "Premagentic", "golden-sets");
+        CliArgs.Value(args, "--golden-set-dir") ?? InstallFolders.GoldenSets;
 
     private static void Print(ProfilePlan plan)
     {

@@ -24,10 +24,12 @@ or a file beside it that it reads is owned by anyone but administrators,
 SYSTEM or the account the API runs as, or anyone else may change it, it
 refuses to start with exit code 2 and a sentence naming the path. Running
 setup again from an elevated prompt puts it right, or says what stands in the
-way. Change anything in that folder, or apply a profile whose golden set is
-copied there, from an elevated prompt. The folder's rules then reach
-`https.crt` too, the certificate clients are given: it is readable by
-administrators and the service only, so copy it out from an elevated prompt.
+way. Change anything in that folder from an elevated prompt. The folder's
+rules then reach `https.crt` too, the certificate clients are given: it is
+readable by administrators and the service only, so copy it out from an
+elevated prompt. A profile's golden set is never copied there:
+`prem profile apply` copies it to `C:\ProgramData\Premagentic-golden-sets`,
+beside it, which the Users group, and so the service, may read.
 
 **Linux.** `deploy/systemd/premagentic-api.service` is a unit template: a system
 account, `Type=notify`, and the application's four files handed to the

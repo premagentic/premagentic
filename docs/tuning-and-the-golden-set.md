@@ -50,7 +50,12 @@ never by copying another's.
 **Judging a change with the golden set.** `prem settings set
 evaluation.golden_set_path <absolute path>` names the golden question set on
 the machine that runs PremAgentic; it is set from the command line only,
-because the server reads whatever file it names. "Run the golden set" on the
+because the server reads whatever file it names. `prem profile apply` sets it
+to its own copy of the profile's golden set, in `Premagentic-golden-sets` in
+the shared application data folder unless `--golden-set-dir` names another
+(`C:\ProgramData\Premagentic-golden-sets` on Windows, which every account
+may read, the service's included). The account the server runs as has to be
+able to read the file. "Run the golden set" on the
 Tuning page runs it under the settings saved now and shows the result beside
 the run before it: how many questions passed, how many no-answer questions
 were answered correctly, the questions that failed by id, and the settings
