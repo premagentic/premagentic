@@ -29,6 +29,14 @@ internal static class AccessRules
     [SupportedOSPlatform("windows")]
     public static void LetUsersWrite(string path) => Allow(path, UsersSid, FileSystemRights.Write);
 
+    /// <summary>Whether a rule on a file lets every user read it, as a service's account can through BUILTIN\Users.</summary>
+    [SupportedOSPlatform("windows")]
+    public static bool UsersMayRead(string path) =>
+        new FileInfo(path).GetAccessControl().GetAccessRules(true, true, typeof(SecurityIdentifier))
+            .Cast<FileSystemAccessRule>()
+            .Any(r => r.IdentityReference.Value == UsersSid && r.AccessControlType == AccessControlType.Allow
+                      && r.FileSystemRights.HasFlag(FileSystemRights.ReadData));
+
     /// <summary>Lets other accounts read a file: a rule for every user on Windows, mode 644 on Unix.</summary>
     public static void LetOthersRead(string path)
     {

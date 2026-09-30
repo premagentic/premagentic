@@ -1,4 +1,6 @@
+using System.Security.AccessControl;
 using System.Text.Json;
+using Premagentic.Cli;
 using Premagentic.Cli.Admin;
 using Premagentic.Core.Admin;
 using Premagentic.Core.Embeddings;
@@ -384,6 +386,66 @@ public sealed class ProfileTests(DatastoreTestDatabase server) : IClassFixture<D
         Assert.Equal(Path.Combine(e.GoldenSetFolder, "office.json"), running.Path);
         Assert.True(File.Exists(running.Path));
         Assert.Single(EvalRunner.LoadCases(running.Path!));
+    }
+
+    [Fact]
+    public async Task A_profile_applied_to_the_default_folder_leaves_the_service_credentials_folder_to_setup()
+    {
+        await using var e = await EmptyAsync();
+        const string OneCase = """
+            { "id": "rota", "question": "Who opens on Saturday?", "category": "operations",
+              "expectedSourcePaths": ["handbook/rota.md"], "expectedHeading": null,
+              "forbiddenSourcePaths": [], "archiveAllowed": false, "expectNoAnswer": false, "notes": "Invented." }
+            """;
+        var folder = Profile(("profile.json", Manifest), ("golden-set.json", $"[ {OneCase} ]"));
+
+        // A stand-in for the shared folder. On Windows it is made the ordinary
+        // way in C:\ProgramData, so what is made in it takes the rules that let
+        // every user add files, as the folders made in C:\ProgramData itself do.
+        var shared = OperatingSystem.IsWindows()
+            ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                "premagentic-profile-tests-" + Guid.NewGuid().ToString("N")[..8])
+            : Directory.CreateTempSubdirectory("premagentic-shared-").FullName;
+        Directory.CreateDirectory(shared);
+        InstallFolders.SharedForTests.Value = shared;
+        try
+        {
+            // The folder setup --windows-service makes and keeps private.
+            var credentials = InstallFolders.Credentials(windowsService: true);
+            Assert.Equal(Path.Combine(shared, "Premagentic"), credentials);
+
+            // No --golden-set-dir: the default, as INSTALL.txt applies the starter profile.
+            Assert.Equal(0, await ProfileCommands.RunAsync(["profile", "apply", folder], e.Db, e.Tenant));
+
+            // Setup finds no folder there, so it makes it private rather than
+            // refusing one another account could have filled.
+            Assert.False(Directory.Exists(credentials), $"profile apply made {credentials}");
+            var copied = (await e.Tuning.ReadGoldenSetPathAsync()).Path!;
+            Assert.Equal(Path.Combine(shared, "Premagentic-golden-sets", "office.json"), copied);
+            Assert.Single(EvalRunner.LoadCases(copied));
+            if (!OperatingSystem.IsWindows()) return;
+
+            // The service's account reads the copy as a member of Users, by the
+            // rules the shared folder gives what is made in it.
+            Assert.True(AccessRules.UsersMayRead(copied), $"{copied} cannot be read by {AccessRules.UsersName}");
+
+            // Once setup has made the folder, applying again leaves it as setup made it.
+            InstallAccess.CreatePrivateFolder(credentials);
+            var made = new DirectoryInfo(credentials).GetAccessControl().GetSecurityDescriptorSddlForm(AccessControlSections.All);
+            File.WriteAllText(Path.Combine(folder, "golden-set.json"), $"[ {OneCase}, {OneCase.Replace("\"rota\"", "\"rota-2\"")} ]");
+
+            Assert.Equal(0, await ProfileCommands.RunAsync(["profile", "apply", folder], e.Db, e.Tenant));
+
+            Assert.Equal(2, EvalRunner.LoadCases(copied).Count);
+            Assert.Empty(Directory.EnumerateFileSystemEntries(credentials));
+            Assert.Equal(made, new DirectoryInfo(credentials).GetAccessControl().GetSecurityDescriptorSddlForm(AccessControlSections.All));
+            Assert.Null(InstallAccess.Untrusted(credentials));
+        }
+        finally
+        {
+            InstallFolders.SharedForTests.Value = null;
+            Directory.Delete(shared, recursive: true);
+        }
     }
 
     [Theory]

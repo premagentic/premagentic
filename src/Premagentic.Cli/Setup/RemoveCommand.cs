@@ -82,9 +82,7 @@ internal static class RemoveCommand
 
         // The same defaults as setup, so a remove finds what a setup with the same
         // flags made.
-        var premFolder = Path.Combine(Environment.GetFolderPath(args.Contains("--windows-service")
-            ? Environment.SpecialFolder.CommonApplicationData
-            : Environment.SpecialFolder.LocalApplicationData), "Premagentic");
+        var premFolder = InstallFolders.Credentials(args.Contains("--windows-service"));
         var credentials = Value(args, "--credentials-dir") ?? premFolder;
         var bundled = Value(args, "--bundled-postgres");
         var bundledInstall = bundled is not null || Value(args, "--data-dir") is not null

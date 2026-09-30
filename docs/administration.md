@@ -76,7 +76,9 @@ key does and what it takes; `set <key> <value>` takes JSON, except a path or
 a trust value, which is plain text; `unset <key>` puts any setting but a
 trust one back to its default, or to not set. A key the catalog does not
 define is refused on every verb. Every change is one entry in the change
-record.
+record. Applying a profile sets `evaluation.golden_set_path` to its copy of
+the profile's golden set, beside setup's credentials folder and never in it
+([Profiles](profiles.md)).
 
 Three of them decide what callers are served of machine-written
 and stale content: `trust.agents_minimum_tier` (`human-reviewed` by default),

@@ -68,7 +68,13 @@ changed by applying a profile, since that would mean removing the source and
 indexing a whole corpus again.
 
 `golden-set.json` is copied to a folder the server can read
-(`--golden-set-dir`, by default the shared application data folder) and the
-golden set path is set to the copy. The default is shared rather than
+(`--golden-set-dir`, by default `Premagentic-golden-sets` in the shared
+application data folder, `C:\ProgramData\Premagentic-golden-sets` on Windows)
+and the golden set path is set to the copy. The default is shared rather than
 per-account on purpose: the file is read by the account the service runs as,
-which is usually not the account applying the profile.
+which is usually not the account applying the profile. Every account on the
+machine may read what is copied there, the Windows service's account
+included, by the rules `C:\ProgramData` gives the folders made in it. The
+folder is beside setup's credentials folder (`C:\ProgramData\Premagentic` for
+the Windows service) and never in it, so a profile applied before setup does
+not make that folder with those rules, which setup would refuse.
