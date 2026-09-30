@@ -69,8 +69,8 @@ the machine it ran on and which of its two modes it ran in
 
 The first two are explained under
 [What it does not do](docs/what-it-is.md#what-it-does-not-do); what it reads
-is above. Sign-in through a company directory is next in the
-[PremAgentic business add-on](#license).
+is above. Sign-in through a company directory is next in
+[PremAgentic for Teams](#license).
 
 ## Quick start
 
@@ -181,7 +181,7 @@ issue labeled good first issue, and what comes next is on
 
 ## Support
 
-Support comes with the PremAgentic business add-on, from Agave Information
+Support comes with PremAgentic for Teams, from Agave Information
 Solutions, LLC: help installing and upgrading, sizing the hardware, mapping
 an organization's directory and permissions into PremAgentic, and answers
 from the maintainers. Write to premagentic@agaveis.com.
@@ -200,7 +200,7 @@ Agave Information Solutions, LLC also offers PremAgentic under a commercial
 license, for building it into a closed product, or running a changed copy for
 its users without offering them its source. Write to premagentic@agaveis.com.
 
-**The PremAgentic business add-on** is what an organization adds to run
+**PremAgentic for Teams** is what an organization adds to run
 PremAgentic for many people. It carries directory group mapping, and audit
 retention and export. Next in it: sign-in through Microsoft, Google or another
 OIDC provider, with group sync; connectors that read a source's own

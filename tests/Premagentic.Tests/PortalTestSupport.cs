@@ -141,7 +141,7 @@ internal static class PortalRoutes
 
     /// <summary>
     /// Addresses only a reader may reach, which answer with the sentence that
-    /// names the business add-on: what used to be there came with it.
+    /// names PremAgentic for Teams: what used to be there came with it.
     /// </summary>
     public static readonly string[] AddOnAddresses = ["/portal/export/audit.jsonl"];
 

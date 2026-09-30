@@ -106,7 +106,7 @@ person to paste into a client that reads a file.
 Every administrator change is in the change record: users, groups and
 their members, agents and their tokens, folder rules, and settings, and
 what an extension's commands change, such as the directory group mappings
-that come with the business add-on. A change and its row are written in one
+that come with PremAgentic for Teams. A change and its row are written in one
 transaction, so a change without a row cannot happen: when, what, the old
 and the new value, and who. Each row names who made it: the
 operating-system account for the command line, the signed-in administrator
@@ -140,7 +140,7 @@ agents.
 ## How long the trail is kept
 
 PremAgentic keeps the audit trail forever. Its retention, the prune that
-enforces it and its export come with the PremAgentic business add-on.
+enforces it and its export come with PremAgentic for Teams.
 
 ## Self-serve agents
 

@@ -19,6 +19,8 @@
 
 ### Changed, 2026-09-29
 
+- The add-on is named PremAgentic for Teams, and the sentence that answers
+  for one of its commands, settings or pages names it so.
 - The release proof upgrades from the previous release, the nearest earlier
   `v` tag (a pre-release tag only for a pre-release), and when there is none
   it says so in one line that begins `UPGRADE NOT RUN` and passes without the
@@ -34,7 +36,7 @@
 - `prem groups map`, `prem groups unmap` and `prem groups mappings`, and the
   public Core types behind them: `IdentityMappings`, `IdentityMapping`,
   `ResolvedPrincipals` and `AdminChange.Mappings`. Directory group mapping
-  comes with the PremAgentic business add-on; without it, each command answers
+  comes with PremAgentic for Teams; without it, each command answers
   with one sentence naming the add-on. Mappings already stored stay in the
   database, unread.
 
@@ -51,8 +53,8 @@
 
 - Audit retention (`audit.retention_days`), `prem audit prune`,
   `prem audit export` and the portal's audit trail download
-  (`/portal/export/audit.jsonl`, whole or for a window). They come with the
-  PremAgentic business add-on; without it, each answers with one sentence
+  (`/portal/export/audit.jsonl`, whole or for a window). They come with
+  PremAgentic for Teams; without it, each answers with one sentence
   naming the add-on. The audit trail, its page, the usage page and the Export
   page's configuration and change record downloads are unchanged.
 

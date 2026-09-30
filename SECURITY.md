@@ -3,8 +3,8 @@
 PremAgentic exists to keep an organization's documents inside that
 organization and in front of only the people allowed to read them. A flaw in
 that is the most serious kind of bug this project can have, and a report of
-one is always answered. This policy covers PremAgentic and the PremAgentic
-business add-on.
+one is always answered. This policy covers PremAgentic and
+PremAgentic for Teams.
 
 ## Reporting
 
@@ -77,7 +77,7 @@ process separately.
 `PREM_ALLOW_HTTP_SIGN_IN=1` sends passwords unencrypted by design. It is for
 development on one machine.
 
-When the PremAgentic business add-on brings sign-in through a directory and
+When PremAgentic for Teams brings sign-in through a directory and
 connectors that read a source's own permissions, they talk to the directory
 and the sources an administrator points them at, by design.
 
@@ -135,7 +135,7 @@ maintains for itself cannot be mapped into at all.
 **The core never deletes the audit trail.** Apart from `prem remove --purge`,
 which drops the whole database, there is no timer, no flag and no command in
 it that empties the trail. A retention, and the prune that enforces it, come
-with the business add-on; each prune is itself written to the change record,
+with PremAgentic for Teams; each prune is itself written to the change record,
 with how many rows it deleted and how far back it went.
 
 **An extension loads only when an administrator has allowed it with `prem

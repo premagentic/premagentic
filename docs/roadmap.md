@@ -20,7 +20,7 @@ with its allow list, the sample extension and the conformance kit (a test
 project since 2026-09-22, a package since 2026-09-25); profiles
 validated, applied and shown; tuning per deployment, judged by a golden set;
 the review queue for machine-written content; an append-only change record;
-audit retention, which now comes with the business add-on; setup on an
+audit retention, which now comes with PremAgentic for Teams; setup on an
 existing PostgreSQL with least-privilege
 roles and row-level security; HTTPS, service hosting and a bundled PostgreSQL
 on Windows; removal; and an install proven on a bare container with no
@@ -28,7 +28,7 @@ network route out. Since 2026-09-24: a command line that explains itself with no
 database, with the manual page generated from it; every setting in one
 catalog; self-serve agents and the portal's connect page; the usage read
 model, the usage page and the windowed audit export (which now comes with
-the business add-on); the reminders seam and
+PremAgentic for Teams); the reminders seam and
 job, with the latest run on the Review page; every file an extension loads
 listed and hashed; groups in a profile; one golden set. Later that day: a
 deployment's instructions for assistants, sent at connect and shown on the
@@ -78,7 +78,7 @@ a page; the suite always ending in a verdict.
   beside it.
 - **Sign-in through a company directory,** as a way of signing in on the
   existing seam: the directory says who you are, and a principal mapper,
-  such as the business add-on's directory group mapping, says what that
+  such as the directory group mapping in PremAgentic for Teams, says what that
   means here.
 - **An installer,** so a deployment starts from a package rather than from
   an archive and the steps in its `INSTALL.txt`. The archives do not carry

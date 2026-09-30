@@ -8,7 +8,7 @@ using Premagentic.Core.Storage;
 namespace Premagentic.Tests;
 
 /// <summary>
-/// A deployment without the business add-on: a command, a setting or a page
+/// A deployment without PremAgentic for Teams: a command, a setting or a page
 /// the add-on brings is answered with one sentence naming it, for whichever
 /// state the deployment is in, and nothing is written. Requires a running
 /// Docker daemon for the tests that use a database.
@@ -16,7 +16,7 @@ namespace Premagentic.Tests;
 [Collection(ConsoleCollection.Name)]
 public sealed class BusinessAddOnTests(DatastoreTestDatabase server) : IClassFixture<DatastoreTestDatabase>
 {
-    private const string Named = "'prem audit prune' comes with the PremAgentic business add-on";
+    private const string Named = "'prem audit prune' comes with PremAgentic for Teams";
 
     private async Task<(PremagenticDatabase Db, Guid Tenant, string ConnectionString)> EmptyAsync()
     {
@@ -51,7 +51,7 @@ public sealed class BusinessAddOnTests(DatastoreTestDatabase server) : IClassFix
             "The audit trail download is not offered in the portal in this version; 'prem audit export' gives the same rows.",
             BusinessAddOn.PageRefusal("/portal/export/audit.jsonl", loaded));
         Assert.Equal(
-            "'/portal/export/audit.jsonl' comes with the PremAgentic business add-on, which is not installed here.",
+            "'/portal/export/audit.jsonl' comes with PremAgentic for Teams, which is not installed here.",
             BusinessAddOn.PageRefusal("/portal/export/audit.jsonl", ExtensionHost.BuiltIn));
     }
 
@@ -108,7 +108,7 @@ public sealed class BusinessAddOnTests(DatastoreTestDatabase server) : IClassFix
             var refused = await ConsoleCapture.RunAsync(() => SettingsCommands.RunAsync(args, db, tenant));
             Assert.Equal(1, refused.Exit);
             Assert.Equal(
-                "The setting audit.retention_days comes with the PremAgentic business add-on, which is not installed here.",
+                "The setting audit.retention_days comes with PremAgentic for Teams, which is not installed here.",
                 refused.Err.Trim());
         }
 
@@ -132,7 +132,7 @@ public sealed class BusinessAddOnTests(DatastoreTestDatabase server) : IClassFix
 
         Assert.Null(plan);
         Assert.Contains(problems, p => p.Problem.StartsWith(
-            "'audit.retention_days' is a setting of the PremAgentic business add-on", StringComparison.Ordinal));
+            "'audit.retention_days' is a setting of PremAgentic for Teams", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -146,7 +146,7 @@ public sealed class BusinessAddOnTests(DatastoreTestDatabase server) : IClassFix
         {
             var run = await ExtensionCommandTests.CliAsync(connectionString, extensions, args);
             Assert.Equal(1, run.Exit);
-            Assert.EndsWith("comes with the PremAgentic business add-on, which is not installed here.", run.Err.Trim());
+            Assert.EndsWith("comes with PremAgentic for Teams, which is not installed here.", run.Err.Trim());
             Assert.Equal("", run.Out);
         }
 

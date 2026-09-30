@@ -22,7 +22,7 @@ sentence the program printed.
   never through an issue or a discussion, and are always answered.
 
 Issues and pull requests are read and triaged by the maintainers. Support
-for a deployment comes with the PremAgentic business add-on; see the Support
+for a deployment comes with PremAgentic for Teams; see the Support
 section of the README.
 
 ## Your first contribution

@@ -31,7 +31,7 @@ for two platforms, one a reminder sink that sends mail), where each agent's
 model runs with the reserved hosted-model group, one seam for the ways a
 person signs in, principal mapping as an extension point (the `principals`
 seam, with nothing mapped when no mapper is loaded; directory group mapping
-itself comes with the business add-on), per-deployment tool
+itself comes with PremAgentic for Teams), per-deployment tool
 text, a deployment's instructions for assistants sent at connect and served as
 a resource (in the `server/discover` result, and in the `initialize` result
 to a client of an earlier revision), the MCP authorization flow built and
@@ -39,8 +39,8 @@ off by default (while off none of its paths is mapped and no table of it is
 read or written, proven from the database's own statistics), a disable or
 a password change ending a person's own assistant credentials for good,
 the usage read model, audit retention with `prem audit prune` and the
-windowed audit export with `prem audit export` (both now come with the
-business add-on), profiles validated, applied
+windowed audit export with `prem audit export` (both now come with
+PremAgentic for Teams), profiles validated, applied
 and shown, carrying every settable setting, with `groups.json` applied before
 sources and rules and a second apply that changes nothing, sources with an
 owner and the hosted-model switch, self-serve agents bounded by
@@ -63,8 +63,8 @@ string cannot silently run without, the first administrator, HTTPS, service
 hosting, a bundled PostgreSQL on Windows and a trusted-proxy setting,
 `prem remove`, the administration portal with the review queue, the reminders
 view, the tuning page judged by the golden set, the usage page paged and
-filtered, the export page (its audit trail download now comes with the
-business add-on), the connect page with the instructions
+filtered, the export page (its audit trail download now comes with
+PremAgentic for Teams), the connect page with the instructions
 block and ChatGPT's and Claude Desktop's texts saying what a client called
 from its vendor's cloud cannot reach, the agents page saying who made each
 agent, the health page naming the model, the usage, audit and Sources pages and
