@@ -1,0 +1,3 @@
+# The image is built from the release archive, so the build needs only these.
+*
+!docker/try-entrypoint.sh
