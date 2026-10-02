@@ -5,13 +5,29 @@
 # 1. PostgreSQL, on its socket only (listen_addresses is empty).
 # 2. A first run registers one person and one agent and issues the agent a
 #    token, kept in a file only this account can read.
-# 3. The API, on 127.0.0.1 only, with no search role (a trial has one database
+# 3. The API, on 127.0.0.1:18080 only (8080 is left free for a proxy in
+#    front of the bridge), with no search role (a trial has one database
 #    role; a deployment made by `prem setup` has its search role).
 # 4. The bridge, given the token file, replaces this script.
 #
 # stdout is the MCP channel, so until the bridge starts everything printed
 # here and by the programs goes to stderr.
 set -eu
+
+# The official postgres image starts this as postgres, with the PostgreSQL
+# programs on PATH. A plain Debian image with Debian's postgresql package
+# starts it as root and keeps them in /usr/lib/postgresql/<major>/bin. Both
+# work: as root, the folders are given to postgres and this runs again as it.
+if [ "$(id -u)" = 0 ]; then
+    mkdir -p /var/lib/postgresql/data /var/run/postgresql
+    chown postgres:postgres /var/lib/postgresql /var/lib/postgresql/data /var/run/postgresql
+    exec runuser -u postgres -- "$0" "$@"
+fi
+for bin in /usr/lib/postgresql/*/bin; do
+    if [ -d "$bin" ]; then PATH="$bin:$PATH"; fi
+done
+export PATH="/opt/premagentic/bin:$PATH"
+
 exec 3>&1 1>&2
 
 data=/var/lib/postgresql/data
@@ -39,11 +55,11 @@ if [ ! -s "$token" ]; then
     prem tokens issue assistant --days 365 | tail -n 1 > "$token"
 fi
 
-ASPNETCORE_URLS=http://127.0.0.1:8080 Premagentic.Api &
+ASPNETCORE_URLS=http://127.0.0.1:18080 Premagentic.Api &
 
-# The image has no curl, so /health is asked over bash's own /dev/tcp.
+# The postgres image has no curl, so /health is asked over bash's own /dev/tcp.
 healthy() {
-    (exec 4<>/dev/tcp/127.0.0.1/8080 \
+    (exec 4<>/dev/tcp/127.0.0.1/18080 \
         && printf 'GET /health HTTP/1.0\r\nHost: 127.0.0.1\r\n\r\n' >&4 \
         && head -n 1 <&4 | grep -q ' 200 ') 2>/dev/null
 }
@@ -58,4 +74,4 @@ until healthy; do
 done
 
 exec 1>&3 3>&-
-PREM_API_URL=http://127.0.0.1:8080 PREM_AGENT_TOKEN_FILE="$token" exec Premagentic.McpServer
+PREM_API_URL=http://127.0.0.1:18080 PREM_AGENT_TOKEN_FILE="$token" exec Premagentic.McpServer
