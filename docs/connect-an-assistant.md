@@ -172,6 +172,10 @@ docker run -i --rm -e PREM_API_URL=https://prem.example.org:8443 -e PREM_AGENT_T
 
 Inside the container, `localhost` is the container itself, so the address is the API's own name and `https://`. An API whose certificate `prem setup` signed itself is trusted by mounting that certificate and naming it in `SSL_CERT_FILE`: add `-v /etc/premagentic/https.crt:/certs/prem.crt:ro -e SSL_CERT_FILE=/certs/prem.crt`. Without it the bridge reports "The SSL connection could not be established" and lists no tools; with it, both tools came through in the run here.
 
+### The bridge as a .NET tool
+
+From the release after 0.1.0, each release also puts the bridge on nuget.org as the .NET tool `Premagentic.McpServer`, the registry's second package for the same server. With the .NET 10 SDK, a client's command is `dnx Premagentic.McpServer`, with `PREM_API_URL` and `PREM_AGENT_TOKEN_FILE` (or `PREM_AGENT_TOKEN`) set as for the built bridge above. It needs no clone and no build; the package carries no runtime of its own, so it runs on the SDK's.
+
 ## Other clients, checked against their documentation
 
 The connect page offers three more kinds. Each configuration was checked

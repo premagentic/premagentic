@@ -110,6 +110,85 @@ jobs:
           printf '%s' "$GH_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
           docker push "$IMAGE"
 
+      # The package is built from the checked-out source, so it is the release
+      # only when that source is the release's own commit.
+      # Until the repository variable NUGET_USER names the nuget.org account
+      # whose Trusted Publishing policy trusts this workflow, the image is
+      # listed alone rather than the whole publish failing at sign-in.
+      - name: Does the NuGet package go with this run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUGET_USER: ${{ vars.NUGET_USER }}
+        run: |
+          set -euo pipefail
+          tag_commit=$(gh api "repos/$GITHUB_REPOSITORY/commits/v$VERSION" --jq .sha)
+          if [ -z "$NUGET_USER" ]; then
+            echo "NUGET=no" >> "$GITHUB_ENV"
+            echo "The repository variable NUGET_USER is not set: the image is listed alone."
+          elif [ "$tag_commit" = "$GITHUB_SHA" ]; then
+            echo "NUGET=yes" >> "$GITHUB_ENV"
+          else
+            echo "NUGET=no" >> "$GITHUB_ENV"
+            echo "This run builds $GITHUB_SHA, not v$VERSION ($tag_commit): the image is listed alone."
+          fi
+
+      # The version in server.json, the image's tag and the NuGet package's
+      # version are set before packing, because the package carries
+      # server.json as .mcp/server.json.
+      - name: Set the version in server.json
+        run: |
+          set -euo pipefail
+          jq --arg v "$VERSION" --arg image "$IMAGE" --arg nuget "$NUGET" '
+            .version = $v
+            | .packages |= map(
+                if .registryType == "oci" then .identifier = $image
+                elif .registryType == "nuget" then .version = $v
+                else . end)
+            | if $nuget == "yes" then . else .packages |= map(select(.registryType != "nuget")) end
+          ' server.json > server.publish.json
+          mv server.publish.json server.json
+          jq -c '[.version, (.packages[] | [.registryType, (.identifier), (.version // "")])]' server.json
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        if: env.NUGET == 'yes'
+        with:
+          global-json-file: global.json
+
+      - name: Pack the .NET tool
+        if: env.NUGET == 'yes'
+        run: |
+          set -euo pipefail
+          dotnet pack src/Premagentic.McpServer/Premagentic.McpServer.csproj -c Release \
+            -p:Version="$VERSION" -p:SourceRevisionId="${GITHUB_SHA:0:10}" -p:ContinuousIntegrationBuild=true \
+            -p:RestoreLockedMode=true --nologo -o nupkg
+          ls nupkg
+
+      - name: Sign in to nuget.org
+        if: env.NUGET == 'yes'
+        id: nuget
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        with:
+          user: ${{ vars.NUGET_USER }}
+
+      # nuget.org validates a new package before it serves it, and the registry
+      # reads the package's README to check ownership, so the publish waits
+      # until the package can be read.
+      - name: Push to nuget.org
+        if: env.NUGET == 'yes'
+        env:
+          NUGET_API_KEY: ${{ steps.nuget.outputs.NUGET_API_KEY }}
+        run: |
+          set -euo pipefail
+          dotnet nuget push "nupkg/Premagentic.McpServer.$VERSION.nupkg" --api-key "$NUGET_API_KEY" \
+            --source https://api.nuget.org/v3/index.json --skip-duplicate
+          url="https://api.nuget.org/v3-flatcontainer/premagentic.mcpserver/$VERSION/premagentic.mcpserver.nuspec"
+          for _ in $(seq 1 60); do
+            if curl -fsS -o /dev/null "$url"; then echo "nuget.org serves $VERSION"; exit 0; fi
+            sleep 30
+          done
+          echo "nuget.org did not serve Premagentic.McpServer $VERSION within 30 minutes" >&2
+          exit 1
+
       - name: Install mcp-publisher 1.8.1
         run: |
           set -euo pipefail
@@ -121,7 +200,5 @@ jobs:
       - name: Publish to the MCP Registry
         run: |
           set -euo pipefail
-          jq --arg v "$VERSION" --arg image "$IMAGE" '.version = $v | .packages[0].identifier = $image' server.json > server.publish.json
-          mv server.publish.json server.json
           ./mcp-publisher login github-oidc
           ./mcp-publisher publish

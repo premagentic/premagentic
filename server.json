@@ -34,6 +34,29 @@
           "isRequired": false
         }
       ]
+    },
+    {
+      "registryType": "nuget",
+      "registryBaseUrl": "https://api.nuget.org/v3/index.json",
+      "identifier": "Premagentic.McpServer",
+      "version": "0.1.0",
+      "runtimeHint": "dnx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "PREM_API_URL",
+          "description": "The PremAgentic API's address, such as https://prem.example.org:8443. Plain http:// only for localhost.",
+          "isRequired": true
+        },
+        {
+          "name": "PREM_AGENT_TOKEN",
+          "description": "The token of a registered agent, issued with 'prem tokens issue <agent>'. It begins with prem_agt_.",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
     }
   ]
 }
