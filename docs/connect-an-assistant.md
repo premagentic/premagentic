@@ -162,6 +162,16 @@ Premagentic MCP bridge cannot start: The bridge needs the agent token of a regis
 Premagentic MCP bridge cannot start: PREM_API_URL must start with https://, because the agent token goes with every request. Plain http:// is accepted only for localhost.
 ```
 
+### The bridge as a container
+
+Each release also publishes the bridge alone as an image, `ghcr.io/premagentic/premagentic-mcp:<version>`, built from that release's Linux archive (`docker/mcp-bridge.Dockerfile`), and lists it in the MCP Registry as `io.github.premagentic/premagentic`. A client that runs containers starts it with the API's address and the agent's token:
+
+```
+docker run -i --rm -e PREM_API_URL=https://prem.example.org:8443 -e PREM_AGENT_TOKEN=prem_agt_... ghcr.io/premagentic/premagentic-mcp:0.1.0
+```
+
+Inside the container, `localhost` is the container itself, so the address is the API's own name and `https://`. An API whose certificate `prem setup` signed itself is trusted by mounting that certificate and naming it in `SSL_CERT_FILE`: add `-v /etc/premagentic/https.crt:/certs/prem.crt:ro -e SSL_CERT_FILE=/certs/prem.crt`. Without it the bridge reports "The SSL connection could not be established" and lists no tools; with it, both tools came through in the run here.
+
 ## Other clients, checked against their documentation
 
 The connect page offers three more kinds. Each configuration was checked

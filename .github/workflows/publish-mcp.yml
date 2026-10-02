@@ -1,0 +1,127 @@
+name: Publish MCP
+
+# On a published release: builds the stdio bridge image
+# (docker/mcp-bridge.Dockerfile) from that release's Linux archive, checked
+# against the release's own SHA256SUMS, proves it answers initialize, pushes it
+# to ghcr.io/premagentic/premagentic-mcp:<version>, and publishes server.json
+# at that version to the MCP Registry. The registry is signed in to with this
+# workflow's GitHub OIDC token, which is good for the io.github.premagentic
+# namespace only; no stored secret is used.
+#
+#   a release published     build, prove, push, publish (a prerelease is skipped)
+#   Run workflow (dispatch) the same, for a release already published
+#
+# The registry reads the image's io.modelcontextprotocol.server.name label, so
+# the GHCR package must be public before the publish step can pass. A new
+# package starts private: the first run pushes it and then fails at the
+# publish step; make the package public and run this again by dispatch.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'A published release, X.Y.Z'
+        required: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  publish:
+    if: ${{ github.event_name == 'workflow_dispatch' || !github.event.release.prerelease }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      # Pinned to a full commit so the action cannot change under us; the tag is a comment.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Every value reaches the shell through env, never by expansion in the script.
+      - name: Version
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+          INPUT: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          version="${INPUT:-${TAG#v}}"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "not a release version: '$version'" >&2; exit 1; }
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+          echo "IMAGE=ghcr.io/premagentic/premagentic-mcp:$version" >> "$GITHUB_ENV"
+
+      - name: The Linux archive's SHA-256, from the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release download "v$VERSION" --repo "$GITHUB_REPOSITORY" --pattern SHA256SUMS --output SHA256SUMS
+          sum=$(awk -v f="premagentic-$VERSION-linux-x64.tar.gz" '{ n = $2; sub(/^\*/, "", n) } n == f { print $1 }' SHA256SUMS)
+          [[ "$sum" =~ ^[0-9a-f]{64}$ ]] || { echo "SHA256SUMS of v$VERSION has no line for the Linux archive" >&2; exit 1; }
+          echo "ARCHIVE_SHA256=$sum" >> "$GITHUB_ENV"
+
+      - name: Build the bridge image
+        run: |
+          set -euo pipefail
+          docker build --file docker/mcp-bridge.Dockerfile \
+            --build-arg PREM_VERSION="$VERSION" --build-arg PREM_ARCHIVE_SHA256="$ARCHIVE_SHA256" \
+            --tag "$IMAGE" .
+          label=$(docker image inspect "$IMAGE" --format '{{ index .Config.Labels "io.modelcontextprotocol.server.name" }}')
+          [ "$label" = "$(jq -r .name server.json)" ] || { echo "the image's server name label is '$label', not server.json's name" >&2; exit 1; }
+
+      # With no API behind it the bridge still answers initialize; that proves
+      # the image starts and speaks MCP on stdin and stdout. Its stdin stays
+      # open until the reply is read, because the bridge ends when stdin closes.
+      - name: Prove it answers initialize
+        run: |
+          set -euo pipefail
+          timeout 90 python3 - "$IMAGE" <<'PY'
+          import json, subprocess, sys
+          bridge = subprocess.Popen(
+              ["docker", "run", "-i", "--rm", "-e", "PREM_API_URL=http://localhost:9",
+               "-e", "PREM_AGENT_TOKEN=prem_agt_placeholder", sys.argv[1]],
+              stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+          bridge.stdin.write(json.dumps({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
+              "protocolVersion": "2025-06-18", "capabilities": {},
+              "clientInfo": {"name": "publish-mcp", "version": "0"}}}) + "\n")
+          bridge.stdin.flush()
+          line = bridge.stdout.readline()
+          bridge.kill()
+          print(line.strip())
+          if json.loads(line)["result"]["serverInfo"]["name"] != "premagentic":
+              sys.exit("the bridge did not answer initialize as premagentic")
+          PY
+
+      - name: Push to GHCR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$GH_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          docker push "$IMAGE"
+
+      - name: Install mcp-publisher 1.8.1
+        run: |
+          set -euo pipefail
+          curl -fsSL -o mcp-publisher.tar.gz \
+            https://github.com/modelcontextprotocol/registry/releases/download/v1.8.1/mcp-publisher_linux_amd64.tar.gz
+          echo "a06c9096dcb9727c13555b6be26c7effa707b01f06a4c561ba7a3635443cf2cc  mcp-publisher.tar.gz" | sha256sum -c -
+          tar -xzf mcp-publisher.tar.gz mcp-publisher
+
+      - name: Publish to the MCP Registry
+        run: |
+          set -euo pipefail
+          jq --arg v "$VERSION" --arg image "$IMAGE" '.version = $v | .packages[0].identifier = $image' server.json > server.publish.json
+          mv server.publish.json server.json
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish

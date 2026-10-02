@@ -1,0 +1,39 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.premagentic/premagentic",
+  "title": "PremAgentic",
+  "description": "On-premises knowledge retrieval, with the rules you set enforced before anything is retrieved.",
+  "websiteUrl": "https://premagentic.com",
+  "repository": {
+    "url": "https://github.com/premagentic/premagentic",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "oci",
+      "identifier": "ghcr.io/premagentic/premagentic-mcp:0.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "PREM_API_URL",
+          "description": "The PremAgentic API's address, such as https://prem.example.org:8443. Plain http:// only for localhost.",
+          "isRequired": true
+        },
+        {
+          "name": "PREM_AGENT_TOKEN",
+          "description": "The token of a registered agent, issued with 'prem tokens issue <agent>'. It begins with prem_agt_.",
+          "isRequired": true,
+          "isSecret": true
+        },
+        {
+          "name": "SSL_CERT_FILE",
+          "description": "Only for an API whose certificate prem setup signed itself: that certificate's path inside the container, mounted read-only.",
+          "isRequired": false
+        }
+      ]
+    }
+  ]
+}
