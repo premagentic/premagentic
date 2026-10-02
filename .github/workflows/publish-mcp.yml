@@ -112,13 +112,20 @@ jobs:
 
       # The package is built from the checked-out source, so it is the release
       # only when that source is the release's own commit.
+      # Until the repository variable NUGET_USER names the nuget.org account
+      # whose Trusted Publishing policy trusts this workflow, the image is
+      # listed alone rather than the whole publish failing at sign-in.
       - name: Does the NuGet package go with this run
         env:
           GH_TOKEN: ${{ github.token }}
+          NUGET_USER: ${{ vars.NUGET_USER }}
         run: |
           set -euo pipefail
           tag_commit=$(gh api "repos/$GITHUB_REPOSITORY/commits/v$VERSION" --jq .sha)
-          if [ "$tag_commit" = "$GITHUB_SHA" ]; then
+          if [ -z "$NUGET_USER" ]; then
+            echo "NUGET=no" >> "$GITHUB_ENV"
+            echo "The repository variable NUGET_USER is not set: the image is listed alone."
+          elif [ "$tag_commit" = "$GITHUB_SHA" ]; then
             echo "NUGET=yes" >> "$GITHUB_ENV"
           else
             echo "NUGET=no" >> "$GITHUB_ENV"
