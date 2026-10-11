@@ -6,10 +6,20 @@ name: Publish MCP
 # to ghcr.io/premagentic/premagentic-mcp:<version>, and publishes server.json
 # at that version to the MCP Registry. The registry is signed in to with this
 # workflow's GitHub OIDC token, which is good for the io.github.premagentic
-# namespace only; no stored secret is used.
+# namespace only; no stored secret is used for it.
 #
-#   a release published     build, prove, push, publish (a prerelease is skipped)
+# Then the same image is copied to Docker Hub as agaveis/premagentic-mcp, under
+# its version and, for the latest release, latest. The copy is the GHCR
+# manifest byte for byte (same digest), and the Hub overview is set from
+# README.md. GHCR stays the image server.json names; the Hub copy is a mirror.
+# This job signs in with the DOCKERHUB_USERNAME variable and the
+# DOCKERHUB_TOKEN secret (a Docker Hub access token with read, write and
+# delete scope, which the overview update needs).
+#
+#   a release published     build, prove, push, publish, mirror (a prerelease is skipped)
 #   Run workflow (dispatch) the same, for a release already published
+#   ... with mirror only    the mirror alone, for a release already on GHCR
+#                           and in the registry
 #
 # The registry reads the image's io.modelcontextprotocol.server.name label, so
 # the GHCR package must be public before the publish step can pass. A new
@@ -24,6 +34,10 @@ on:
       version:
         description: 'A published release, X.Y.Z'
         required: true
+      mirror_only:
+        description: 'Only copy the GHCR image to Docker Hub'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -34,7 +48,7 @@ defaults:
 
 jobs:
   publish:
-    if: ${{ github.event_name == 'workflow_dispatch' || !github.event.release.prerelease }}
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.mirror_only || github.event_name == 'release' && !github.event.release.prerelease }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -125,3 +139,73 @@ jobs:
           mv server.publish.json server.json
           ./mcp-publisher login github-oidc
           ./mcp-publisher publish
+
+  dockerhub:
+    needs: publish
+    # After a publish that passed, or alone on a mirror-only dispatch.
+    if: ${{ !cancelled() && (needs.publish.result == 'success' || needs.publish.result == 'skipped' && github.event_name == 'workflow_dispatch' && inputs.mirror_only) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      MIRROR: docker.io/agaveis/premagentic-mcp
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Version
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+          INPUT: ${{ inputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version="${INPUT:-${TAG#v}}"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "not a release version: '$version'" >&2; exit 1; }
+          latest=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)
+          is_latest=false
+          if [ "$latest" = "v$version" ]; then is_latest=true; fi
+          {
+            echo "VERSION=$version"
+            echo "SOURCE=ghcr.io/premagentic/premagentic-mcp:$version"
+            echo "IS_LATEST=$is_latest"
+            echo "SHORT_DESCRIPTION=$(jq -r .description server.json)"
+          } >> "$GITHUB_ENV"
+
+      - name: Sign in to Docker Hub
+        env:
+          DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "$DOCKERHUB_USERNAME" ] || [ -z "$DOCKERHUB_TOKEN" ]; then
+            echo "set the DOCKERHUB_USERNAME variable and the DOCKERHUB_TOKEN secret" >&2
+            exit 1
+          fi
+          printf '%s' "$DOCKERHUB_TOKEN" | docker login docker.io --username "$DOCKERHUB_USERNAME" --password-stdin
+
+      # --prefer-index=false copies the single-platform manifest as it is;
+      # the default wraps it in a new index with a different digest.
+      - name: Copy the GHCR image to Docker Hub
+        run: |
+          set -euo pipefail
+          tags=(--tag "$MIRROR:$VERSION")
+          if [ "$IS_LATEST" = true ]; then tags+=(--tag "$MIRROR:latest"); fi
+          docker buildx imagetools create --prefer-index=false "${tags[@]}" "$SOURCE"
+          want=$(docker buildx imagetools inspect "$SOURCE" --format '{{ json .Manifest }}' | jq -r .digest)
+          got=$(docker buildx imagetools inspect "$MIRROR:$VERSION" --format '{{ json .Manifest }}' | jq -r .digest)
+          [ "$want" = "$got" ] || { echo "Docker Hub has $got, GHCR has $want" >&2; exit 1; }
+          echo "$MIRROR:$VERSION is $got, the same as $SOURCE"
+
+      # Relative links in README.md are made absolute against this repository.
+      - name: The Docker Hub overview, from README.md
+        uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5.0.0
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: agaveis/premagentic-mcp
+          short-description: ${{ env.SHORT_DESCRIPTION }}
+          enable-url-completion: true
