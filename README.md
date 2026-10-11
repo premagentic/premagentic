@@ -216,3 +216,9 @@ licensed with the code.
 
 To report a vulnerability see `SECURITY.md`; to contribute see
 `CONTRIBUTING.md`.
+
+**Website:** [https://premagentic.com](https://premagentic.com)
+
+**Listing and source:** [https://github.com/premagentic/premagentic](https://github.com/premagentic/premagentic)
+
+Built and maintained by [AgaveIS](https://agaveis.com), Scottsdale, Arizona.
