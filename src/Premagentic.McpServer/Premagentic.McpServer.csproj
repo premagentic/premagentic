@@ -22,4 +22,31 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <!-- The bridge as a .NET tool on nuget.org, for `dnx Premagentic.McpServer`
+       and the MCP Registry's NuGet route. Framework-dependent on purpose: dnx
+       comes with the .NET 10 SDK, so whoever runs it already has the runtime,
+       and the package stays small and the same on every platform. It is packed
+       without a runtime, so it carries no ICU of its own and uses the system's,
+       as `dotnet run` does. The package README carries the registry's ownership
+       marker, and .mcp/server.json is the listing NuGet shows for an MCP
+       server; publish-mcp.yml sets its version to the release's before packing. -->
+  <PropertyGroup>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>premagentic-mcp</ToolCommandName>
+    <PackageId>Premagentic.McpServer</PackageId>
+    <PackageType>McpServer</PackageType>
+    <Title>PremAgentic MCP bridge</Title>
+    <Description>The stdio MCP bridge to a PremAgentic API: an assistant that starts a local program reaches the API's read-only tools through it.</Description>
+    <PackageTags>mcp;mcp-server;model-context-protocol;premagentic;rag;self-hosted</PackageTags>
+    <PackageProjectUrl>https://premagentic.com</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/premagentic/premagentic</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="/" />
+    <None Include="../../server.json" Pack="true" PackagePath="/.mcp/server.json" />
+  </ItemGroup>
+
 </Project>
