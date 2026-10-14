@@ -4,9 +4,9 @@
     "net10.0": {
       "Microsoft.Extensions.Hosting.Systemd": {
         "type": "Direct",
-        "requested": "[10.0.12, )",
-        "resolved": "10.0.12",
-        "contentHash": "WC1u8RbTqJTY/JknZFHX0+TDptgtpoBRc8Kro0xPSwunMql3e1zBxnK+OJbx30ozSCfMpHaYAfaeiVQgM5sizw=="
+        "requested": "[10.0.13, )",
+        "resolved": "10.0.13",
+        "contentHash": "FTbDomFMcdxTOG621obgiyNIzSeqPzmCwdsHL1YkVNxNZnkzQlkA4SRWTJKaZj8VOX22iV3aVYuzKU7Ift1ZKw=="
       },
       "Microsoft.Extensions.Hosting.WindowsServices": {
         "type": "Direct",
